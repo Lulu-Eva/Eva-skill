@@ -5,17 +5,17 @@
   },
   "metadata": {
     "description": "Eva-skill 思维流爆款短视频工具箱",
-    "version": "0.3.0"
+    "version": "0.4.0"
   },
   "plugins": [
     {
       "name": "eva",
-      "description": "Eva-skill 思维流爆款短视频工具箱，覆盖选题、拆解、标题封面、口播文案、口播表现和发布复盘。",
+      "description": "Eva-skill 思维流爆款短视频工具箱，覆盖思考助理、选题、拆解、标题封面、口播文案、口播表现和发布复盘。",
       "source": "./",
       "strict": false,
-      "version": "0.3.0",
+      "version": "0.4.0",
       "category": "content-creation",
-      "keywords": ["short-video", "xiaohongshu", "script", "content", "chinese"],
+      "keywords": ["short-video", "xiaohongshu", "script", "content", "thinking", "creator", "chinese"],
       "skills": ["./skills/eva"]
     }
   ]
