@@ -5,7 +5,7 @@
   },
   "metadata": {
     "description": "Eva-skill 思维流爆款短视频工具箱",
-    "version": "0.2.0"
+    "version": "0.3.0"
   },
   "plugins": [
     {
@@ -13,7 +13,7 @@
       "description": "Eva-skill 思维流爆款短视频工具箱，覆盖选题、拆解、标题封面、口播文案、口播表现和发布复盘。",
       "source": "./",
       "strict": false,
-      "version": "0.2.0",
+      "version": "0.3.0",
       "category": "content-creation",
       "keywords": ["short-video", "xiaohongshu", "script", "content", "chinese"],
       "skills": ["./skills/eva"]
