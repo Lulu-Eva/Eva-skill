@@ -1,10 +1,11 @@
 # Eva-skill
 
-Eva-skill 思维流爆款短视频工具箱，用于小红书、抖音、视频号等口播短视频内容生产和创作者思考陪练。
+Eva-skill 创作者思考陪练与思维流爆款短视频工具箱，用于整理表达欲、把表象问题归位、拆概念、发散内容方向，并完成小红书、抖音、视频号等口播短视频内容生产。
 
-它覆盖 7 个核心环节：
+它覆盖 8 个核心能力：
 
 - 思考助理
+- 表象问题归位
 - 爆款选题
 - 爆款拆解与网感训练
 - 标题封面点击率
@@ -25,6 +26,8 @@ npx skills add Lulu-Eva/Eva-skill -g -y
 ```text
 /eva
 /eva-think
+/eva-reframe
+/eva-shortvideo
 /eva-topic
 /eva-deconstruct
 /eva-title-cover
@@ -46,13 +49,15 @@ Eva-skill/
         ├── SKILL.md
         └── references/
             ├── 00_工具箱总览.md
-            ├── 01_eva-topic_爆款选题.md
-            ├── 02_eva-deconstruct_爆款拆解与网感训练.md
-            ├── 03_eva-title-cover_标题封面点击率.md
-            ├── 04_eva-script_思维流口播文案.md
-            ├── 05_eva-performance_口播情绪节奏.md
-            ├── 06_eva-review_发布复盘诊断.md
-            └── 07_eva-think_思考助理.md
+            ├── 01_eva-think_思考助理.md
+            ├── 02_eva-reframe_表象问题归位.md
+            ├── 03_eva-shortvideo_主入口.md
+            ├── 04_eva-topic_爆款选题.md
+            ├── 05_eva-deconstruct_爆款拆解与网感训练.md
+            ├── 06_eva-title-cover_标题封面点击率.md
+            ├── 07_eva-script_思维流口播文案.md
+            ├── 08_eva-performance_口播情绪节奏.md
+            └── 09_eva-review_发布复盘诊断.md
 ```
 
 ## 更新
