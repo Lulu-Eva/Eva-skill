@@ -53,16 +53,6 @@ Eva-skill 的共同底层是“表达公理 + 归位漏斗”。
 
 ## 安装
 
-推荐使用跨 Agent 安装脚本。它会先用 `skills` CLI 安装 Eva-skill，再补齐 WorkBuddy、Cursor、Augment Code 等暂未被 `skills add --all` 覆盖的客户端链接。
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/Lulu-Eva/Eva-skill/main/install.sh | bash
-```
-
-如果 WorkBuddy 已经打开，安装后请重启或刷新 WorkBuddy，再使用 `/eva`。
-
-如果只需要安装到 `skills` CLI 已支持的客户端，也可以使用：
-
 ```bash
 npx skills add Lulu-Eva/Eva-skill -g -y
 ```
@@ -109,7 +99,6 @@ npx skills add Lulu-Eva/Eva-skill -g -y
 Eva-skill/
 ├── VERSION
 ├── README.md
-├── install.sh
 ├── .claude-plugin/
 │   └── marketplace.json
 └── skills/
@@ -132,15 +121,7 @@ Eva-skill/
 
 ## 更新
 
-重新执行跨 Agent 安装脚本即可获取最新版本，并同步刷新 WorkBuddy 等客户端链接：
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/Lulu-Eva/Eva-skill/main/install.sh | bash
-```
-
-如果 WorkBuddy 已经打开，更新后请重启或刷新 WorkBuddy。
-
-如果只更新 `skills` CLI 已支持的客户端，可以使用：
+重新安装即可获取最新版本：
 
 ```bash
 npx skills add Lulu-Eva/Eva-skill -g -y
