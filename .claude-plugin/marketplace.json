@@ -5,7 +5,7 @@
   },
   "metadata": {
     "description": "Eva-skill 创作者思考陪练与思维流爆款短视频工具箱，内置表达公理、归位漏斗、思想镜片、互动语气节奏和短视频生产链路。",
-    "version": "0.8.0"
+    "version": "0.8.1"
   },
   "plugins": [
     {
@@ -13,7 +13,7 @@
       "description": "Eva-skill 创作者思考陪练与思维流爆款短视频工具箱，覆盖思考助理、思想镜片、表象问题归位、选题、拆解、标题封面、口播文案、口播表现、发布复盘和互动语气节奏。",
       "source": "./",
       "strict": false,
-      "version": "0.8.0",
+      "version": "0.8.1",
       "category": "content-creation",
       "keywords": ["short-video", "xiaohongshu", "script", "content", "thinking", "reframe", "creator", "lenses", "voice", "tone", "chinese"],
       "skills": ["./skills/eva"]
