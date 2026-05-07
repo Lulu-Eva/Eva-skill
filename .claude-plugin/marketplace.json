@@ -1,21 +1,21 @@
 {
-  "name": "eva-skills",
+  "name": "eva-skill",
   "owner": {
     "name": "Lulu-Eva"
   },
   "metadata": {
-    "description": "Eva-skill 创作者思考陪练与思维流爆款短视频工具箱，内置表达公理、归位漏斗、标题锚点、用户疑问验证、点子卡、素材回捞、创作者思想工具库、思想镜片、MBTI Lens、沉淀机制、兜底机制、互动语气节奏和短视频生产链路。",
-    "version": "1.1.3"
+    "description": "Eva-skill v1.2 创作者思考陪练与表达工具箱，围绕想法、人群、标题和正文，提供思考助理、表象问题归位、话题人群识别、标题即选题、正文文案、对标文案拆解、思想镜片、MBTI 镜片、沉淀机制、兜底机制和互动语气节奏。",
+    "version": "1.2.0"
   },
   "plugins": [
     {
       "name": "eva",
-      "description": "Eva-skill 创作者思考陪练与思维流爆款短视频工具箱，覆盖思考助理、创作者思想工具库、思想镜片、MBTI Lens、表象问题归位、选题、拆解、标题锚点、用户疑问验证、点子卡、素材回捞、标题封面、口播文案、口播表现、发布复盘、沉淀机制、兜底机制和互动语气节奏。",
+      "description": "Eva-skill v1.2 创作者思考陪练与表达工具箱。核心链路是想法、人群、标题、正文；标题本身就是选题。适合创作者整理表达欲、归位表象问题、识别话题人群、验证标题疑问、写口播正文和拆解对标文案。",
       "source": "./",
       "strict": false,
-      "version": "1.1.3",
+      "version": "1.2.0",
       "category": "content-creation",
-      "keywords": ["short-video", "xiaohongshu", "script", "content", "thinking", "reframe", "creator", "title-anchor", "question-validation", "idea-card", "material-retrieval", "lenses", "mbti", "sediment", "fallback", "voice", "tone", "chinese"],
+      "keywords": ["creator", "short-video", "xiaohongshu", "script", "title", "audience", "thinking", "reframe", "benchmark-copy", "lenses", "mbti", "sediment", "fallback", "voice", "chinese"],
       "skills": ["./skills/eva"]
     }
   ]
