@@ -4,18 +4,18 @@
     "name": "Lulu-Eva"
   },
   "metadata": {
-    "description": "Eva-skill v1.5.1 创作者思考陪练与表达工具箱，围绕想法、人群、标题/第一句话、正文逻辑链、内容撰写和表达资产，提供思考助理、表象问题归位、话题人群识别、对标文案拆解、点子卡沉淀与回溯、人设记忆采集、用户表达文风提取、表达真实性审查、短视频创作主入口、标题即选题、思维流爆款内容创作和开头针对性优化；内容创作前会静默检查人群、表达资产和正文逻辑链，只暴露最高优先级阻塞点；开头针对性优化可处理有标题开头承接、无标题第一句话和专门优化开头。",
-    "version": "1.5.1"
+    "description": "Eva-skill v1.5.2 创作者思考陪练与表达工具箱，围绕想法、人群、标题/第一句话、正文逻辑链、内容撰写和表达资产，提供思考助理、表象问题归位、话题人群识别、对标文案拆解、点子卡沉淀与回溯、人设记忆采集、用户表达文风提取、表达真实性审查、短视频创作主入口、标题即选题、思维流爆款内容创作和开头针对性优化；内容创作前会静默检查人群、表达资产和正文逻辑链，只暴露最高优先级阻塞点；开头针对性优化可处理有标题开头承接、无标题第一句话和专门优化开头；正文标题补强优先寻找可一字不改使用的爆款正文标题，找不到才做结构迁移。",
+    "version": "1.5.2"
   },
   "plugins": [
     {
       "name": "eva",
-      "description": "Eva-skill v1.5.1 创作者思考陪练与表达工具箱。核心链路是想法、人群、标题/第一句话、人群轻量校准、人设/表达文风确认、正文逻辑链推理、正文撰写、表达资产；标题本身就是选题。适合创作者整理表达欲、归位表象问题、识别话题人群、拆解对标文案、检测表达真实性、沉淀点子卡、梳理人设素材、提炼用户表达文风、验证标题疑问、设计正文逻辑链、写思维流内容稿，以及在 /eva-script 中处理有标题开头承接、无标题第一句话和专门优化开头。",
+      "description": "Eva-skill v1.5.2 创作者思考陪练与表达工具箱。核心链路是想法、人群、标题/第一句话、人群轻量校准、人设/表达文风确认、正文逻辑链推理、正文撰写、表达资产；标题本身就是选题。适合创作者整理表达欲、归位表象问题、识别话题人群、拆解对标文案、检测表达真实性、沉淀点子卡、梳理人设素材、提炼用户表达文风、验证标题疑问、补强正文标题、设计正文逻辑链、写思维流内容稿，以及在 /eva-script 中处理有标题开头承接、无标题第一句话和专门优化开头。",
       "source": "./",
       "strict": false,
-      "version": "1.5.1",
+      "version": "1.5.2",
       "category": "content-creation",
-      "keywords": ["creator", "short-video", "xiaohongshu", "script", "script-structure", "content-writing", "title", "audience", "thinking", "reframe", "benchmark-copy", "memory", "persona", "persona-memory", "user-voice", "voice-card", "ai-check", "voice", "chinese"],
+      "keywords": ["creator", "short-video", "xiaohongshu", "script", "script-structure", "content-writing", "title", "body-title", "audience", "thinking", "reframe", "benchmark-copy", "memory", "persona", "persona-memory", "user-voice", "voice-card", "ai-check", "voice", "chinese"],
       "skills": ["./skills/eva"]
     }
   ]
