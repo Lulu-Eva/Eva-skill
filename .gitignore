@@ -9,3 +9,6 @@ node_modules/
 
 # Eva runtime memory
 eva-memory/
+
+# Local scratch files
+*.tmp
