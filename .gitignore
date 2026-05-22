@@ -7,7 +7,7 @@ node_modules/
 # Logs
 *.log
 
-# Eva runtime memory
+# Eva-skill v1.5 runtime memory
 eva-memory/
 
 # Local scratch files
