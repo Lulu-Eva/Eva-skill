@@ -9,6 +9,10 @@ node_modules/
 
 # Eva-skill v1.6.1 runtime memory
 eva-memory/
+eva-learn/
+
+# Local Claude/Codex settings
+.claude/settings.local.json
 
 # Local scratch files
 *.tmp
