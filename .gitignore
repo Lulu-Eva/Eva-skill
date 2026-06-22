@@ -7,7 +7,7 @@ node_modules/
 # Logs
 *.log
 
-# Eva-skill v1.7.2 runtime memory
+# Eva-skill runtime memory
 eva-memory/
 eva-learn/
 
