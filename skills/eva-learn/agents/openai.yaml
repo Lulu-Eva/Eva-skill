@@ -1,0 +1,4 @@
+interface:
+  display_name: "Eva Learn"
+  short_description: "独立 Eva 学习项目、资料带读和主题式阅读入口"
+  default_prompt: "用 $eva-learn 进入 Eva Learn 学习、带读或主题式阅读项目。"

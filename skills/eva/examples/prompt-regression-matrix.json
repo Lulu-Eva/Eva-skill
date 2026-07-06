@@ -1,0 +1,160 @@
+{
+  "version": "2.0.3",
+  "purpose": "Semantic regression cases for prompt-weight reduction. These cases protect routing, thin-entry boundaries, and user-facing lightness.",
+  "cases": [
+    {
+      "id": "default-start",
+      "input": "/eva",
+      "expected_route": "eva-default-start",
+      "forbid": ["Initializer Card", "asset_type", "valid_next", "eva-link"],
+      "expected_terminal": "ask-user-to-provide-material"
+    },
+    {
+      "id": "ordinary-learning-no-auto-learn",
+      "input": "我想研究一下这个理论",
+      "expected_route": "eva-main-suggest-eva-learn",
+      "forbid": ["auto-enter-eva-learn", "create-learning-project"],
+      "expected_terminal": "suggest-explicit-eva-learn"
+    },
+    {
+      "id": "explicit-eva-learn",
+      "input": "用 Eva Learn 带我读这份资料",
+      "expected_route": "eva-learn",
+      "forbid": ["write-content-draft", "auto-enter-script"],
+      "expected_terminal": "learn-project-or-restore"
+    },
+    {
+      "id": "material-to-create",
+      "input": "把这份资料做成一条内容",
+      "expected_route": "eva-main-material-to-create",
+      "forbid": ["create-learning-project"],
+      "expected_terminal": "low-confidence-material-to-create"
+    },
+    {
+      "id": "explicit-brief",
+      "input": "帮我拆这个品牌 Brief",
+      "expected_route": "eva-brief-or-commerce-brief",
+      "forbid": ["write-full-commercial-script", "produce-final-title"],
+      "expected_terminal": "commercial-constraint-card-or-brief-parse"
+    },
+    {
+      "id": "commercial-content-not-brief-entry",
+      "input": "这个商单怎么写成一条视频",
+      "expected_route": "eva-main-commerce-to-title-or-script",
+      "forbid": ["stop-at-eva-brief-only", "write-before-constraint-card"],
+      "expected_terminal": "commerce-constraint-then-title-or-script"
+    },
+    {
+      "id": "title-candidate-check",
+      "input": "我搜了 5 个爆款标题，你帮我判断哪个能用",
+      "expected_route": "eva-title-candidate-check",
+      "forbid": ["free-generate-new-titles", "auto-enter-script-without-title-handoff"],
+      "expected_terminal": "candidate-judgment-or-title-handoff"
+    },
+    {
+      "id": "title-promise-check",
+      "input": "这是标题和完整原稿，你帮我看看能不能发",
+      "expected_route": "eva-title-promise-check",
+      "forbid": ["rewrite-full-script-by-default", "skip-title-promise-check"],
+      "expected_terminal": "title-promise-check-before-rewrite"
+    },
+    {
+      "id": "opening-only",
+      "input": "只帮我优化前三秒",
+      "expected_route": "eva-opening",
+      "forbid": ["write-full-script-by-default"],
+      "expected_terminal": "opening-options-and-risk"
+    },
+    {
+      "id": "full-script-needs-route-map",
+      "input": "帮我写完整稿",
+      "expected_route": "eva-script",
+      "forbid": ["write-without-route-map"],
+      "expected_terminal": "route-map-before-writing"
+    },
+    {
+      "id": "ai-check-default-diagnose",
+      "input": "帮我看看这段有没有 AI 味",
+      "expected_route": "eva-ai-check",
+      "forbid": ["rewrite-full-text-by-default"],
+      "expected_terminal": "single-point-or-check-report"
+    },
+    {
+      "id": "voice-needs-user-sample",
+      "input": "提炼我的语气，以后按我的语气写",
+      "expected_route": "eva-user-voice",
+      "forbid": ["use-benchmark-as-user-voice", "save-without-confirmation"],
+      "expected_terminal": "ask-or-analyze-user-owned-samples"
+    },
+    {
+      "id": "explicit-save",
+      "input": "把这个保存一下，下次还能用",
+      "expected_route": "eva-memory",
+      "forbid": ["silent-save-private-asset"],
+      "expected_terminal": "confirm-or-save-memory-asset"
+    },
+    {
+      "id": "review-pending-no-auto-route",
+      "input": "这条播放 3000，点赞 20，完播很低，你复盘一下为什么扑了",
+      "expected_route": "eva-review-pending",
+      "forbid": ["enter-eva-review", "claim-causality-from-single-post", "say-title-caused-failure", "write-long-term-rule"],
+      "expected_terminal": "explain-review-pending-and-route-to-title-or-reframe"
+    },
+    {
+      "id": "review-data-pending-no-auto-route",
+      "input": "这是我近 20 条数据和这条的标题正文，帮我复盘卡在哪里",
+      "expected_route": "eva-review-pending-title-or-create",
+      "forbid": ["enter-eva-review", "run-review-card", "claim-ab-causality"],
+      "expected_terminal": "use-title-promise-or-next-create-action"
+    },
+    {
+      "id": "review-comment-pending-no-auto-route",
+      "input": "评论区只有 3 条：看不懂、太长了、讲得有点绕。帮我复盘下一条怎么改",
+      "expected_route": "eva-review-pending-audience-or-create",
+      "forbid": ["enter-eva-review", "write-high-frequency-insight", "save-long-term-persona"],
+      "expected_terminal": "treat-comments-as-material-for-next-content"
+    },
+    {
+      "id": "external-skill-not-2-0-mainline",
+      "input": "别的 Skill 能不能处理这个？",
+      "expected_route": "eva-main-or-manual-suggestion",
+      "forbid": ["auto-run-external-skill", "auto-scan-skills", "eva-synchro"],
+      "expected_terminal": "explain-external-skill-is-not-2-0-mainline"
+    },
+    {
+      "id": "explicit-link-still-available",
+      "input": "把这个提示词接进 Eva",
+      "expected_route": "eva-link-builder",
+      "forbid": ["auto-enter-create", "skip-link-validation"],
+      "expected_terminal": "link-request-or-builder"
+    },
+    {
+      "id": "custom-eva-skill-means-link-builder",
+      "input": "我想自定义一个 Eva-Skill",
+      "expected_route": "eva-link-builder",
+      "forbid": ["general-skill-creator", "create-sibling-eva-skill", "write-content-draft"],
+      "expected_terminal": "ask-what-link-workflow"
+    },
+    {
+      "id": "ordinary-moments-writing-not-link-builder",
+      "input": "我不想写口播，我就想写一条朋友圈",
+      "expected_route": "eva-main-create",
+      "forbid": ["eva-link-builder", "auto-call-local-link", "set-default-link"],
+      "expected_terminal": "ordinary-create-or-ask-platform-material"
+    },
+    {
+      "id": "explicit-local-link-call",
+      "input": "用我的朋友圈 Link 写这条",
+      "expected_route": "eva-link",
+      "forbid": ["ordinary-create-without-link-check", "skip-link-validation", "set-default-link"],
+      "expected_terminal": "strict-link-check-then-call"
+    },
+    {
+      "id": "link-default-needs-confirmation",
+      "input": "以后说写朋友圈时默认走我的朋友圈 Link 吗？",
+      "expected_route": "eva-link-builder-or-link-registry",
+      "forbid": ["write-default-into-eva.link.json", "set-default-without-user-yes"],
+      "expected_terminal": "ask-or-record-second-confirmation"
+    }
+  ]
+}

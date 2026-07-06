@@ -1,0 +1,78 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Eva Link Registry",
+  "description": "Project-level registry for enabled Eva Links and user-confirmed default intents. This file lives at .eva/links.json in the user's project.",
+  "type": "object",
+  "required": [
+    "version",
+    "links",
+    "defaults"
+  ],
+  "properties": {
+    "version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "links": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "path",
+          "enabled"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9_.-]+$"
+          },
+          "path": {
+            "type": "string",
+            "minLength": 1
+          },
+          "enabled": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "defaults": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "intent",
+          "link_id",
+          "confirmed",
+          "confirmed_at",
+          "confirmed_phrase"
+        ],
+        "properties": {
+          "intent": {
+            "type": "string",
+            "minLength": 1
+          },
+          "link_id": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9_.-]+$"
+          },
+          "confirmed": {
+            "type": "boolean"
+          },
+          "confirmed_at": {
+            "type": "string",
+            "minLength": 1
+          },
+          "confirmed_phrase": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "additionalProperties": true
+      }
+    }
+  },
+  "additionalProperties": true
+}

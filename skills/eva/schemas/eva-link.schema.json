@@ -1,0 +1,68 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Eva Link Config",
+  "description": "Module capability declaration for one Eva Link. User enablement and default routing must live in project .eva/links.json, not in this file.",
+  "type": "object",
+  "required": [
+    "id",
+    "name",
+    "scope",
+    "accepts",
+    "requires",
+    "produces",
+    "handoff_to"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-zA-Z0-9_.-]+$"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "scope": {
+      "type": "string",
+      "minLength": 1
+    },
+    "version": {
+      "type": "string"
+    },
+    "accepts": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1
+    },
+    "requires": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1
+    },
+    "produces": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1
+    },
+    "handoff_to": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1
+    },
+    "entry_aliases": {
+      "description": "Explicit point-name aliases users can use to call this Link. Do not put ordinary creation commands such as 写朋友圈 here; defaults belong in .eva/links.json.",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "additionalProperties": true
+}

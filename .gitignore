@@ -3,16 +3,25 @@
 
 # Dependencies
 node_modules/
+venv/
+.venv/
 
 # Logs
 *.log
+*.py[cod]
+__pycache__/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
 
 # Eva-skill runtime memory
-eva-memory/
-eva-learn/
+/eva-memory/
+/eva-learn/
 
 # Local Claude/Codex settings
 .claude/settings.local.json
+.env
+.env.*
 
 # Local scratch files
 *.tmp

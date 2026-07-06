@@ -1,0 +1,19 @@
+{
+  "version": "1.0.0",
+  "links": [
+    {
+      "id": "local.weibo-copy",
+      "path": "examples/local.weibo-copy",
+      "enabled": true
+    }
+  ],
+  "defaults": [
+    {
+      "intent": "写微博短文案",
+      "link_id": "local.weibo-copy",
+      "confirmed": true,
+      "confirmed_at": "2026-07-04T10:00:00+08:00",
+      "confirmed_phrase": "以后说写微博短文案时，默认走 local.weibo-copy"
+    }
+  ]
+}

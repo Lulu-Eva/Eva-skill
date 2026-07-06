@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Eva Initializer Card",
+  "type": "object",
+  "required": [
+    "user_goal",
+    "task_type",
+    "definition_of_done",
+    "assets_to_generate",
+    "required_fields",
+    "next_step"
+  ],
+  "properties": {
+    "user_goal": {
+      "type": "string",
+      "minLength": 1
+    },
+    "task_type": {
+      "type": "string",
+      "minLength": 1
+    },
+    "definition_of_done": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1
+    },
+    "assets_to_generate": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "required_fields": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "available_sources": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "missing_sources": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "verification_method": {
+      "type": "string"
+    },
+    "needs_user_confirmation": {
+      "type": "boolean"
+    },
+    "next_step": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "additionalProperties": true
+}

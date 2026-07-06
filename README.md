@@ -1,151 +1,181 @@
-# Eva-skill
+# Eva Skill v2.0
 
-Eva-skill 是面向创作者的思考陪练与表达工具箱。
+Eva 2.0 是从 Eva 1.7.4 升级而来的创作者工作台。
 
-当前版本：`1.7.4`
+当前开发版本：`2.0.3`。
 
-核心链路：
+1.7.4 的核心是内容创作调度：帮用户把想法推进到标题、开头、正文和商单。  
+2.0 的核心是工作台化：在原有创作能力上，新增 Assist Harness、Eva Link，以及独立的 Brief / Learn 入口，让 Eva 能处理更长链路、更复杂的创作任务和跨模块交接。
 
-```text
-想法 -> 人群 -> 标题/第一句话 -> 内容创作 -> 表达资产
-```
-
-商单链路：
+一句话：
 
 ```text
-品牌 Brief -> 商单约束卡 -> 标题/第一句话 -> 内容创作
+Eva 1.7.4 主要解决“怎么写出来”。
+Eva 2.0 进一步解决“怎么判断任务、承接上下文、拆分专门入口、接入自己的工作流，再稳定写出来”。
 ```
 
-Eva Learn 是主动触发的学习方法链路：
+## 2.0 的三件大更新
+
+### 1. Assist Harness：从写作调度器升级为创作工作台底座
+
+Assist Harness 是 2.0 最大的结构变化。
+
+它不是一个给用户直接调用的新功能，而是 Eva 背后的任务协作层。它负责：
+
+- 判断用户当前卡在哪一层：想法、问题、人群、标题、开头、正文、商单、资产保存。
+- 在模块之间做交接：Think / Create / Memory / Link 不再各自散跑。
+- 把跨模块结果收回 Eva Asset：输出能继续被下游读取，而不是停在一段自由文本。
+- 在完成前做校验：缺人群、缺标题验证、缺 Brief、缺真实素材、缺交接字段时，先退回补齐。
+- 控制前台体验：普通创作任务不暴露 Harness、schema、valid_next、DoD 等后台词。
+
+对 1.7.4 用户来说，最直接的变化是：
 
 ```text
-建档 -> 旅程判断 -> 学习/带读/主题式阅读 -> 掌握检查 -> 判断版本/思想种子卡 -> Eva 内容链路
+Eva 不再只是“帮我写一条内容”的工具，
+而是能判断“这条内容现在该先想清楚、先找人群、先拆 Brief、先搜标题、先补素材，还是可以开始写”的工作台。
 ```
 
-Eva 不急着帮用户写稿。它先判断用户卡在想法、人群、标题/第一句话、正文路线图、商单 Brief，还是表达资产。标题本身就是选题；商单必须先拆 Brief；完整正文必须先过正文路线图。
+### 2. Eva Link：从单次对话升级为可接入自己的工作流
 
-如果你想专门学习、阅读或做主题研究，需要主动说：
+Eva 2.0 新增 Eva Link：
+
+| 能力 | 解决什么问题 | 什么时候使用 |
+|---|---|---|
+| Eva Link | 把本地私有模块、个人提示词、SOP、方法论接入 Eva 资产流 | 用户明确说“把这个提示词接进 Eva”“做一个自己的 Link”“检查本地 Link” |
+
+Link 不是默认创作流程的一部分。  
+它只有在用户明确触发或确认后才进入，不抢占普通写作、商单和学习任务。
+
+这次升级的意义不是“多了一个按钮”，而是：
 
 ```text
-eva-learn
+Eva 可以稳定连接你的私有流程和本地模块，
+同时仍然用 Eva Asset 和 Harness 保证结果能被主创作链继续承接。
 ```
 
-Eva Learn 不会因为用户提到“学习、阅读、研究”就自动启动。主动进入后，它会先建档或恢复学习项目，再判断走探索式学习、资料带学、主题式阅读，或思想种子卡交接。
+### 3. Brief / Learn 独立入口：主 Eva 更干净，专门任务更清楚
 
-## 核心能力
+1.7.4 里，商单 Brief 和学习项目容易挤在 Eva 主流程里。  
+2.0 把它们拆成 sibling Skill：
 
-- `/eva-think`：思考助理。处理脑子乱、表达欲很多但说不清、拆概念、判断方向。
-- `/eva-reframe`：表象问题归位。处理限流、垂直、频率、为什么不涨粉等容易问偏的问题。
-- `/eva-audience-finder`：话题人群识别器。判断一个话题到底戳中了谁。
-- `/eva-benchmark-copy`：对标文案拆解。拆标题、用户疑问、正文结构和可迁移动作。
-- `/eva-brief`：商单 Brief 需求拆解。先拆品牌硬要求、卖点池、表达风险和素材匹配，输出商单约束卡。
-- `/eva-ai-check`：表达真实性审查。看文本有没有具体意思、个人立场、身体感和内容推进。
-- `/eva-memory`：点子卡沉淀与回溯。保存和回捞可复用素材。
-- `/eva-persona-memory`：人设记忆采集。沉淀真实经历、选择代价、生活风格和表达资格。
-- `/eva-user-voice`：用户表达文风提取。生成 `voice-card`，后续写稿保护用户自己的声音。
-- `/eva-shortvideo`：短视频创作主入口。判断有标题链路还是无标题链路。
-- `/eva-title`：标题即选题。输出爆款标题搜索方案，判断候选标题，形成内容任务交接卡。
-- `/eva-script`：思维流爆款内容创作。先过正文逻辑链和正文路线图，再进入正文撰写。
-- `/eva-learn`：提问式学习与主题式阅读。主动触发后建档，按旅程推进学习、资料带学、主题式阅读和思想种子卡。
+| 入口 | 定位 | 处理什么 | 不处理什么 |
+|---|---|---|---|
+| `eva` | 主创作工作台 | 想法归位、人群判断、标题/开头/正文、资料转内容、资产保存 | 不把严肃学习项目和独立 Brief 拆解塞进主流程 |
+| `eva-brief` | 独立商单 Brief 入口 | 品牌 Brief、合作需求、商单约束卡、已有商单稿检查、对标样本迁移 | 不直接写完整商单稿、标题、开头或正文 |
+| `eva-learn` | 独立学习项目入口 | 带读、主题式阅读、跨轮学习项目、思想种子卡 | 不直接替代创作链路，不直接写标题或正文 |
 
-## 使用入口
+这个拆分的核心价值：
+
+- 主 Eva 继续以创作为主干，不被长期学习项目拖重。
+- 商单 Brief 有专门入口，不再和普通商单成稿混在一起。
+- Learn 可以跨轮推进学习项目，但只有用户明确触发时才进入。
+
+## 从 1.7.4 升级到 2.0：用户会感知到什么
+
+| 变化 | 1.7.4 | 2.0 |
+|---|---|---|
+| 主定位 | 内容生产调度器 | 创作者工作台 |
+| 默认入口 | 围绕创作模块分流 | 仍默认创作，但先判断任务层级 |
+| 商单 Brief | 在主流程中处理 | `eva-brief` 独立入口，生成约束资产后交回主链路 |
+| 学习项目 | 容易和资料转内容混在一起 | `eva-learn` 独立入口，明确区分“学懂资料”和“直接做内容” |
+| 模块交接 | 依赖上下文理解 | 通过 Eva Asset 和 handoff 规则承接 |
+| 本地私有模块 | 不作为正式系统能力 | 用 Eva Link 接入 |
+| 前台体验 | 更像一个写作助手 | 普通任务保持轻交互，复杂任务才展示系统状态 |
+
+## 旧用法还在吗
+
+还在。
+
+原来 1.7.4 的核心创作能力仍然保留：
+
+- 想法归位：`/eva-think`
+- 话题人群判断：`/eva-audience-finder`
+- 标题搜索和标题判断：`/eva-title`
+- 开头、第一句话、前三秒：`/eva-script` 或开头分支
+- 正文路线图和正文撰写：`/eva-script`
+- 商单内容创作：仍回到 Eva 主创作链，但必须先有 Brief / 商单约束
+- 表达真实性审查：`/eva-ai-check`
+- 点子、人设、文风沉淀：`/eva-memory`
+
+2.0 不是替换旧创作链，而是给旧创作链加上更清楚的任务边界、资产承接和 Link 接入能力。
+
+## 什么时候用哪个入口
+
+| 用户想做什么 | 应该用 |
+|---|---|
+| “帮我想想这个选题 / 这个问题怎么讲” | `eva` |
+| “这个话题讲给谁 / 戳中谁” | `eva` -> Audience |
+| “帮我搜标题 / 判断标题 / 正文标题补强” | `eva` -> Title |
+| “帮我写开头 / 第一句 / 前三秒 / 完整视频稿” | `eva` -> Script |
+| “帮我拆品牌 Brief / 生成商单约束卡 / 检查商单稿能不能交” | `eva-brief` |
+| “用 Eva Learn 带我读 / 做主题式阅读 / 继续学习项目” | `eva-learn` |
+| “把这个提示词接进 Eva / 做一个自己的 Link” | `eva-link-builder` |
+| “检查本地 Link / 升级后还能不能用” | `eva-link-doctor` |
+
+## 2.0 的工程边界
+
+Eva 2.0 的工程结构围绕“主 Skill + 两个薄入口 + 协议和校验脚本”组织。
 
 ```text
-/eva
-/eva-think
-/eva-reframe
-/eva-audience-finder
-/eva-benchmark-copy
-/eva-brief
-/eva-memory
-/eva-persona-memory
-/eva-user-voice
-/eva-ai-check
-/eva-shortvideo
-/eva-title
-/eva-script
-/eva-learn
+skills/
+├── eva/              # 主创作工作台
+├── eva-brief/        # 独立商单 Brief 薄入口
+└── eva-learn/        # 独立学习项目薄入口
 ```
 
-## 安装
-
-```bash
-npx skills add Lulu-Eva/Eva-skill -g -y
-```
-
-## v1.7.4 更新
-
-v1.7.4 不改变 Eva Learn 的产品名，仍然是“提问式学习与主题式阅读”。这次升级重点是结构稳定性和提示词瘦身。
-
-- 压缩 `SKILL.md` 的路由描述，删除重复的防御性声明。
-- 保留弱模型需要的硬路由：每个判断节点都有输入特征、执行路径和兜底。
-- Eva Learn 从功能模块拆分改为用户旅程拆分。
-- 新增 `11_eva-learn.md` 作为入口，只做触发、建档、恢复和旅程判断。
-- Eva Learn 新增学习目标尺度闸门：大主题遇到应用词时，先区分学科型、应用型、制度型和内容素材型，不直接开讲。
-- 新增 `11-A_探索式学习.md`：无资料时从问题、谱系和学习目录进入。
-- 新增 `11-B_资料带学.md`：单份或少量资料的完整带学和问题驱动学习。
-- 新增 `11-C_主题式阅读.md`：多资料、对比研究和长期主题式阅读。
-- 新增 `11-D_思想种子卡与内容链路交接.md`：学习成果沉淀和下游内容链路硬闸门。
-- 删除旧的 `11a/11b/11c` 运行文件，避免新旧路由并存。
-
-## v1.7.4 结构
+`skills/eva/` 内部的关键目录：
 
 ```text
-Eva-skill/
-├── VERSION
-├── README.md
-├── .claude-plugin/
-│   └── marketplace.json
-└── skills/
-    └── eva/
-        ├── SKILL.md
-        └── references/
-            ├── 01_eva-think_思考助理.md
-            ├── 02_eva-reframe_表象问题归位.md
-            ├── 03_eva-audience-finder_话题人群识别器.md
-            ├── 04_eva-benchmark-copy_对标文案拆解.md
-            ├── 05_eva-memory_点子卡沉淀与回溯.md
-            ├── 06_eva-voice_互动语气节奏.md
-            ├── 07_eva-persona-memory_人设记忆采集.md
-            ├── 08_eva-ai-check_表达真实性审查.md
-            ├── 09_eva-user-voice_用户表达文风提取.md
-            ├── 10_eva-brief_商单Brief需求拆解.md
-            ├── 11_eva-learn.md
-            ├── 11-A_探索式学习.md
-            ├── 11-B_资料带学.md
-            ├── 11-C_主题式阅读.md
-            ├── 11-D_思想种子卡与内容链路交接.md
-            ├── shared/
-            │   ├── 01_handoff-cards_交接卡字段真源.md
-            │   ├── 02_asset-state_资产状态归一表.md
-            │   ├── 03_low-confidence_低置信度授权协议.md
-            │   └── 04_commercial-constraint-card_商单约束卡真源.md
-            └── shortvideo/
-                ├── 00_eva-shortvideo_短视频创作主入口.md
-                ├── 01_eva-title_标题即选题.md
-                ├── 01a_eva-title-search-plan_爆款标题搜索方案.md
-                ├── 01b_eva-title-candidate-check_爆款标题候选判断.md
-                ├── 01c_eva-title-body-heading_正文标题补强.md
-                ├── 01d_eva-title-promise-check_标题承诺与原稿检查.md
-                ├── 02_eva-script_思维流爆款内容创作.md
-                ├── 02a_eva-script-logic_正文逻辑链推理.md
-                ├── 02a1_eva-script-long-material_长素材消化.md
-                ├── 02a2_eva-script-commercial-constraints_商单约束检查.md
-                ├── 02a3_eva-script-route-map_正文路线图.md
-                ├── 02b_eva-script-writing_正文撰写.md
-                └── 03_eva-opening_开头针对性优化.md
+references/
+├── entry/            # 主入口路由真源
+├── harness/          # Assist Harness：状态、交接、失败分类、完成前验证
+├── asset/            # Eva Asset：资产卡协议
+├── shared/           # 交接卡、低置信度、商单约束、轻交互等共享真源
+├── create/           # 创作主链路
+├── think/            # 想法归位和问题重构
+├── memory/           # 点子、人设、文风资产保存和回捞
+└── link/             # Eva Link 本地模块连接
 ```
 
-## 运行原则
+工程目录只是维护索引，不是用户理解 2.0 的主线。
 
-运行原则以 `skills/eva/SKILL.md` 为唯一真源。README 只说明能力、入口、版本和结构。
+## 2.0 的约束
 
-用户运行时生成的 `eva-memory/` 和 `eva-learn/` 不应提交到 GitHub。
+- Link 是显式系统能力，不会自动进入普通创作任务。
+- `eva-brief` 和 `eva-learn` 是独立薄入口，但不维护第二套规则；它们读取 sibling `eva` 的真源。
+- 商单内容不能跳过 Brief / 商单约束卡。
+- 完整正文不能跳过标题或第一句话验证，也不能跳过正文路线图。
+- 用户资产、学习项目、Link registry 不写进 Skill 仓库本体；保存必须由用户明确触发。
+- 普通前台不展示 Harness、schema、valid_next、DoD、failure-record 等后台字段。
 
-## 更新
+## 验证
 
-重新安装即可获取最新版本：
+从本目录运行：
 
-```bash
-npx skills add Lulu-Eva/Eva-skill -g -y
+```text
+python3 "${CODEX_HOME:-$HOME/.codex}/skills/.system/skill-creator/scripts/quick_validate.py" skills/eva
+python3 "${CODEX_HOME:-$HOME/.codex}/skills/.system/skill-creator/scripts/quick_validate.py" skills/eva-learn
+python3 "${CODEX_HOME:-$HOME/.codex}/skills/.system/skill-creator/scripts/quick_validate.py" skills/eva-brief
+python3 skills/eva/scripts/eva_doctor.py --base skills/eva
+python3 skills/eva/scripts/eva_prompt_lint.py --base skills/eva
+python3 skills/eva/scripts/eva_selftest.py --base skills/eva
+python3 skills/eva/scripts/eva_asset_validate.py --asset skills/eva/examples/asset-card.example.json --downstream eva-create
+python3 skills/eva/scripts/eva_link_check.py --link skills/eva/examples/eva.link.example.json
+python3 skills/eva/scripts/eva_link_check.py --link skills/eva/examples/local.weibo-copy/ --strict
+python3 skills/eva/scripts/eva_asset_validate.py --asset skills/eva/examples/local.weibo-copy/tests/expected-asset.example.json --downstream eva-memory
+PYTHONPYCACHEPREFIX=/private/tmp/eva-harness-pycache python3 -m py_compile skills/eva/scripts/*.py
 ```
+
+`eva_link_check.py` 不带 `--strict` 只校验 Link config。正式挂载用户 Link 时，应对完整 Link 目录运行：
+
+```text
+python3 skills/eva/scripts/eva_link_check.py --link local-modules/{link-id}/ --strict
+```
+
+## 发布前检查
+
+- README 首屏是否讲清楚 1.7.4 -> 2.0 的升级价值。
+- `eva`、`eva-brief`、`eva-learn` 是否都能通过 quick validate。
+- Assist Harness、Eva Asset、Link 的 schema 和脚本是否通过校验。
+- `eva_prompt_lint.py` 是否通过，确认字段表没有重新散落到模块文件。
+- 未经用户明确触发，不应把用户资产、学习项目或 Link registry 写进 Skill 仓库。

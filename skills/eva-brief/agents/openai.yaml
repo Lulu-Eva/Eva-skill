@@ -1,0 +1,4 @@
+interface:
+  display_name: "Eva Brief"
+  short_description: "独立商单 Brief 拆解、品牌需求检查和约束卡入口"
+  default_prompt: "用 $eva-brief 拆品牌 Brief、商单约束卡或对照 Brief 检查商单稿。"

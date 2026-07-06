@@ -4,19 +4,19 @@
     "name": "Lulu-Eva"
   },
   "metadata": {
-    "description": "Eva-skill v1.7.4 创作者思考陪练与表达工具箱。围绕想法、人群、标题/第一句话、正文路线图、商单 Brief、表达资产和主动触发的 Eva Learn 做硬路由；商单先拆 Brief，标题先验证，完整正文先过正文路线图，Eva Learn 只在用户明确触发时启动。",
-    "version": "1.7.4"
+    "description": "Eva-skill v2.0.3 创作者工作台。以创作为主干，新增 Assist Harness、Eva Asset、Eva Link、本地 Link 校验，以及独立 eva-brief / eva-learn 薄入口；普通前台保持轻交互，复杂任务通过资产和交接协议稳定推进。",
+    "version": "2.0.3"
   },
   "plugins": [
     {
       "name": "eva",
-      "description": "Eva-skill v1.7.4 创作者思考陪练与表达工具箱。主链路是想法、人群、标题/第一句话、内容创作、表达资产；商单先拆 Brief；标题先验证；完整正文先过正文路线图。Eva Learn 只在用户主动说 /eva-learn、eva-learn 或 Eva Learn 时启动，按探索式学习、资料带学、主题式阅读和思想种子卡交接推进。",
+      "description": "Eva-skill v2.0.3 创作者工作台。主链路处理想法归位、人群判断、标题/开头/正文、商单约束、资料转内容、表达审查、资产保存和本地 Link 接入；eva-brief / eva-learn 由 sibling Skill 承接。",
       "source": "./",
       "strict": false,
-      "version": "1.7.4",
+      "version": "2.0.3",
       "category": "content-creation",
       "keywords": ["creator", "short-video", "xiaohongshu", "script", "script-structure", "content-writing", "title", "body-title", "audience", "thinking", "reframe", "benchmark-copy", "commercial-brief", "brand-brief", "sponsored-content", "memory", "persona", "persona-memory", "user-voice", "voice-card", "ai-check", "learn", "learning", "reading", "research", "study", "thought-seed-card", "voice", "chinese"],
-      "skills": ["./skills/eva"]
+      "skills": ["./skills/eva", "./skills/eva-brief", "./skills/eva-learn"]
     }
   ]
 }

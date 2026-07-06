@@ -1,0 +1,25 @@
+{
+  "id": "local.weibo-copy",
+  "name": "微博文案",
+  "scope": "create",
+  "version": "0.1.0",
+  "accepts": [
+    "thought-seed-card",
+    "judgment-version-card"
+  ],
+  "requires": [
+    "核心判断",
+    "目标读者",
+    "发布平台"
+  ],
+  "produces": [
+    "content-asset-card"
+  ],
+  "handoff_to": [
+    "eva-memory"
+  ],
+  "entry_aliases": [
+    "微博文案",
+    "weibo-copy"
+  ]
+}

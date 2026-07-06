@@ -1,0 +1,20 @@
+{
+  "asset_type": "thought-seed-card",
+  "source_module": "eva-learn",
+  "core_content": "内容变贵，是因为信任建立被前置到了内容阶段。",
+  "user_question": "为什么 AI 时代内容对商业生产者更重要？",
+  "evidence": [
+    "媒介从中心化背书迁移到算法分发",
+    "成交前的信任叙事越来越重要"
+  ],
+  "valid_next": [
+    "eva-think",
+    "eva-create",
+    "eva-memory"
+  ],
+  "saved": false,
+  "confidence": "medium",
+  "low_confidence_reason": [],
+  "missing_fields": [],
+  "privacy_flags": []
+}

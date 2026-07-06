@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Eva Failure Record",
+  "type": "object",
+  "required": [
+    "failure_type",
+    "summary",
+    "recommended_action"
+  ],
+  "properties": {
+    "failure_type": {
+      "type": "string",
+      "enum": [
+        "input_missing",
+        "route_conflict",
+        "asset_validation_failed",
+        "low_confidence",
+        "script_or_tool_failed",
+        "permission_or_safety_boundary"
+      ]
+    },
+    "summary": {
+      "type": "string",
+      "minLength": 1
+    },
+    "recommended_action": {
+      "type": "string",
+      "minLength": 1
+    },
+    "missing_fields": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "confidence": {
+      "type": "string",
+      "enum": ["high", "medium", "low"]
+    }
+  },
+  "additionalProperties": true
+}

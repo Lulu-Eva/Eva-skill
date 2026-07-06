@@ -1,0 +1,19 @@
+{
+  "asset_type": "content-asset-card",
+  "source_module": "local.weibo-copy",
+  "core_content": "内容会越来越贵，不是因为写作本身变难了，而是因为信任建立被前置到了内容阶段。以前用户先认识你，再决定要不要信你。现在很多时候，是先刷到一条内容，再决定你值不值得继续看。对商业生产者来说，内容不是表达欲，而是信任基础设施。",
+  "user_question": "为什么 AI 时代内容对商业生产者更重要？",
+  "evidence": [
+    "上游 thought-seed-card：内容变贵，是因为信任建立被前置到了内容阶段。",
+    "目标读者：想通过内容建立信任的商业生产者",
+    "发布平台：微博"
+  ],
+  "valid_next": [
+    "eva-memory"
+  ],
+  "saved": false,
+  "confidence": "medium",
+  "low_confidence_reason": [],
+  "missing_fields": [],
+  "privacy_flags": []
+}

@@ -1,0 +1,241 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Eva Asset Card",
+  "type": "object",
+  "required": [
+    "asset_type",
+    "source_module",
+    "core_content",
+    "user_question",
+    "valid_next",
+    "saved"
+  ],
+  "properties": {
+    "asset_type": {
+      "type": "string",
+      "enum": [
+        "inquiry-question-card",
+        "reading-lineage-card",
+        "learning-progress-card",
+        "judgment-version-card",
+        "thought-seed-card",
+        "core-judgment-card",
+        "user-question-card",
+        "idea-card",
+        "audience-card",
+        "title-handoff-card",
+        "opening-handoff-card",
+        "commercial-constraint-card",
+        "content-task-card",
+        "content-asset-card",
+        "review-card",
+        "persona-card",
+        "voice-card"
+      ]
+    },
+    "source_module": {
+      "type": "string",
+      "minLength": 1
+    },
+    "core_content": {
+      "type": ["string", "object", "array"],
+      "minLength": 1
+    },
+    "user_question": {
+      "type": "string",
+      "minLength": 1
+    },
+    "evidence": {
+      "type": ["string", "array", "object"]
+    },
+    "valid_next": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1
+    },
+    "saved": {
+      "type": "boolean"
+    },
+    "confidence": {
+      "type": "string",
+      "enum": ["high", "medium", "low"]
+    },
+    "low_confidence_reason": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "title-unverified",
+          "brief-incomplete",
+          "missing-audience",
+          "missing-user-question",
+          "missing-source-material",
+          "user-requested-draft-before-evidence",
+          "link-output-schema-failed",
+          "missing-title-or-content",
+          "missing-data",
+          "small-comment-sample",
+          "unclear-data-window",
+          "missing-user-goal",
+          "unverified-causality"
+        ]
+      }
+    },
+    "missing_fields": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "privacy_flags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "evidence_level": {
+      "type": "string",
+      "enum": ["L0", "L1", "L2", "L3", "L4", "L5"]
+    },
+    "path_bottleneck": {
+      "type": "string",
+      "enum": [
+        "exposure",
+        "click",
+        "retention",
+        "interaction",
+        "profile_visit",
+        "follow",
+        "consultation",
+        "unknown"
+      ]
+    },
+    "facts": {
+      "type": ["array", "object", "string"]
+    },
+    "baseline": {
+      "type": ["array", "object", "string"]
+    },
+    "hypothesis": {
+      "type": "string"
+    },
+    "confounders": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "next_test_action": {
+      "type": "string"
+    },
+    "metrics_to_watch": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "result_backfill_required": {
+      "type": "boolean"
+    },
+    "design_type": {
+      "type": "string",
+      "enum": [
+        "single_observation",
+        "baseline_comparison",
+        "matched_comparison",
+        "natural_experiment",
+        "ab_test"
+      ]
+    },
+    "treatment_variable": {
+      "type": "string"
+    },
+    "outcome_variable": {
+      "type": "string"
+    },
+    "control_plan": {
+      "type": "string"
+    },
+    "adjustment_variables": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "baseline_distribution": {
+      "type": ["object", "array", "string"]
+    },
+    "metric_spec": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "role", "numerator", "denominator", "window"],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string",
+            "enum": ["primary", "guardrail", "exploratory"]
+          },
+          "numerator": {
+            "type": "string"
+          },
+          "denominator": {
+            "type": "string"
+          },
+          "window": {
+            "type": "string"
+          },
+          "dedupe_rule": {
+            "type": "string"
+          },
+          "win_threshold": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "business_goal": {
+      "type": "string"
+    },
+    "macro_conversion": {
+      "type": "string"
+    },
+    "micro_conversion": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "lead_quality_signal": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "outlier_flag": {
+      "type": "boolean"
+    },
+    "outlier_reason": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "success_criteria": {
+      "type": "string"
+    },
+    "observation_window": {
+      "type": "string"
+    },
+    "learning_log_status": {
+      "type": "string",
+      "enum": ["success", "failed", "inconclusive"]
+    }
+  },
+  "additionalProperties": true
+}
