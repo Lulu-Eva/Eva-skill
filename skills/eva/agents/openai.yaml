@@ -1,4 +1,4 @@
 interface:
-  display_name: "Eva 2.0"
-  short_description: "默认创作工作台，学习和商单约束拆解可独立触发"
-  default_prompt: "用 $eva 进入默认创作模式；学习请说 eva-learn，拆商单 Brief 或约束卡请说 eva-brief。"
+  display_name: "Eva Router"
+  short_description: "极薄路由入口，判断该进哪个 Eva 模块"
+  default_prompt: "用 $eva 判断这次该进入 Eva Think、Create、Learn、Brief 还是 Link。"

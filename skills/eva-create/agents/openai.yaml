@@ -1,0 +1,4 @@
+interface:
+  display_name: "Eva Create"
+  short_description: "短视频、标题、开头、正文和图文创作入口"
+  default_prompt: "用 $eva-create 处理短视频、标题、开头、正文或普通内容创作。"

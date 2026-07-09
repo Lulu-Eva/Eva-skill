@@ -1,0 +1,4 @@
+interface:
+  display_name: "Eva Link"
+  short_description: "本地 Link 创建、检查和调用入口"
+  default_prompt: "用 $eva-link 创建、检查或调用一个已确认的 Eva Link。"

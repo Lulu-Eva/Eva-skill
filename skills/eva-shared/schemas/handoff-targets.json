@@ -1,0 +1,20 @@
+{
+  "version": "2.0.4",
+  "targets": [
+    "eva",
+    "eva-learn",
+    "eva-brief",
+    "eva-think",
+    "eva-create",
+    "eva-memory",
+    "eva-link",
+    "learn",
+    "think",
+    "create",
+    "memory",
+    "link",
+    "title",
+    "opening",
+    "script"
+  ]
+}

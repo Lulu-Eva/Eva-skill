@@ -11,31 +11,38 @@ description: |
 
 ## 真源
 
-本 Skill 是薄入口，不维护第二套商单规则。执行时读取并遵守：
+本 Skill 是薄入口，不维护第二套商单规则。首轮快速拆解默认只读取：
 
 ```text
-../eva/schemas/asset-types.json
-../eva/references/create/commerce/00_eva-commerce_商单主入口.md
-../eva/references/shared/03_commercial-constraint-card_商单约束卡真源.md
-../eva/references/shared/01_asset-state_资产状态归一表.md
-../eva/references/shared/02_low-confidence_低置信度授权协议.md
-../eva/references/asset/00_eva-asset_资产卡协议.md
+../eva-shared/schemas/asset-types.json
+../eva-shared/references/commerce/00_eva-commerce_商单主入口.md
+../eva-shared/references/commerce/01_brief-parse_Brief基础解析.md
 ```
+
+如果这些文件不可读，或 `../eva-shared/schemas/asset-types.json` 的 `version` 不属于 `2.0.x`，停止商单流程，只说明缺少同系列 Eva 2.0 shared 真源；不要凭记忆补 Brief 规则。`2.0.2`、`2.0.4` 这类小版本允许继续；不属于 `2.0.x` 的架构版本必须停下确认。
+
+首轮不因资产字段不完整阻塞初拆；只有要生成正式商单约束卡、检查已有商单稿、迁移对标样本，或要交回创作链路时，才追加读取：
+
+```text
+../eva-shared/references/shared/03_commercial-constraint-card_商单约束卡真源.md
+../eva-shared/references/shared/01_asset-state_资产状态归一表.md
+../eva-shared/references/shared/02_low-confidence_低置信度授权协议.md
+../eva-shared/references/asset/00_eva-asset_资产卡协议.md
+```
+
+`eva-brief` 首轮不默认读取 `../eva-shared/references/shared/05_expression-asset-preload_表达资产轻量预加载协议.md`。只有检查已有商单稿是否符合用户人设/文风，或把商单约束交回 `eva-create` 成稿时，才按该协议把表达资产作为状态参考；不得让预加载拖慢 Brief 初拆。
 
 按场景继续读取：
 
 ```text
-../eva/references/create/commerce/01_brief-parse_Brief基础解析.md
-../eva/references/create/commerce/02_constraint-card_商单约束卡生成.md
-../eva/references/create/commerce/03_draft-check_已有商单稿检查.md
-../eva/references/create/commerce/04_sample-transfer_对标样本迁移.md
+../eva-shared/references/commerce/02_constraint-card_商单约束卡生成.md
+../eva-shared/references/commerce/03_draft-check_已有商单稿检查.md
+../eva-shared/references/commerce/04_sample-transfer_对标样本迁移.md
 ```
 
-如果这些文件不可读，或 `../eva/schemas/asset-types.json` 的 `version` 不属于 `2.0.x`，停止商单流程，只说明缺少同系列 Eva 2.0 主 Skill 真源；不要凭记忆补 Brief 规则。`2.0.2`、`2.0.3` 这类小版本允许继续；不属于 `2.0.x` 的架构版本必须停下确认。
+`eva-brief` 不是可单独分发的完整 Skill；它必须和 sibling `eva-shared` 安装在同一个 `skills/` 目录下，并且只读取该 shared 真源。
 
-`eva-brief` 不是可单独分发的完整 Skill；它必须和 sibling `eva` 安装在同一个 `skills/` 目录下，并且只读取该 sibling 真源。
-
-商单约束字段、商单内容任务卡、素材缺失降级和禁止项只认 sibling `eva` 的 shared 真源；本入口只负责触发、读取和交回主创作链。
+商单约束字段、商单内容任务卡、素材缺失降级和禁止项只认 sibling `eva-shared` 的 shared 真源；本入口只负责触发、读取和交回 `eva-create`。
 
 ## 处理范围
 
@@ -56,7 +63,7 @@ description: |
 
 ## 执行
 
-1. 先读取 `../eva/references/create/commerce/00_eva-commerce_商单主入口.md`。
+1. 先读取 `../eva-shared/references/commerce/00_eva-commerce_商单主入口.md`。
 2. 判断输入是 Brief、明确要求拆解的低置信度产品卖点、已有商单稿、对标样本，还是身份不明稿件。
 3. 读取唯一优先子文件。
 4. 输出 Brief 解析、卖点池、商单约束卡、已有稿检查或样本迁移判断。
@@ -74,4 +81,4 @@ Brief 需求拆解
 对标样本迁移判断
 ```
 
-商单约束卡不是标题交接卡、第一句话交接卡或正文入口。没有合格标题交接卡或第一句话交接卡，不得转换成商单内容任务卡；转换规则只按 sibling `eva` 的 shared 商单约束真源执行。
+商单约束卡不是标题交接卡、第一句话交接卡或正文入口。没有合格标题交接卡或第一句话交接卡，不得转换成商单内容任务卡；转换规则只按 sibling `eva-shared` 的商单约束真源执行。
