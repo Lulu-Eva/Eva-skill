@@ -319,6 +319,6 @@ Phase 5 自查收束：跑偏自检、观看体验、自查和下一步动作。
 | 入口、人群或商单门槛不成立 | 回 `references/create/shortvideo/script/01_eva-script-logic_正文逻辑链推理.md` |
 | 素材不足 | 补 1 个真实素材或点子卡；缺身份/信任感/表达资格时补 `persona-card` |
 | 稿子已成 | 让用户朗读一遍，标出车轱辘话或卡壳处 |
-| 用户担心 AI 味 | 接 `references/create/quality/00_eva-ai-check_表达真实性审查.md` |
+| 用户担心 AI 味 | 接 `../eva-shared/references/quality/00_eva-ai-check_表达真实性审查.md` |
 | 用户想以后按自己的语气写 | 接 `../eva-shared/references/memory/02_eva-user-voice_用户表达文风提取.md` |
 | 好点子有复用价值 | 建议保存；用户同意后接 `../eva-shared/references/memory/00_eva-memory_点子卡沉淀与回溯.md` |

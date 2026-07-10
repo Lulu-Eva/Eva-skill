@@ -1,7 +1,7 @@
 ---
 name: eva-learn
 description: |
-  Eva Learn 独立学习项目入口。用户明确说 /eva-learn、eva-learn、Eva Learn，或用自然语言明确要求“带我学懂 / 带我系统学 / 带我读 / 主题式阅读 / 继续上次学习”时使用。负责建档或恢复学习项目，并读取 eva-shared 的 Learn 真源执行；不处理普通创作、改稿、标题、商单成稿或资料转内容。
+  Eva Learn 2.0.5 独立学习项目入口。用户明确说 /eva-learn、eva-learn、Eva Learn，或用自然语言明确要求“带我学懂 / 带我系统学 / 带我读 / 主题式阅读 / 继续上次学习”时使用。所有 Learn 任务都必须先建立或恢复可追溯档案，再同轮开始教学；不处理普通解释、创作、改稿、标题、商单成稿或资料转短视频。
   触发方式：/eva-learn、eva-learn、Eva Learn、进入 Eva Learn 模式、带我学懂、带我系统学、带我读、做提问式学习、做主题式阅读、继续 Eva Learn 学习项目、继续上次学习项目、接着讲上次带读。
 ---
 
@@ -14,24 +14,20 @@ description: |
 本 Skill 是薄入口。首轮默认只读取：
 
 ```text
-../eva-shared/schemas/asset-types.json
+../eva-shared/references/learn/05_eva-learn-project_分级建档与恢复.md
 ../eva-shared/references/learn/00_eva-learn.md
-../eva-shared/references/shared/04_light-interaction_轻交互协议.md
 ```
 
-如果这些文件不可读，或 `../eva-shared/schemas/asset-types.json` 的 `version` 不属于 `2.0.x`，停止学习流程，只说明缺少同系列 Eva 2.0 shared 真源；不要凭记忆补流程。`2.0.2`、`2.0.4` 这类小版本允许继续；不属于 `2.0.x` 的架构版本必须停下确认。
-
-只有命中以下条件之一，才追加读取 `../eva-shared/references/asset/00_eva-asset_资产卡协议.md` 和 `../eva-shared/references/harness/00_eva-harness_状态与交接校验.md`：
+只有命中以下条件之一，才追加读取 `../eva-shared/schemas/asset-types.json`、`../eva-shared/references/asset/00_eva-asset_资产卡协议.md` 和 `../eva-shared/references/harness/00_eva-harness_状态与交接校验.md`：
 
 ```text
-用户要求保存学习项目。
-用户要求下次继续。
 需要生成思想种子卡并交接到创作链路。
 学习项目恢复失败。
 学习状态校验失败。
+需要生成、保存或交接正式 Eva Asset。
 ```
 
-未命中以上条件时，不读取、不引用 Harness / Asset 字段；第一轮直接进入带读或默认知识谱系。
+未命中以上条件时，不读取、不引用 Harness / Asset 字段；项目建档按 Learn 项目协议执行，不依赖 Asset/Harness。
 
 只有学习结果要转成内容、观点、思想种子或交接创作时，才读取 `../eva-shared/references/shared/05_expression-asset-preload_表达资产轻量预加载协议.md` 做表达资产轻量预检；普通带读、资料理解和主题学习不预加载，不进入 Memory 重流程。
 
@@ -45,6 +41,8 @@ description: |
 - 用户明确说“进入 Eva Learn 模式”。
 - 用户明确说“带我学懂 / 带我系统学 / 带我读 / 研究清楚 / 做提问式学习 / 做主题式阅读”，即使没有说出 Eva Learn 字样。
 - 用户说“继续上次学习项目 / 接着讲上次带读 / 我上次让你带我读的那本书继续讲”。
+
+普通“解释一下 / 这是什么意思 / 为什么会这样”属于 Eva Think 或基础模型解释，不进入 Learn、不建档。
 
 禁止进入：
 
@@ -60,11 +58,12 @@ description: |
 
 ## 执行
 
-1. 先读取 `../eva-shared/references/learn/00_eva-learn.md`。
-2. 按该文件完成触发确认、建档或恢复、旅程判断。
-3. 需要交接创作时，输出思想种子、判断版本或素材判断，不直接写标题、开头或完整稿。
-4. 学习项目和用户资料只写入用户运行项目、用户指定目录或 `~/Documents/eva-learn/`，不得写进 Skill 仓库本体。
-5. 用户要求继续上次学习但没有提供路径、当前运行目录也找不到项目时，不要求用户重新说 `eva-learn`；只问学习项目放在哪个文件夹，或在找到多个候选时让用户选一个。
+1. 先读取分级建档与恢复协议，完成最小建档、完整建档或项目恢复；未成功建档不得教学。
+2. 再读取 `../eva-shared/references/learn/00_eva-learn.md` 判断旅程，并在同一轮进入第一讲或恢复讲次。
+3. 每轮更新 `00-学习进度.md`，并把真实讲解、用户回答和 Eva 反馈追加到 `07-学习问答原稿.md`；写入失败必须停止并说明。
+4. 需要交接创作时，输出思想种子、判断版本或素材判断，不直接写标题、开头或完整稿。
+5. 学习项目和用户资料只写入用户运行项目、用户指定目录或 `~/Documents/eva-learn/`，不得写进 Skill 仓库本体。
+6. 用户要求继续上次学习但没有提供路径、当前运行目录也找不到项目时，不要求用户重新说 `eva-learn`；只问学习项目放在哪个文件夹，或在找到多个候选时让用户选一个。
 
 ## 边界
 

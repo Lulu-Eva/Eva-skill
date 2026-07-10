@@ -1,68 +1,53 @@
-# Eva Skill v2.0.4
+# Eva Skill v2.0.5
 
-当前版本：`2.0.4`。
+当前版本：`2.0.5`。
 
-Eva Skill 是面向创作者的思考、学习、商单拆解和内容生产工具。2.0.4 延续 1.7.4 的主链路，但把入口结构和共享规则拆得更清楚，让高频聊天更轻，创作链路更稳，学习、商单和本地扩展可以显式直达。
+Eva Skill 是面向创作者的思考、短视频创作、学习、商单拆解和本地工作流接入工具。2.0.5 保留 Eva 的建档、验证、隐私、交接和质量闸门，同时减少高频入口的默认读取与前台等待。
 
-## 从 1.7.4 到 2.0.4
+## 从 1.7.4 到 2.0.5
 
-1.7.4 是单入口结构：
+1.7.4 使用一个主 `SKILL.md` 承担路由和全局规则，Think、Learn、Brief、Create、Memory 等能力位于 `references/` 内部。
 
-```text
-Eva-skill 1.7.4/
-├── SKILL.md                 # 主入口，负责路由和全局规则
-└── references/              # Think / Learn / Brief / Create / Memory 等内部模块
-```
-
-2.0.4 改为一个路由入口、五个能力入口和一个共享真源层：
+2.0.5 拆成一个路由入口、五个能力入口和一个共享真源层：
 
 ```text
 skills/
-├── eva/              # 极薄路由，只判断进入哪个入口
-├── eva-think/        # 日常聊天、想法归位、问题重构
-├── eva-learn/        # 学习、带读、主题式阅读
+├── eva/              # 路由后同轮执行目标入口
+├── eva-think/        # 日常解释、聊天、想法归位、问题重构
 ├── eva-create/       # 短视频、标题、开头、正文、对标、AI 味检测
+├── eva-learn/        # 学习、资料带读、主题式阅读
 ├── eva-brief/        # 商单 Brief、合作需求、商单约束
 ├── eva-link/         # 本地 Link 创建、检查、调用
-└── eva-shared/       # 共享真源包，只为安装和 sibling 读取存在
+└── eva-shared/       # 共享协议、schema、脚本和示例
 ```
 
-`eva-shared` 是安装用支撑包，不处理用户任务。它只存放多个入口共同依赖的规则、脚本、schema 和示例，避免每个入口维护一套重复规则。安装时必须和其他 Eva 入口一起安装，否则 Think / Create / Learn / Brief / Link 会缺少 shared 真源。
+安装时必须同时安装七个目录。`eva-shared` 不是用户入口，但其他入口需要它提供共享协议、schema、脚本和正式校验规则。
 
-## 主要升级点
+## 主要升级
 
-- **入口更轻**：`/eva` 只做路由；材料不清时默认交给 `eva-think`，先把问题聊清楚。
-- **能力入口平级**：Think、Create、Learn、Brief、Link 都是独立入口，不再全部挤在一个主入口里判断。
-- **Learn 明确直达**：用户明确说 Eva Learn，或自然表达“带我学懂 / 带我系统学 / 带我读 / 主题式阅读 / 继续上次学习”时进入学习链路；普通资料不会自动变成学习项目。
-- **Brief 显式直达**：品牌 Brief、合作需求和商单约束由 `eva-brief` 先拆清楚，再交回创作链路。
-- **Create 保留深链路**：标题、人群、第一句话、正文路线图、商单约束和素材置信度仍然由创作链路控制。
-- **Link 独立接入**：用户可以把本地提示词、SOP 或私有方法接入 Eva；普通“写朋友圈 / 写微博 / 写公众号”仍默认走 Create。
-- **表达资产轻量预加载**：已保存的 `persona-card` / `voice-card` 可以在需要时只读加载，用来保护表达资格和用户文风；使用具体个人经历时会给出更明确提示，没有命中时不打扰用户。
-- **共享校验集中**：资产、Link、回归用例和基础结构检查集中在 `eva-shared`，便于升级后验证。
+- **同轮路由**：`/eva` 判断入口后立即执行目标模块，不停在模块介绍或功能菜单。
+- **Think 轻启动但不轻思考**：普通解释直接回答；陪聊梳理会持续承接主线、区分事实与判断、找到核心冲突并形成阶段性结论。只有涉及文风、人设、保存或创作交接时，才加载对应外部协议。
+- **Learn 分级建档**：所有 Learn 任务仍然先建档。单概念或单资料先建立最小可追溯档案，系统学习、多资料对读、长期研究和项目恢复使用完整档案；建档成功后同轮开始教学。
+- **Create 聚焦短视频**：继续执行人群、用户疑问、标题或第一句话、正文路线图等质量闸门，不承接普通朋友圈、微博或公众号写作。
+- **Brief 保留商单闸门**：商单先拆正式约束，再交回短视频创作；约束不足时不进入高置信度成稿。
+- **Link 显式调用**：只有用户点名、创建、检查或确认项目默认 Link 时才进入，完整 Link 校验不减。
+- **资产按阶段校验**：普通入口启动不读取完整 schema；生成资产、保存或跨模块交接前仍必须读取 schema 并校验字段。
+- **表达资产按需读取**：只有内容需要个性化、人设资格、用户文风或真实经历时，才轻量读取当前项目的 persona/voice 资产；隐私和授权边界不变。
+- **兼容 1.7.4 入口**：Reframe、Audience Finder、Benchmark、Memory、Persona Memory、User Voice 和 AI Check 的旧触发词由根 Eva 重定向到现有 Think/Create/shared 真源，不复制第二套模块。
+- **通用诊断不丢失**：AI Check 和 Benchmark 仍可处理一般自然语言、公众号长文和图文样本；Create 本身继续只负责短视频生产。
 
-## 入口说明
+## 入口边界
 
-| 入口 | 适合处理 | 不负责 |
+| 入口 | 负责 | 硬边界 |
 |---|---|---|
-| `eva` | 判断这次该进 Think / Create / Learn / Brief / Link 哪个入口 | 不直接诊断、学习、拆 Brief、写稿或校验 Link |
-| `eva-think` | 日常聊天、想法归位、概念澄清、表象问题重构 | 不直接写完整稿 |
-| `eva-create` | 短视频、标题、开头、正文、对标、AI 味检测、普通图文/朋友圈/微博/公众号创作 | 不自动调用 Link，不绕过人群和标题验证 |
-| `eva-learn` | 学习项目、资料带读、主题式阅读 | 不直接写标题、正文或商单稿 |
-| `eva-brief` | 品牌 Brief、合作需求、商单约束卡、已有商单稿检查 | 不直接写完整商单稿 |
-| `eva-link` | 自定义 Link、检查 Link、调用已确认 Link | 不抢占普通创作意图 |
+| `eva` | 判断入口并同轮执行 | 不替代目标入口的内部闸门 |
+| `eva-think` | 日常解释、现象讨论、问题归位、人设资格诊断 | 不直接写完整短视频稿 |
+| `eva-create` | 短视频、视频标题、开头、正文、对标、视频稿检查 | 不处理普通朋友圈、微博、公众号写作 |
+| `eva-learn` | 单概念学习、资料带读、系统学习、主题式阅读 | 必须先建档；建档失败停止 |
+| `eva-brief` | 品牌 Brief、合作需求、商单约束、商单稿检查 | 不直接写完整商单稿 |
+| `eva-link` | 创建、检查、调用已确认的本地 Link | 普通写作意图不自动触发 Link |
 
-## 表达资产
-
-2.0.4 仍然沿用 1.7.4 的 `eva-memory/` 思路，但把表达资产的读取边界写得更明确。
-
-默认只读取当前运行项目里的：
-
-```text
-./eva-memory/persona/
-./eva-memory/voice/
-```
-
-轻量预加载只读，不保存、不生成新卡、不推断、不编造。命中后可以辅助 Think、Create 或 Link 保护用户的人设素材和文风；是否能被标题或正文阶段继续复用，要按资产状态规则重新判断当前任务是否仍相关。
+用户通过 `/eva` 提出普通朋友圈、微博、公众号或其他非短视频写作时，由基础模型直接完成，不加载 Eva Create、Brief 或 Link，也不把结果标记为经过 Eva 短视频闸门验证的资产。
 
 ## 开发验证
 
@@ -81,5 +66,5 @@ python3 skills/eva-shared/scripts/eva_prompt_lint.py --base skills/eva-shared
 python3 skills/eva-shared/scripts/eva_selftest.py --base skills/eva-shared
 python3 skills/eva-shared/scripts/eva_link_check.py --link skills/eva-shared/examples/eva.link.example.json
 python3 skills/eva-shared/scripts/eva_link_check.py --link skills/eva-shared/examples/local.weibo-copy/ --strict
-PYTHONPYCACHEPREFIX=/private/tmp/eva-harness-pycache python3 -m py_compile skills/eva-shared/scripts/*.py
+PYTHONPYCACHEPREFIX=/private/tmp/eva-shared-pycache python3 -m py_compile skills/eva-shared/scripts/*.py
 ```

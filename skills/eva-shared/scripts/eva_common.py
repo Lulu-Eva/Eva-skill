@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Common helpers for Eva Harness 2.0 scripts."""
+"""Common helpers for Eva Shared 2.0.5 scripts."""
 
 from __future__ import annotations
 
@@ -39,7 +39,7 @@ VALID_LOW_CONFIDENCE_REASONS = {
     "unverified-causality",
 }
 
-VERSION = "eva-harness-2.0.4"
+VERSION = "eva-shared-2.0.5"
 
 
 def default_base_from_script(script_path: str) -> Path:

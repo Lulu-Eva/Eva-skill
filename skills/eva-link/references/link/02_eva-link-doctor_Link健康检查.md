@@ -28,6 +28,8 @@ local-modules/{link-id}/eva.link.json
 
 默认只检查用户指定 Link。不要扫描整个用户项目，除非用户明确要求。
 
+运行命令前，必须先按 `00_eva-link_本地模块连接.md` 的“运行路径解析”得到绝对 `EVA_SHARED_ROOT` 和 `PROJECT_ROOT`。下列命令中的占位符必须替换为绝对路径；不得假设 Skill 安装目录就是用户项目目录。
+
 ## 检查项
 
 ### 1. 配置结构
@@ -35,7 +37,7 @@ local-modules/{link-id}/eva.link.json
 运行：
 
 ```text
-python3 ../eva-shared/scripts/eva_link_check.py --link local-modules/{link-id}/ --strict
+python3 "<EVA_SHARED_ROOT>/scripts/eva_link_check.py" --link "<PROJECT_ROOT>/local-modules/{link-id}/" --strict
 ```
 
 必须检查：
@@ -87,7 +89,7 @@ tests/expected-asset.example.json
 如果 expected asset 存在，运行：
 
 ```text
-python3 ../eva-shared/scripts/eva_asset_validate.py --asset local-modules/{link-id}/tests/expected-asset.example.json
+python3 "<EVA_SHARED_ROOT>/scripts/eva_asset_validate.py" --asset "<PROJECT_ROOT>/local-modules/{link-id}/tests/expected-asset.example.json"
 ```
 
 缺测试样例不一定阻塞运行，但必须标记为风险。
@@ -110,8 +112,8 @@ requires 字段是否仍能由上游资产提供
 如果用户提供 `.eva/links.json`，运行：
 
 ```text
-python3 ../eva-shared/scripts/eva_link_check.py --registry .eva/links.json
-python3 ../eva-shared/scripts/eva_link_check.py --link local-modules/{link-id}/ --strict --registry .eva/links.json
+python3 "<EVA_SHARED_ROOT>/scripts/eva_link_check.py" --registry "<PROJECT_ROOT>/.eva/links.json"
+python3 "<EVA_SHARED_ROOT>/scripts/eva_link_check.py" --link "<PROJECT_ROOT>/local-modules/{link-id}/" --strict --registry "<PROJECT_ROOT>/.eva/links.json"
 ```
 
 必须检查：

@@ -13,13 +13,9 @@ Link 是扩展协议，不是普通创作入口，也不是新的流程中心。
 ## 默认读取
 
 ```text
-../eva-shared/schemas/asset-types.json
 references/link/00_eva-link_本地模块连接.md
 ../eva-shared/references/shared/04_light-interaction_轻交互协议.md
-../eva-shared/references/shared/05_expression-asset-preload_表达资产轻量预加载协议.md
 ```
-
-如果这些文件不可读，或 `../eva-shared/schemas/asset-types.json` 的 `version` 不属于 `2.0.x`，停止 Link 流程，只说明缺少同系列 Eva 2.0 shared 真源；不要凭记忆补 Link 规则。`2.0.2`、`2.0.4` 这类小版本允许继续；不属于 `2.0.x` 的架构版本必须停下确认。
 
 按需读取：
 
@@ -28,7 +24,10 @@ references/link/01_eva-link-builder_自定义Link生成.md
 references/link/02_eva-link-doctor_Link健康检查.md
 references/link/03_eva-link-builder-templates_生成模板.md
 ../eva-shared/references/asset/00_eva-asset_资产卡协议.md
+../eva-shared/references/harness/00_eva-harness_状态与交接校验.md
 ../eva-shared/references/audience/00_eva-audience-finder_话题人群识别器.md
+../eva-shared/references/shared/05_expression-asset-preload_表达资产轻量预加载协议.md
+../eva-shared/schemas/asset-types.json
 ```
 
 ## 边界
@@ -38,4 +37,6 @@ references/link/03_eva-link-builder-templates_生成模板.md
 - 不自动抢占模糊需求。
 - Link 输出接回 Eva 时，按 shared 预加载协议轻量预检表达资产，避免外部模块输出滑向通用腔。
 - 不绕过 Link 校验。
+- 只有 Link、脚本、schema 或 Asset 校验失败，需要结构化说明失败项时，才读取 Harness；正常调用不加载 Harness。
+- Link 生成资产或交接前必须读取 `asset-types.json` 和 Asset 协议；表达资产预加载只在输出接回 Eva 时读取，不作为 Link 首轮负担。
 - 不把用户默认偏好写进 `eva.link.json`；默认设置只写项目级 `.eva/links.json`，且必须二次确认。

@@ -27,6 +27,8 @@ assets/          # 只有模板、图片、表格等真实资产时才需要
 
 启用和默认设置写入用户项目的 `.eva/links.json`。不要把默认意图、用户确认语、启用状态写进 `eva.link.json`。
 
+运行命令前，必须先按 `00_eva-link_本地模块连接.md` 的“运行路径解析”得到绝对 `EVA_SHARED_ROOT` 和 `PROJECT_ROOT`。下列命令中的占位符必须替换为绝对路径；不得假设 Skill 安装目录就是用户项目目录。
+
 ## eva.link.json 模板
 
 ```json
@@ -61,7 +63,7 @@ assets/          # 只有模板、图片、表格等真实资产时才需要
 生成后必须运行：
 
 ```text
-python3 ../eva-shared/scripts/eva_link_check.py --link local-modules/{link-id}/ --strict
+python3 "<EVA_SHARED_ROOT>/scripts/eva_link_check.py" --link "<PROJECT_ROOT>/local-modules/{link-id}/" --strict
 ```
 
 ## .eva/links.json 模板
@@ -99,8 +101,8 @@ python3 ../eva-shared/scripts/eva_link_check.py --link local-modules/{link-id}/ 
 写入后必须运行：
 
 ```text
-python3 ../eva-shared/scripts/eva_link_check.py --registry .eva/links.json
-python3 ../eva-shared/scripts/eva_link_check.py --link local-modules/{link-id}/ --strict --registry .eva/links.json
+python3 "<EVA_SHARED_ROOT>/scripts/eva_link_check.py" --registry "<PROJECT_ROOT>/.eva/links.json"
+python3 "<EVA_SHARED_ROOT>/scripts/eva_link_check.py" --link "<PROJECT_ROOT>/local-modules/{link-id}/" --strict --registry "<PROJECT_ROOT>/.eva/links.json"
 ```
 
 ## module.md 模板
@@ -185,5 +187,5 @@ privacy_flags：
 生成后必须运行：
 
 ```text
-python3 ../eva-shared/scripts/eva_asset_validate.py --asset local-modules/{link-id}/tests/expected-asset.example.json --downstream eva-memory
+python3 "<EVA_SHARED_ROOT>/scripts/eva_asset_validate.py" --asset "<PROJECT_ROOT>/local-modules/{link-id}/tests/expected-asset.example.json" --downstream eva-memory
 ```

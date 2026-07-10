@@ -1,6 +1,6 @@
-# Eva Create：创作主入口
+# Eva Create：短视频创作主入口
 
-Eva 默认按创作模式接住输入，但创作模式不等于直接写稿。它先判断用户卡在创作链路的哪一层。
+Eva Create 只负责短视频生产。进入后先判断用户卡在短视频链路的哪一层；不把普通朋友圈、微博、公众号或其他写作请求包装成 Eva 短视频任务。
 
 创作域默认遵守 `../eva-shared/references/shared/04_light-interaction_轻交互协议.md`：不展示完整功能菜单，不外显 Harness、资产卡字段、schema、valid_next 或 DoD；路由和退回时只给当前判断、一个最高优先级阻塞点和下一步动作。进入具体创作模块后，按模块输出真实产物。
 
@@ -9,13 +9,20 @@ Eva 默认按创作模式接住输入，但创作模式不等于直接写稿。�
 | 信号 | 读取 |
 |---|---|
 | 话题、热词、现象、标题，但不知道讲给谁 | `../eva-shared/references/audience/00_eva-audience-finder_话题人群识别器.md` |
-| 对标文案、爆款笔记、口播稿、图文内容拆解 | `references/create/benchmark/00_eva-benchmark-copy_对标文案拆解.md` |
+| 短视频对标文案、爆款笔记、口播稿拆解 | `../eva-shared/references/benchmark/00_eva-benchmark-copy_对标文案拆解.md` |
 | 品牌 Brief、商单需求、合作口径、产品卖点、商单原稿、同产品样本 | `../eva-shared/references/commerce/00_eva-commerce_商单主入口.md` |
-| AI 味、太机械、表达真实性审查 | `references/create/quality/00_eva-ai-check_表达真实性审查.md` |
+| 视频稿 AI 味、太机械、表达真实性审查 | `../eva-shared/references/quality/00_eva-ai-check_表达真实性审查.md` |
 | 做一条短视频，但还没判断标题/开头/正文入口 | `references/create/shortvideo/00_eva-shortvideo_主入口.md` |
 | 搜标题、判断标题、正文标题、标题兑现 | `references/create/shortvideo/title/00_eva-title_标题即选题.md` |
 | 标题交接卡或第一句话交接卡已成立，准备写正文 | `references/create/shortvideo/script/00_eva-script_思维流爆款内容创作.md` |
 | 只优化第一句话、前 5 秒、开头 | `references/create/shortvideo/opening/00_eva-opening_开头针对性优化.md` |
+
+非短视频内容处理：
+
+```text
+明确点名已有 Link / 创建 Link / 检查 Link -> eva-link
+没有点名 Link 的朋友圈、微博、公众号或普通写作 -> 退出 Eva Create，由基础模型直接完成
+```
 
 ## 硬规则
 
@@ -24,6 +31,7 @@ Eva 默认按创作模式接住输入，但创作模式不等于直接写稿。�
 - 商单内容先拆 Brief，再进入标题或第一句话链路。
 - 表达真实性审查只诊断表达问题，不顺手改写成完整稿。
 - 对标拆解不能变成照搬对标。
+- 普通写作结果不得标记为 Eva 已验证资产，也不得声称通过短视频人群、标题或路线图闸门。
 
 ## 默认接法
 

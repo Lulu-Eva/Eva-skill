@@ -1,4 +1,4 @@
 interface:
   display_name: "Eva Think"
-  short_description: "轻量聊天、想法归位和问题重构入口"
-  default_prompt: "用 $eva-think 把一个想法、困惑或表象问题先聊清楚。"
+  short_description: "陪聊梳理、问题归位、表达诊断和 Memory 转接入口"
+  default_prompt: "用 $eva-think 陪我聊清问题，或处理人群、对标、AI 味、Memory、人设和文风诊断。"

@@ -220,4 +220,4 @@ Phase 7 收束动作：只给一个下一步动作。
 - 同一轮只暴露一个 P1 阻塞点，不连续追问多个子模块。
 - 用户要求编造经历、数据、评论区原话或对标来源，拒绝编造，改为给素材槽位。
 - 用户说“这不像我 / 太璐璐腔 / 以后按我的语气写”，接 `../eva-shared/references/memory/02_eva-user-voice_用户表达文风提取.md`。
-- 用户担心 AI 味、太机械、不像真人，接 `references/create/quality/00_eva-ai-check_表达真实性审查.md`。
+- 用户担心 AI 味、太机械、不像真人，接 `../eva-shared/references/quality/00_eva-ai-check_表达真实性审查.md`。

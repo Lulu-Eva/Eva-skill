@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Check Eva Harness 2.0 local health."""
+"""Check Eva Shared 2.0.5 local structure and dependencies."""
 
 from __future__ import annotations
 
@@ -49,10 +49,14 @@ REQUIRED_PEER_SKILLS = {
         "references/think/01_eva-reframe_表象问题归位.md",
         "../eva-shared/references/shared/04_light-interaction_轻交互协议.md",
         "../eva-shared/references/audience/00_eva-audience-finder_话题人群识别器.md",
+        "../eva-shared/references/benchmark/00_eva-benchmark-copy_对标文案拆解.md",
+        "../eva-shared/references/quality/00_eva-ai-check_表达真实性审查.md",
     ],
     "eva-create": [
         "references/create/00_eva-create_创作主入口.md",
         "../eva-shared/references/audience/00_eva-audience-finder_话题人群识别器.md",
+        "../eva-shared/references/benchmark/00_eva-benchmark-copy_对标文案拆解.md",
+        "../eva-shared/references/quality/00_eva-ai-check_表达真实性审查.md",
         "../eva-shared/references/commerce/00_eva-commerce_商单主入口.md",
         "../eva-shared/references/shared/00_handoff-cards_交接卡字段真源.md",
         "../eva-shared/references/shared/02_low-confidence_低置信度授权协议.md",
@@ -73,6 +77,7 @@ REQUIRED_PEER_SKILLS = {
     "eva-learn": [
         "../eva-shared/schemas/asset-types.json",
         "../eva-shared/references/learn/00_eva-learn.md",
+        "../eva-shared/references/learn/05_eva-learn-project_分级建档与恢复.md",
         "../eva-shared/references/shared/04_light-interaction_轻交互协议.md",
         "../eva-shared/references/asset/00_eva-asset_资产卡协议.md",
         "../eva-shared/references/harness/00_eva-harness_状态与交接校验.md",
@@ -83,6 +88,7 @@ REQUIRED_PEER_SKILLS = {
         "references/link/02_eva-link-doctor_Link健康检查.md",
         "references/link/03_eva-link-builder-templates_生成模板.md",
         "../eva-shared/references/asset/00_eva-asset_资产卡协议.md",
+        "../eva-shared/references/harness/00_eva-harness_状态与交接校验.md",
         "../eva-shared/references/audience/00_eva-audience-finder_话题人群识别器.md",
     ],
 }
@@ -265,8 +271,6 @@ def check_peer_skills(base: Path) -> tuple[list[str], list[str], dict]:
             errors.append(f"missing peer skill: ../{skill_name}/SKILL.md")
             continue
         skill_text = skill_file.read_text(encoding="utf-8")
-        if skill_name in {"eva-brief", "eva-learn"} and "2.0.x" not in skill_text:
-            warnings.append(f"../{skill_name}/SKILL.md does not explicitly guard eva-shared version 2.0.x")
         if skill_name != "eva" and "../eva-shared" not in skill_text:
             warnings.append(f"../{skill_name}/SKILL.md does not reference ../eva-shared")
         for relative in referenced_paths:
@@ -278,7 +282,7 @@ def check_peer_skills(base: Path) -> tuple[list[str], list[str], dict]:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Check Eva Harness 2.0 health.")
+    parser = argparse.ArgumentParser(description="Check Eva Shared 2.0.5 structure and dependencies.")
     parser.add_argument("--base", default=".", help="Base folder containing schemas/ and scripts/.")
     parser.add_argument("--link", action="append", help="Optional Link config path to note in report.")
     add_common_arguments(parser)
@@ -325,7 +329,7 @@ def main() -> None:
         result(
             ok,
             "doctor",
-            "Eva Harness 2.0状态正常" if ok else "Eva Harness 2.0状态异常",
+            "Eva Shared 2.0.5结构正常" if ok else "Eva Shared 2.0.5结构异常",
             errors,
             warnings,
             data,

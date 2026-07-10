@@ -1,34 +1,69 @@
 {
-  "version": "2.0.4",
-  "purpose": "Semantic regression cases for prompt-weight reduction. These cases protect routing, thin-entry boundaries, and user-facing lightness.",
+  "version": "2.0.5",
+  "purpose": "Scenario contract inventory for same-turn routing, staged loading, hard gates, and user-facing lightness. Structural selftest validates this inventory but does not execute model behavior.",
   "cases": [
     {
       "id": "default-start",
       "input": "/eva",
-      "expected_route": "eva-default-start",
-      "forbid": ["Initializer Card", "asset_type", "valid_next", "eva-link"],
-      "expected_terminal": "ask-user-to-provide-material"
+      "expected_route": "eva-think-same-turn",
+      "forbid": ["Initializer Card", "asset_type", "valid_next", "route-only-response", "feature-menu"],
+      "expected_terminal": "think-naturally-asks-what-to-discuss"
+    },
+    {
+      "id": "direct-think-luckin",
+      "input": "/eva 我觉得瑞幸新品都很甜，不好喝，为什么还频繁推新品？",
+      "expected_route": "eva-think-same-turn",
+      "forbid": ["ask-to-create-content", "show-eva-module", "load-expression-assets", "ask-audience-first"],
+      "expected_terminal": "direct-causal-analysis"
+    },
+    {
+      "id": "think-companion-continuity",
+      "input": "我脑子很乱，你先别急着给方案，陪我把这件事聊清楚",
+      "expected_route": "eva-think-deep-sorting",
+      "forbid": ["one-shot-solution", "force-content-creation", "ask-multiple-questions", "restart-thread-each-turn"],
+      "expected_terminal": "retain-conversation-thread-and-build-provisional-map"
+    },
+    {
+      "id": "think-deep-sorting",
+      "input": "我一边觉得应该做个人 IP，一边又很抗拒把生活都公开，你帮我梳理一下",
+      "expected_route": "eva-think-deep-sorting",
+      "forbid": ["tell-user-to-post-more", "force-short-video-route", "reduce-to-single-keyword", "ask-multiple-questions"],
+      "expected_terminal": "separate-goal-boundary-and-core-conflict-then-one-question-or-judgment"
     },
     {
       "id": "ordinary-learning-no-auto-learn",
       "input": "我想研究一下这个理论",
-      "expected_route": "eva-main-suggest-eva-learn",
+      "expected_route": "eva-think",
       "forbid": ["auto-enter-eva-learn", "create-learning-project"],
-      "expected_terminal": "suggest-explicit-eva-learn"
+      "expected_terminal": "direct-discussion-or-one-clarifying-question"
     },
     {
       "id": "explicit-eva-learn",
       "input": "用 Eva Learn 带我读这份资料",
-      "expected_route": "eva-learn",
-      "forbid": ["write-content-draft", "auto-enter-script"],
-      "expected_terminal": "learn-project-or-restore"
+      "expected_route": "eva-learn-minimum-archive",
+      "forbid": ["teach-before-archive", "write-content-draft", "auto-enter-script", "show-file-list-by-default"],
+      "expected_terminal": "minimum-archive-then-first-reading-step"
+    },
+    {
+      "id": "learn-minimum-archive",
+      "input": "带我学懂认知失调",
+      "expected_route": "eva-learn-minimum-archive",
+      "forbid": ["teach-before-archive", "create-empty-eight-file-archive", "show-phase-by-default"],
+      "expected_terminal": "minimum-archive-then-first-lesson"
     },
     {
       "id": "semantic-eva-learn",
       "input": "带我系统学一下认知失调这个概念",
-      "expected_route": "eva-learn",
-      "forbid": ["suggest-explicit-eva-learn", "ask-user-to-say-eva-learn", "create-content-draft"],
-      "expected_terminal": "learn-project-or-default-knowledge-path"
+      "expected_route": "eva-learn-full-archive",
+      "forbid": ["teach-before-archive", "suggest-explicit-eva-learn", "ask-user-to-say-eva-learn", "create-content-draft"],
+      "expected_terminal": "full-archive-then-default-knowledge-path-and-first-lesson"
+    },
+    {
+      "id": "learn-archive-write-failure",
+      "input": "带我学懂认知失调，但学习项目目录不可写",
+      "expected_route": "eva-learn-archive-failure",
+      "forbid": ["start-first-lesson", "claim-archived", "continue-with-memory-only"],
+      "expected_terminal": "stop-and-request-writable-path"
     },
     {
       "id": "learn-restore-without-path",
@@ -39,10 +74,10 @@
     },
     {
       "id": "material-to-create",
-      "input": "把这份资料做成一条内容",
-      "expected_route": "eva-main-material-to-create",
+      "input": "把这份资料做成一条短视频",
+      "expected_route": "eva-create-material-to-short-video",
       "forbid": ["create-learning-project"],
-      "expected_terminal": "low-confidence-material-to-create"
+      "expected_terminal": "short-video-gates-before-draft"
     },
     {
       "id": "explicit-brief",
@@ -60,14 +95,14 @@
     },
     {
       "id": "title-candidate-check",
-      "input": "我搜了 5 个爆款标题，你帮我判断哪个能用",
+      "input": "我搜了 5 个短视频爆款标题，你帮我判断哪个能用",
       "expected_route": "eva-title-candidate-check",
       "forbid": ["free-generate-new-titles", "auto-enter-script-without-title-handoff"],
       "expected_terminal": "candidate-judgment-or-title-handoff"
     },
     {
       "id": "title-promise-check",
-      "input": "这是标题和完整原稿，你帮我看看能不能发",
+      "input": "这是短视频标题和完整视频原稿，你帮我看看能不能发",
       "expected_route": "eva-title-promise-check",
       "forbid": ["rewrite-full-script-by-default", "skip-title-promise-check"],
       "expected_terminal": "title-promise-check-before-rewrite"
@@ -81,14 +116,14 @@
     },
     {
       "id": "full-script-needs-route-map",
-      "input": "帮我写完整稿",
+      "input": "帮我写一条完整短视频稿",
       "expected_route": "eva-script",
-      "forbid": ["write-without-route-map"],
-      "expected_terminal": "route-map-before-writing"
+      "forbid": ["write-without-audience", "write-without-user-question", "write-without-title-or-first-line", "write-without-route-map"],
+      "expected_terminal": "audience-title-or-first-line-and-route-map-before-writing"
     },
     {
       "id": "ai-check-default-diagnose",
-      "input": "帮我看看这段有没有 AI 味",
+      "input": "帮我看看这段视频稿有没有 AI 味",
       "expected_route": "eva-ai-check",
       "forbid": ["rewrite-full-text-by-default"],
       "expected_terminal": "single-point-or-check-report"
@@ -122,27 +157,6 @@
       "expected_terminal": "confirm-or-save-memory-asset"
     },
     {
-      "id": "review-pending-no-auto-route",
-      "input": "这条播放 3000，点赞 20，完播很低，你复盘一下为什么扑了",
-      "expected_route": "eva-review-pending",
-      "forbid": ["enter-eva-review", "claim-causality-from-single-post", "say-title-caused-failure", "write-long-term-rule"],
-      "expected_terminal": "explain-review-pending-and-route-to-title-or-reframe"
-    },
-    {
-      "id": "review-data-pending-no-auto-route",
-      "input": "这是我近 20 条数据和这条的标题正文，帮我复盘卡在哪里",
-      "expected_route": "eva-review-pending-title-or-create",
-      "forbid": ["enter-eva-review", "run-review-card", "claim-ab-causality"],
-      "expected_terminal": "use-title-promise-or-next-create-action"
-    },
-    {
-      "id": "review-comment-pending-no-auto-route",
-      "input": "评论区只有 3 条：看不懂、太长了、讲得有点绕。帮我复盘下一条怎么改",
-      "expected_route": "eva-review-pending-audience-or-create",
-      "forbid": ["enter-eva-review", "write-high-frequency-insight", "save-long-term-persona"],
-      "expected_terminal": "treat-comments-as-material-for-next-content"
-    },
-    {
       "id": "external-skill-not-2-0-mainline",
       "input": "别的 Skill 能不能处理这个？",
       "expected_route": "eva-main-or-manual-suggestion",
@@ -166,9 +180,9 @@
     {
       "id": "ordinary-moments-writing-not-link-builder",
       "input": "我不想写口播，我就想写一条朋友圈",
-      "expected_route": "eva-main-create",
-      "forbid": ["eva-link-builder", "auto-call-local-link", "set-default-link"],
-      "expected_terminal": "ordinary-create-or-ask-platform-material"
+      "expected_route": "base-model-direct-writing",
+      "forbid": ["eva-create", "eva-link-builder", "auto-call-local-link", "set-default-link", "claim-eva-validated-asset"],
+      "expected_terminal": "direct-moments-draft-without-eva-gates"
     },
     {
       "id": "explicit-local-link-call",
@@ -203,14 +217,14 @@
       "input": "用 Eva Learn 带我读这份资料，先不用做成内容",
       "expected_route": "eva-learn",
       "forbid": ["enter-memory-flow", "preload-persona-by-default", "write-content-draft"],
-      "expected_terminal": "learn-reading-without-expression-preload"
+      "expected_terminal": "minimum-archive-then-reading-without-expression-preload"
     },
     {
       "id": "link-doctor-uses-shared-script-path",
       "input": "检查我的 local-modules/local.weibo-copy Link 为什么不能交接",
       "expected_route": "eva-link-doctor",
-      "forbid": ["python3 scripts/eva_link_check.py", "python3 scripts/eva_asset_validate.py"],
-      "expected_terminal": "use-eva-shared-script-path-for-link-check"
+      "forbid": ["python3 scripts/eva_link_check.py", "python3 ../eva-shared/scripts/eva_link_check.py", "cwd-dependent-relative-paths"],
+      "expected_terminal": "resolve-absolute-eva-shared-root-and-project-root-before-link-check"
     },
     {
       "id": "expression-preload-create-reuse",
@@ -239,6 +253,90 @@
       "expected_route": "eva-create-with-voice-current-instruction",
       "forbid": ["ignore-current-style-instruction", "overwrite-voice-card-without-confirmation", "invent-new-persona"],
       "expected_terminal": "current-instruction-adjusts-this-turn-without-saving"
+    },
+    {
+      "id": "legacy-reframe-alias",
+      "input": "/eva-reframe 为什么最近小眼睛这么低，是不是被限流了？",
+      "expected_route": "eva-think-to-reframe",
+      "forbid": ["generic-platform-myth", "create-content-draft"],
+      "expected_terminal": "reframe-surface-metric-to-content-or-evidence-question"
+    },
+    {
+      "id": "legacy-audience-alias",
+      "input": "/eva-audience-finder 这个话题真正会戳中谁？",
+      "expected_route": "eva-think-to-shared-audience",
+      "forbid": ["generic-think-only", "write-full-script"],
+      "expected_terminal": "audience-position-gap-and-user-question"
+    },
+    {
+      "id": "legacy-benchmark-alias",
+      "input": "/eva-benchmark-copy 帮我拆一下这篇爆款图文的结构",
+      "expected_route": "eva-think-to-shared-benchmark",
+      "forbid": ["reject-because-not-video", "copy-source-wording", "write-new-post"],
+      "expected_terminal": "benchmark-structure-and-transferable-actions"
+    },
+    {
+      "id": "legacy-memory-alias",
+      "input": "/eva-memory 把这个想法保存下来，下次还能回捞",
+      "expected_route": "eva-think-to-shared-memory",
+      "forbid": ["silent-save", "skip-asset-validation"],
+      "expected_terminal": "confirm-and-save-traceable-memory-asset"
+    },
+    {
+      "id": "legacy-persona-alias",
+      "input": "/eva-persona-memory 帮我梳理这段经历为什么能支撑我讲这个话题",
+      "expected_route": "eva-think-to-shared-persona",
+      "forbid": ["account-positioning", "invent-personal-story", "save-without-confirmation"],
+      "expected_terminal": "persona-qualification-or-one-missing-layer"
+    },
+    {
+      "id": "legacy-user-voice-alias",
+      "input": "/eva-user-voice 根据这些我自己写的样本提炼文风",
+      "expected_route": "eva-think-to-shared-user-voice",
+      "forbid": ["use-benchmark-as-user-voice", "save-without-confirmation"],
+      "expected_terminal": "analyze-user-owned-samples-and-offer-voice-card"
+    },
+    {
+      "id": "legacy-ai-check-alias",
+      "input": "/eva-ai-check 帮我看这篇文章哪里像 AI 写的",
+      "expected_route": "eva-think-to-shared-ai-check",
+      "forbid": ["reject-because-not-video", "claim-ai-authorship-detection", "rewrite-full-text-by-default"],
+      "expected_terminal": "general-natural-language-authenticity-diagnosis"
+    },
+    {
+      "id": "general-ai-check-longform",
+      "input": "帮我检查这篇公众号文章有没有 AI 味，先不要改",
+      "expected_route": "eva-think-to-shared-ai-check",
+      "forbid": ["base-model-generic-review", "eva-create-short-video-only-rejection", "rewrite-text"],
+      "expected_terminal": "single-point-or-longform-authenticity-report"
+    },
+    {
+      "id": "general-benchmark-analysis",
+      "input": "这是一篇爆款图文，只拆它的标题承诺、用户疑问和正文结构",
+      "expected_route": "eva-think-to-shared-benchmark",
+      "forbid": ["force-short-video-create", "write-new-content", "copy-source-wording"],
+      "expected_terminal": "diagnostic-benchmark-deconstruction"
+    },
+    {
+      "id": "ai-check-rewrite-combination",
+      "input": "先检查这段文章哪里不像人话，再把最严重的一处改掉",
+      "expected_route": "eva-think-to-shared-ai-check-local-rewrite",
+      "forbid": ["rewrite-before-diagnosis", "rewrite-full-text", "force-short-video-create"],
+      "expected_terminal": "diagnose-first-then-rewrite-authorized-local-part"
+    },
+    {
+      "id": "long-material-final-verb",
+      "input": "这是同一份课程资料：不要带我学习，把它做成一条短视频",
+      "expected_route": "eva-create-material-to-short-video",
+      "forbid": ["eva-learn", "create-learning-project", "route-by-material-type-only"],
+      "expected_terminal": "route-by-final-verb-and-apply-short-video-gates"
+    },
+    {
+      "id": "low-confidence-draft-not-publishable",
+      "input": "我知道标题还没验证，先写一版草稿看看结构，但不要当成能直接发的终稿",
+      "expected_route": "eva-create-low-confidence-draft",
+      "forbid": ["claim-publishable", "skip-route-map", "invent-missing-material"],
+      "expected_terminal": "unverified-draft-with-warning-placeholders-and-confidence-cap"
     }
   ]
 }

@@ -12,7 +12,7 @@ Eva Link 不是“多一个功能”，而是本地模块接入 Eva 资产流的
 所有输出仍可被 Memory / Create 继续承接。
 ```
 
-Link 属于 `../eva-shared/references/shared/04_light-interaction_轻交互协议.md` 允许显性 Harness 的系统任务。可以展示配置检查、缺字段和交接失败原因，但仍只说明必要字段，不把普通创作任务升级成 Link 界面。
+Link 属于 `../eva-shared/references/shared/04_light-interaction_轻交互协议.md` 允许展示必要校验信息的系统任务。正常调用不读取 Harness；只有 Link、脚本、schema 或 Asset 校验失败，需要结构化定位失败项时才追加读取。即使失败，也只说明必要字段，不把普通创作任务升级成 Link 界面。
 
 本文件只维护运行时协议：识别、校验、调用、交接。创建 Link 读取 Builder，检查 Link 读取 Doctor；不要把 Builder / Doctor 细节复制回本文件。
 
@@ -61,7 +61,7 @@ Skill 仓库只放协议和脚本，不保存用户私有模块。
 }
 ```
 
-Schema 真源：`schemas/eva-link.schema.json`。
+Schema 真源：`../eva-shared/schemas/eva-link.schema.json`。
 
 ## .eva/links.json
 
@@ -83,7 +83,7 @@ Schema 真源：`schemas/eva-link.schema.json`。
 }
 ```
 
-Schema 真源：`schemas/link-registry.schema.json`。
+Schema 真源：`../eva-shared/schemas/link-registry.schema.json`。
 
 设置默认 Link 的唯一合法时机：Link 已生成、strict 校验通过、用户试跑或看过定义后，用户明确回答“以后默认 / 设成默认 / 是”。不能在创建 Link 时顺手默认。
 
@@ -99,14 +99,29 @@ Schema 真源：`schemas/link-registry.schema.json`。
 }
 ```
 
+## 运行路径解析
+
+运行任何 Link 脚本前，必须先在后台解析两个互相独立的绝对根目录：
+
+```text
+EVA_SHARED_ROOT = 当前已加载 Eva Link 所属安装包中的 eva-shared 目录
+PROJECT_ROOT = 用户当前运行项目，或用户明确指定的项目目录
+```
+
+- GitHub 七组件版：从当前 `eva-link` 入口定位 sibling `../eva-shared/`。
+- SkillHub 一体化版：从当前 `modules/eva-link/` 定位 sibling `../eva-shared/`。
+- `EVA_SHARED_ROOT` 只定位协议、schema、示例和脚本。
+- `PROJECT_ROOT` 只定位 `.eva/`、`local-modules/` 和用户资料。
+- 执行命令时把下列占位符替换成已解析的绝对路径并保留引号。不得把两类路径继续写成依赖同一工作目录的相对路径。
+
 检查命令：
 
 ```text
-python3 ../eva-shared/scripts/eva_link_check.py --link ../eva-shared/examples/eva.link.example.json
-python3 ../eva-shared/scripts/eva_link_check.py --link local-modules/local.weibo-copy/
-python3 ../eva-shared/scripts/eva_link_check.py --link local-modules/local.weibo-copy/ --strict
-python3 ../eva-shared/scripts/eva_link_check.py --registry .eva/links.json
-python3 ../eva-shared/scripts/eva_link_check.py --link local-modules/local.weibo-copy/ --strict --registry .eva/links.json
+python3 "<EVA_SHARED_ROOT>/scripts/eva_link_check.py" --link "<EVA_SHARED_ROOT>/examples/eva.link.example.json"
+python3 "<EVA_SHARED_ROOT>/scripts/eva_link_check.py" --link "<PROJECT_ROOT>/local-modules/local.weibo-copy/"
+python3 "<EVA_SHARED_ROOT>/scripts/eva_link_check.py" --link "<PROJECT_ROOT>/local-modules/local.weibo-copy/" --strict
+python3 "<EVA_SHARED_ROOT>/scripts/eva_link_check.py" --registry "<PROJECT_ROOT>/.eva/links.json"
+python3 "<EVA_SHARED_ROOT>/scripts/eva_link_check.py" --link "<PROJECT_ROOT>/local-modules/local.weibo-copy/" --strict --registry "<PROJECT_ROOT>/.eva/links.json"
 ```
 
 不带 `--strict` 只表示 Link config 字段合法，不表示 Link 模块完整可运行。正式挂载或升级前必须使用 `--strict`。
@@ -159,7 +174,7 @@ python3 ../eva-shared/scripts/eva_link_check.py --link local-modules/local.weibo
 
 ## Link 输出要求
 
-Link 输出必须能被 Eva Asset 承接。字段真源读取 `../eva-shared/references/asset/00_eva-asset_资产卡协议.md` 和 `schemas/asset-card.schema.json`；本文件不维护第二套资产字段表。
+Link 输出必须能被 Eva Asset 承接。字段真源读取 `../eva-shared/references/asset/00_eva-asset_资产卡协议.md` 和 `../eva-shared/schemas/asset-card.schema.json`；本文件不维护第二套资产字段表。
 
 运行时前台只显示：
 

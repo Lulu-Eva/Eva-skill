@@ -1,15 +1,14 @@
 # Eva Harness：状态与交接校验
 
-Harness 是 Eva 2.0 的调度层，不是第六个功能板块。
+Harness 是 Eva 2.0.5 的异常恢复与正式状态校验协议，不是第六个功能板块，也不是所有入口默认加载的全局调度器。
 
-Harness 默认在后台运行。前台是否展示 Harness 状态，按 `../eva-shared/references/shared/04_light-interaction_轻交互协议.md` 判断。
+只有 Learn 恢复/写入/状态失败、Link/脚本/schema/Asset 校验失败、正式 Asset 交接失败，或用户明确要求查看状态时，入口才读取 Harness。前台是否展示状态，按 `../eva-shared/references/shared/04_light-interaction_轻交互协议.md` 判断。
 
-它负责：
+被入口明确读取时，它负责：
 
 ```text
-路由
-状态
-初始化
+失败状态
+必要初始化信息
 交接校验
 完成前验证
 失败处理
@@ -44,13 +43,13 @@ Module / Link 返回交接请求
 
 ## Initializer
 
-复杂任务开始前先生成任务初始化卡。
+2.0.5 不因任务复杂就默认生成任务初始化卡。只有用户要求查看结构化任务状态，或异常恢复确实需要重建任务上下文时才生成。
 
-触发条件只读取 `../eva-shared/references/shared/04_light-interaction_轻交互协议.md` 的显性 Harness 触发条件。本文件只说明 Harness 如何生成和校验初始化卡，不维护第二套外显条件清单。
+触发条件只读取 `../eva-shared/references/shared/04_light-interaction_轻交互协议.md` 的 Harness 读取与外显条件。本文件只说明命中条件后如何生成和校验初始化卡，不维护第二套条件清单。
 
 不用于简单聊天、一次性改写、低风险标题发散、用户明确要求快速草稿。
 
-未命中轻交互协议的显性条件时，只允许后台初始化，不外显任务初始化卡。
+未命中轻交互协议条件时，不读取 Harness、不生成任务初始化卡。
 
 任务初始化卡：
 
@@ -121,7 +120,7 @@ Eva 可以低风险自动交接，但必须同时满足：
 下游路径有多个合理选择
 ```
 
-Harness 不做第一入口路由；第一入口以 `../eva/SKILL.md` 为准。自动交接只处理“已经有资产之后，能否把资产交给下游”。
+Harness 不做第一入口路由；第一入口以 `../eva/SKILL.md` 为准。当前入口和 handoff/Asset 真源先做常规交接判断，只有正式交接失败或需要结构化状态恢复时才追加读取 Harness。
 
 资产交接判断顺序：
 
@@ -164,9 +163,9 @@ Eva 不能在缺少校验时声称完成。
 
 记录格式真源：`schemas/failure-record.schema.json`。
 
-## Eva Doubt
+## Eva Doubt（按需兼容）
 
-高价值判断需要反向审查。
+本节保留高价值判断的按需反向审查格式，但 2.0.5 没有独立 Doubt 入口，也不自动触发。只有入口已经按本文件的异常/状态条件加载 Harness，且用户明确要求反向审查时才使用。
 
 触发条件：
 
