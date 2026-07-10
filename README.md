@@ -24,10 +24,10 @@ skills/
 ├── eva-create/       # 短视频、标题、开头、正文、对标、AI 味检测
 ├── eva-brief/        # 商单 Brief、合作需求、商单约束
 ├── eva-link/         # 本地 Link 创建、检查、调用
-└── eva-shared/       # 共享真源层，不可直接触发
+└── eva-shared/       # 共享真源包，只为安装和 sibling 读取存在
 ```
 
-`eva-shared` 不提供触发入口。它只存放多个入口共同依赖的规则、脚本、schema 和示例，避免每个入口维护一套重复规则。
+`eva-shared` 是安装用支撑包，不处理用户任务。它只存放多个入口共同依赖的规则、脚本、schema 和示例，避免每个入口维护一套重复规则。安装时必须和其他 Eva 入口一起安装，否则 Think / Create / Learn / Brief / Link 会缺少 shared 真源。
 
 ## 主要升级点
 
@@ -70,6 +70,7 @@ skills/
 
 ```text
 python3 "${CODEX_HOME:-$HOME/.codex}/skills/.system/skill-creator/scripts/quick_validate.py" skills/eva
+python3 "${CODEX_HOME:-$HOME/.codex}/skills/.system/skill-creator/scripts/quick_validate.py" skills/eva-shared
 python3 "${CODEX_HOME:-$HOME/.codex}/skills/.system/skill-creator/scripts/quick_validate.py" skills/eva-think
 python3 "${CODEX_HOME:-$HOME/.codex}/skills/.system/skill-creator/scripts/quick_validate.py" skills/eva-create
 python3 "${CODEX_HOME:-$HOME/.codex}/skills/.system/skill-creator/scripts/quick_validate.py" skills/eva-learn

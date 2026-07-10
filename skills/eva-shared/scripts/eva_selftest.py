@@ -272,8 +272,19 @@ def main() -> None:
             if "forbid" in case and not isinstance(case["forbid"], list):
                 errors.append(f"prompt regression case {case.get('id', index)!r} forbid must be an array")
 
-    if (base / "SKILL.md").exists():
-        errors.append("eva-shared must not have SKILL.md; shared layer must not be directly triggerable")
+    shared_skill_path = base / "SKILL.md"
+    if not shared_skill_path.exists():
+        errors.append("eva-shared must have SKILL.md so GitHub skill installers copy the shared package")
+    else:
+        shared_skill_text = shared_skill_path.read_text(encoding="utf-8")
+        for marker in ("name: eva-shared", "Do not use directly", "not a user-facing Eva entry", "Direct Invocation Response"):
+            if marker not in shared_skill_text:
+                errors.append(f"eva-shared SKILL.md missing support-only marker: {marker}")
+    shared_openai_path = base / "agents" / "openai.yaml"
+    if not shared_openai_path.exists():
+        errors.append("eva-shared must have agents/openai.yaml")
+    elif "allow_implicit_invocation: false" not in shared_openai_path.read_text(encoding="utf-8"):
+        errors.append("eva-shared must disable implicit invocation in agents/openai.yaml")
 
     for relative in REQUIRED_ARCHITECTURE_PATHS:
         if not (base / relative).resolve().exists():

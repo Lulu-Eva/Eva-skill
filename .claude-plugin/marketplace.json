@@ -10,13 +10,13 @@
   "plugins": [
     {
       "name": "eva",
-      "description": "Eva-skill v2.0.4 创作者工作台。相比 1.7.4，入口拆成 eva 路由 + eva-think、eva-create、eva-learn、eva-brief、eva-link；共享规则集中在 eva-shared。",
+      "description": "Eva-skill v2.0.4 创作者工作台。相比 1.7.4，入口拆成 eva 路由 + eva-think、eva-create、eva-learn、eva-brief、eva-link；eva-shared 作为安装用共享真源包随同安装。",
       "source": "./",
       "strict": false,
       "version": "2.0.4",
       "category": "content-creation",
       "keywords": ["creator", "short-video", "xiaohongshu", "script", "script-structure", "content-writing", "title", "body-title", "audience", "thinking", "reframe", "benchmark-copy", "commercial-brief", "brand-brief", "sponsored-content", "memory", "persona", "persona-memory", "user-voice", "voice-card", "ai-check", "learn", "learning", "reading", "research", "study", "thought-seed-card", "voice", "chinese"],
-      "skills": ["./skills/eva", "./skills/eva-think", "./skills/eva-create", "./skills/eva-learn", "./skills/eva-brief", "./skills/eva-link"]
+      "skills": ["./skills/eva", "./skills/eva-shared", "./skills/eva-think", "./skills/eva-create", "./skills/eva-learn", "./skills/eva-brief", "./skills/eva-link"]
     }
   ]
 }

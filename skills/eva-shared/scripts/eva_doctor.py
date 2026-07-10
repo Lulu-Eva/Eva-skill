@@ -228,9 +228,22 @@ def check_peer_skills(base: Path) -> tuple[list[str], list[str], dict]:
 
     skills_root = base.parent
     schema_path = base / "schemas" / "asset-types.json"
-    data["eva_shared_has_skill_md"] = (base / "SKILL.md").exists()
-    if (base / "SKILL.md").exists():
-        errors.append("eva-shared must not contain SKILL.md; it is a non-trigger shared source layer")
+    shared_skill_md = base / "SKILL.md"
+    data["eva_shared_has_skill_md"] = shared_skill_md.exists()
+    if not shared_skill_md.exists():
+        errors.append("eva-shared must contain SKILL.md so GitHub skill installers copy the shared package")
+    else:
+        shared_skill_text = shared_skill_md.read_text(encoding="utf-8")
+        for marker in ("name: eva-shared", "Do not use directly", "not a user-facing Eva entry", "Direct Invocation Response"):
+            if marker not in shared_skill_text:
+                errors.append(f"eva-shared SKILL.md missing support-only marker: {marker}")
+    shared_openai_yaml = base / "agents" / "openai.yaml"
+    if not shared_openai_yaml.exists():
+        errors.append("eva-shared must include agents/openai.yaml with implicit invocation disabled")
+    else:
+        shared_openai_text = shared_openai_yaml.read_text(encoding="utf-8")
+        if "allow_implicit_invocation: false" not in shared_openai_text:
+            errors.append("eva-shared agents/openai.yaml must set allow_implicit_invocation: false")
 
     if schema_path.exists():
         version = str(read_json(schema_path).get("version", ""))

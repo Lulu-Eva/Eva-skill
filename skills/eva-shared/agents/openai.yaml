@@ -1,0 +1,7 @@
+interface:
+  display_name: "Eva Shared"
+  short_description: "Eva 共享真源包，不直接使用"
+  default_prompt: "Use $eva-shared only as an installed support package for Eva sibling skills."
+
+policy:
+  allow_implicit_invocation: false
