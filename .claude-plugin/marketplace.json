@@ -4,19 +4,19 @@
     "name": "Lulu-Eva"
   },
   "metadata": {
-    "description": "Eva-skill v2.1.0 创作者工作台。一个同轮路由入口连接七个能力入口，并保留建档与质量校验。",
-    "version": "2.1.0"
+    "description": "Eva-skill v2.1.1 创作者工作台。新增 Eva New User 动态新手教程与轻量启动引导。",
+    "version": "2.1.1"
   },
   "plugins": [
     {
       "name": "eva",
-      "description": "Eva-skill v2.1.0 创作者工作台。包含 eva 路由、Think、短视频 Create、Learn、Brief、Link、Review、Lens 和 shared 真源包。",
+      "description": "Eva-skill v2.1.1 创作者工作台。包含 Eva New User、Think、短视频 Create、Learn、Brief、Link、Review、Lens 和 shared 真源包。",
       "source": "./",
       "strict": false,
-      "version": "2.1.0",
+      "version": "2.1.1",
       "category": "content-creation",
-      "keywords": ["creator", "short-video", "xiaohongshu", "script", "script-structure", "content-writing", "title", "body-title", "audience", "thinking", "reframe", "benchmark-copy", "commercial-brief", "brand-brief", "sponsored-content", "memory", "persona", "persona-memory", "user-voice", "voice-card", "ai-check", "learn", "learning", "reading", "research", "study", "review", "content-review", "multi-perspective", "lens", "thought-seed-card", "voice", "chinese"],
-      "skills": ["./skills/eva", "./skills/eva-shared", "./skills/eva-think", "./skills/eva-create", "./skills/eva-learn", "./skills/eva-brief", "./skills/eva-link", "./skills/eva-review", "./skills/eva-lens"]
+      "keywords": ["creator", "new-user", "tutorial", "short-video", "xiaohongshu", "script", "script-structure", "content-writing", "title", "body-title", "audience", "thinking", "reframe", "benchmark-copy", "commercial-brief", "brand-brief", "sponsored-content", "memory", "persona", "persona-memory", "user-voice", "voice-card", "ai-check", "learn", "learning", "reading", "research", "study", "review", "content-review", "multi-perspective", "lens", "thought-seed-card", "voice", "chinese"],
+      "skills": ["./skills/eva", "./skills/eva-new-user", "./skills/eva-shared", "./skills/eva-think", "./skills/eva-create", "./skills/eva-learn", "./skills/eva-brief", "./skills/eva-link", "./skills/eva-review", "./skills/eva-lens"]
     }
   ]
 }

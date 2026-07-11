@@ -18,7 +18,7 @@
 
 - 本模块负责：入口闸门、路径选择、阻塞点暴露、调度长素材消化、商单约束检查和正文路线图。
 - 本模块不负责：长素材完整拆解、商单约束细查、正文路线图细写、正文成稿。
-- 本模块必须保证：任何进入 `references/create/shortvideo/script/05_eva-script-writing_正文撰写.md` 的完整稿、改稿或低置信度草案，都先经过 `references/create/shortvideo/script/04_eva-script-route-map_正文路线图.md`。
+- 本模块只接管复杂完整路线。凡进入本模块的商单、冲突、长素材未选入口、复杂故事、材料双薄、深度审视或完整发布审查，都必须先经过 `references/create/shortvideo/script/04_eva-script-route-map_正文路线图.md`；普通任务由 `03_eva-script-runtime_普通正文简版路线.md` 接管。
 
 ## 总原则
 

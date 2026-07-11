@@ -1,0 +1,4 @@
+interface:
+  display_name: "Eva New User"
+  short_description: "跟着你的节奏，快速认识并学会使用 Eva-skill"
+  default_prompt: "Use $eva-new-user to show me how to start using Eva-skill."

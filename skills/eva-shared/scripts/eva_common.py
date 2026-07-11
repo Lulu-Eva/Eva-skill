@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Common helpers for Eva Shared 2.1.0 scripts."""
+"""Common helpers for Eva Shared 2.1.1 scripts."""
 
 from __future__ import annotations
 
@@ -15,6 +15,7 @@ from typing import Any
 
 CORE_ENTRIES = {
     "eva",
+    "eva-new-user",
     "eva-learn",
     "eva-brief",
     "eva-think",
@@ -41,7 +42,7 @@ VALID_LOW_CONFIDENCE_REASONS = {
     "unverified-causality",
 }
 
-VERSION = "eva-shared-2.1.0"
+VERSION = "eva-shared-2.1.1"
 
 
 def default_base_from_script(script_path: str) -> Path:

@@ -1,8 +1,8 @@
 ---
 name: eva
 description: |
-  EvaSkill 2.1.0 的极薄路由入口。仅在用户明确调用 /eva、进入 Eva 模式、点名 Eva 子入口，或明确提出 Eva 的思考梳理、表达诊断、短视频、带学、商单 Brief、发布复盘、多元视角、Memory、Link 任务时使用；不要抢占代码、财务、文件处理或其他无关任务。判断后同轮执行 eva-think、eva-learn、eva-create、eva-brief、eva-link、eva-review 或 eva-lens。
-  当前入口：/eva、/eva-think、/eva-create、/eva-learn、/eva-brief、/eva-link、/eva-review、/eva-lens。兼容入口：/eva-reframe、/eva-audience-finder、/eva-benchmark-copy、/eva-memory、/eva-persona-memory、/eva-user-voice、/eva-ai-check。自然语言触发包括：帮我想想、问题归位、这个话题讲给谁、对标拆解、AI 味检测、人设梳理、提炼我的文风、保存或回捞点子、带我学懂、做一条短视频、拆品牌 Brief、发布后复盘、多元视角、深度审视、把提示词接进 Eva。
+  EvaSkill 2.1.1 的极薄路由入口。仅在用户明确调用 /eva、进入 Eva 模式、点名 Eva 子入口，或明确提出 Eva 的思考梳理、表达诊断、短视频、带学、商单 Brief、发布复盘、多元视角、Memory、Link、新手教程任务时使用；不要抢占代码、财务、文件处理或其他无关任务。判断后同轮执行 eva-new-user、eva-think、eva-learn、eva-create、eva-brief、eva-link、eva-review 或 eva-lens。
+  当前入口：/eva、/eva-new-user、/eva-think、/eva-create、/eva-learn、/eva-brief、/eva-link、/eva-review、/eva-lens。兼容入口：/eva-reframe、/eva-audience-finder、/eva-benchmark-copy、/eva-memory、/eva-persona-memory、/eva-user-voice、/eva-ai-check。自然语言触发包括：开启新手教程、我是新用户、教我怎么用 Eva、帮我想想、问题归位、这个话题讲给谁、对标拆解、AI 味检测、人设梳理、提炼我的文风、保存或回捞点子、带我学懂、做一条短视频、拆品牌 Brief、发布后复盘、多元视角、深度审视、把提示词接进 Eva。
 ---
 
 # Eva：极薄路由
@@ -20,6 +20,7 @@ description: |
 
 | 用户信号 | 路由到 | 说明 |
 |---|---|---|
+| `/eva-new-user`、Eva New User、我是新用户、开启新手教程、教我怎么用 Eva | `eva-new-user` | 动态扫描已安装 Eva 能力，按用户节奏带练 |
 | `/eva-learn`、`eva-learn`、Eva Learn、带我学懂、带我系统学、带我读、主题式阅读、继续学习项目、接着讲上次带读 | `eva-learn` | 学习专线，直接开始学习或恢复项目 |
 | `/eva-brief`、品牌 Brief、商单 Brief、拆合作需求、检查商单稿 | `eva-brief` | 商单约束专线，先拆 Brief |
 | `/eva-link`、`eva-link-builder`、`eva-link-doctor`、自定义 Eva-Skill、把提示词接进 Eva、检查 Link、用我的某个 Link | `eva-link` | 本地工作流接入专线 |
@@ -36,7 +37,8 @@ description: |
 | 做一条短视频、写视频标题、优化视频开头、写视频完整稿、短视频对标拆解、视频稿 AI 味检测、资料转短视频 | `eva-create` | 短视频生产链路 |
 | `/eva-think`、帮我想想、脑子乱、问题归位、想聊清楚、这个概念什么意思、为什么不涨粉、小眼睛低、提取我朋友圈的语气/调调、以后照着这个写、人设立不住、资格感不足、凭什么我能讲 | `eva-think` | 默认思考入口 |
 | 写朋友圈、微博、公众号或其他非短视频内容，且没有点名 Link | 基础模型 | 直接完成普通写作，不加载 Eva Create / Brief / Link，不标记为 Eva 已验证资产 |
-| 只说 `/eva`、进入 Eva、帮我看看，但材料不清 | `eva-think` | 默认兜底 |
+| 只说 `/eva`、启动 Eva、进入 Eva，且没有附带任务 | 欢迎语 | 给轻量入口并邀请用户选择新手教程，不先判断新旧用户 |
+| 说“帮我看看”但材料不清 | `eva-think` | 默认兜底 |
 
 ## 冲突规则
 
@@ -51,11 +53,13 @@ description: |
 - 用户显式触发 `eva-learn`、`eva-brief`、`eva-link` 时，不回主路由二次判断。
 - 用户明确说“带我学懂 / 带我系统学 / 带我读 / 主题式阅读 / 继续上次学习”时，路由到 `eva-learn`；不要求用户必须说出 `eva-learn` 字样。
 - 用户不知道该进哪里时，默认进 `eva-think`，让 Think 轻量接住。
+- 用户只做裸 `/eva` 启动时，不读取 Think，也不展示完整菜单；先输出欢迎语。用户选择教程后同轮读取 `eva-new-user`。
 - 路由后不要继续执行当前文件里的分析；必须读取目标入口自己的 `SKILL.md`，并在同一轮按其闸门继续。
 
 ## 同轮交接
 
 ```text
+eva-new-user -> ../eva-new-user/SKILL.md
 eva-think  -> ../eva-think/SKILL.md
 eva-create -> ../eva-create/SKILL.md
 eva-learn  -> ../eva-learn/SKILL.md
@@ -82,8 +86,14 @@ eva-lens   -> ../eva-lens/SKILL.md
 
 ## 输出方式
 
-裸 `/eva` 或输入模糊时，读取 Think 后自然接住：
+裸 `/eva` 或只说“启动 Eva”时，直接输出：
 
 ```text
-你把现在最想聊清楚的东西丢给我就行。
+我在。
+
+你可以直接把现在想聊清楚、想学习，或者想做成短视频的东西丢给我。不用先研究该用哪个功能，我会帮你判断。
+
+如果你是第一次使用 Eva，需要开启 Eva 新手教程吗？
 ```
+
+这句询问只是可选入口，不判断、不记录用户是不是新手。用户直接给任务时立即路由，不再次追问教程。

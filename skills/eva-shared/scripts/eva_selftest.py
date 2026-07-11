@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Eva 2.1.0 structural checks and prompt scenario-contract validation."""
+"""Eva 2.1.1 structural checks and prompt scenario-contract validation."""
 
 from __future__ import annotations
 
@@ -44,6 +44,9 @@ def source_allowed_for_asset(source_module: object, allowed_sources: list) -> bo
 
 REQUIRED_SCENARIO_CASES = {
     "default-start",
+    "explicit-eva-new-user",
+    "eva-new-user-skip",
+    "eva-new-user-to-real-task",
     "direct-think-luckin",
     "think-companion-continuity",
     "think-deep-sorting",
@@ -59,7 +62,7 @@ REQUIRED_SCENARIO_CASES = {
     "title-candidate-check",
     "title-promise-check",
     "opening-only",
-    "full-script-needs-route-map",
+    "full-script-needs-route",
     "ai-check-default-diagnose",
     "voice-needs-user-sample",
     "moments-voice-extraction-not-create",
@@ -102,9 +105,11 @@ REQUIRED_SCENARIO_CASES = {
     "eva-lens-zero-save",
     "harness-reverse-review-to-lens",
     "information-complete-direct-draft",
+    "second-explicit-draft-request",
 }
 
 REQUIRED_ROUTER_MARKERS = {
+    "eva-new-user": "Router must expose the adaptive new-user tutorial",
     "eva-think": "Router must expose eva-think as the default light entry",
     "eva-create": "Router must expose short-video creation through eva-create",
     "eva-learn": "Router must route explicit Eva Learn requests to eva-learn",
@@ -135,10 +140,12 @@ REQUIRED_ROUTER_MARKERS = {
 
 REQUIRED_ARCHITECTURE_PATHS = (
     "../eva/SKILL.md",
+    "../eva-new-user/SKILL.md",
     "../eva-think/SKILL.md",
     "../eva-think/references/think/00_eva-think_思考助理.md",
     "../eva-create/SKILL.md",
     "../eva-create/references/create/00_eva-create_创作主入口.md",
+    "../eva-create/references/create/shortvideo/script/03_eva-script-runtime_普通正文简版路线.md",
     "../eva-learn/SKILL.md",
     "../eva-brief/SKILL.md",
     "../eva-link/SKILL.md",
@@ -646,9 +653,9 @@ def main() -> None:
         for marker in ("只处理短视频", "不处理朋友圈、微博、公众号"):
             if marker not in create_frontmatter:
                 errors.append(f"eva-create frontmatter missing short-video boundary: {marker}")
-        for marker in ("用户已经给齐目标人群", "直接完成草稿", "最多在稿件结尾用一句话标注"):
+        for marker in ("第一次要求", "标题搜索方案", "第二次明确", "不能包装成可直接发布的终稿"):
             if marker not in create_entry_text:
-                errors.append(f"eva-create missing information-complete direct-draft marker: {marker}")
+                errors.append(f"eva-create missing two-turn draft boundary marker: {marker}")
     if create_openai_path.exists():
         create_openai_text = create_openai_path.read_text(encoding="utf-8")
         for marker in ("图文创作入口", "普通内容创作"):
@@ -657,6 +664,7 @@ def main() -> None:
 
     direct_draft_paths = {
         "script router": (base / "../eva-create/references/create/shortvideo/script/00_eva-script_思维流爆款内容创作.md").resolve(),
+        "compact route": (base / "../eva-create/references/create/shortvideo/script/03_eva-script-runtime_普通正文简版路线.md").resolve(),
         "route map": (base / "../eva-create/references/create/shortvideo/script/04_eva-script-route-map_正文路线图.md").resolve(),
         "script writing": (base / "../eva-create/references/create/shortvideo/script/05_eva-script-writing_正文撰写.md").resolve(),
     }
@@ -670,7 +678,7 @@ def main() -> None:
     script_writing_path = direct_draft_paths["script writing"]
     if script_writing_path.exists():
         script_writing_text = script_writing_path.read_text(encoding="utf-8")
-        for marker in ("信息齐全直接成稿", "前台只输出完整内容稿", "不能替用户发明新的处方", "连续发十条"):
+        for marker in ("二次坚持后的未验证草稿", "前台只输出完整内容稿", "不能替用户发明新的处方", "连续发十条"):
             if marker not in script_writing_text:
                 errors.append(f"script writing missing direct-draft scope marker: {marker}")
 
@@ -693,16 +701,18 @@ def main() -> None:
             "所有明确进入 Eva Learn 的任务都必须先建立或恢复可追溯档案",
             "最小档案",
             "完整档案",
-            "建档、资料保存、进度更新或问答原稿追加失败时立即停止",
+            "项目锚点、资料保存、进度更新或问答原稿追加失败时立即停止",
             "同轮进入教学",
+            "第一讲前的项目锚点",
+            "建档状态: 初始化",
             "07-学习问答原稿.md",
         ):
             if marker not in learn_project_text:
                 errors.append(f"Learn graded archive protocol missing marker: {marker}")
 
     learn_journey_markers = {
-        "references/learn/01_探索式学习.md": ("首次写入前创建", "创建或写入失败"),
-        "references/learn/02_资料带学.md": ("在首次写入前创建", "创建、资料保存或写入失败"),
+        "references/learn/01_探索式学习.md": ("第一讲前只创建", "展示给用户前创建", "创建或写入失败"),
+        "references/learn/02_资料带学.md": ("第一讲前只创建", "展示给用户前", "创建、资料保存或写入失败"),
         "references/learn/03_主题式阅读.md": ("完整建档", "写入失败"),
         "references/learn/04_思想种子卡与内容链路交接.md": ("先创建", "写入失败"),
     }
@@ -743,7 +753,14 @@ def main() -> None:
 
     internal_pending_dir = base / "references" / "internal-pending"
     if internal_pending_dir.exists():
-        errors.append("references/internal-pending must not exist in Eva 2.1.0; move upgrade drafts outside this skill")
+        errors.append("references/internal-pending must not exist in Eva 2.1.1; move upgrade drafts outside this skill")
+
+    new_user_path = (base / "../eva-new-user/SKILL.md").resolve()
+    if new_user_path.exists():
+        new_user_text = new_user_path.read_text(encoding="utf-8")
+        for marker in ("开始前扫描", "跳过", "指定提前学习的功能", "正式处理", "不先判断或记录用户是不是新手"):
+            if marker not in new_user_text:
+                errors.append(f"eva-new-user missing adaptive tutorial marker: {marker}")
 
     review_path = (base / "../eva-review/SKILL.md").resolve()
     if review_path.exists():
@@ -834,7 +851,7 @@ def main() -> None:
         result(
             ok,
             "selftest",
-            "Eva 2.1.0结构自检与场景契约检查通过" if ok else "Eva 2.1.0结构自检与场景契约检查失败",
+            "Eva 2.1.1结构自检与场景契约检查通过" if ok else "Eva 2.1.1结构自检与场景契约检查失败",
             errors,
             warnings,
             {
