@@ -1,5 +1,5 @@
 {
-  "version": "2.0.5",
+  "version": "2.1.0",
   "visibility_values": {
     "surface": "用户直接感知的主干成品或主干输入",
     "bridge": "主干上承上启下的半成品，需要交接、缺字段或低置信度时才外显",
@@ -105,9 +105,9 @@
       "visibility": "surface"
     },
     "review-card": {
-      "produced_by": ["upgrade-pending-review"],
-      "valid_next": ["eva-think", "eva-create", "eva-memory"],
-      "required_fields": ["asset_type", "source_module", "core_content", "user_question", "evidence", "evidence_level", "path_bottleneck", "design_type", "treatment_variable", "outcome_variable", "control_plan", "adjustment_variables", "hypothesis", "confounders", "metric_spec", "next_test_action", "metrics_to_watch", "success_criteria", "observation_window", "result_backfill_required", "valid_next", "saved"],
+      "produced_by": ["eva-review"],
+      "valid_next": ["eva-think", "eva-create", "eva-lens", "eva-memory"],
+      "required_fields": ["asset_type", "source_module", "core_content", "user_question", "evidence", "hypothesis", "alternative_explanations", "next_test_action", "observation_window", "falsification_condition", "valid_next", "saved"],
       "is_handoff": true,
       "visibility": "bridge"
     },

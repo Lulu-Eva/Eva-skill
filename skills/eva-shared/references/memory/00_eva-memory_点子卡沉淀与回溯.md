@@ -6,7 +6,7 @@
 
 本模块遵守 `../eva-shared/references/shared/04_light-interaction_轻交互协议.md`。未明确保存前，只输出可沉淀摘要和一个动作；点子卡、persona-card、voice-card 的完整字段只在用户确认保存、字段缺失、低置信度确认或用户要求查看时外显。
 
-出口契约：Memory 的完成不是“建了资料库”，而是保存或回捞能喂回创作主干的 `idea-card`、`persona-card`、`voice-card` 等资产。`review-card` 只作为历史复盘卡兼容资产，不作为 Eva 2.0 主链路主动产物。回捞时默认只返回当前创作最能用的 1-3 个资产，不展示仓库。
+出口契约：Memory 的完成不是“建了资料库”，而是保存或回捞能喂回创作主干的 `idea-card`、`persona-card`、`voice-card` 等资产。`review-card` 由 Eva Review 在明确跨模块交接时生成；Review 自己的账号记录库不归 Memory 管理。回捞时默认只返回当前创作最能用的 1-3 个资产，不展示仓库。
 
 核心规则：
 

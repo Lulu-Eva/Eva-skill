@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Prompt-level lint checks for Eva 2.0 source-of-truth boundaries."""
+"""Prompt-level lint checks for Eva 2.1 source-of-truth boundaries."""
 
 from __future__ import annotations
 

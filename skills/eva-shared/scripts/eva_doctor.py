@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Check Eva Shared 2.0.5 local structure and dependencies."""
+"""Check Eva Shared 2.1.0 local structure and dependencies."""
 
 from __future__ import annotations
 
@@ -90,6 +90,23 @@ REQUIRED_PEER_SKILLS = {
         "../eva-shared/references/asset/00_eva-asset_资产卡协议.md",
         "../eva-shared/references/harness/00_eva-harness_状态与交接校验.md",
         "../eva-shared/references/audience/00_eva-audience-finder_话题人群识别器.md",
+    ],
+    "eva-review": [
+        "references/review/00_entry_入口与模式路由.md",
+        "references/review/01_frontstage_前台语言.md",
+        "references/review/02_single_单篇复盘.md",
+        "references/review/03_pattern_批量规律回溯.md",
+        "references/review/04_backfill_结果回填.md",
+        "references/review/05_record_记录字段真源.md",
+        "references/review/06_store_记录库与保存协议.md",
+        "../eva-shared/schemas/asset-types.json",
+        "../eva-shared/references/asset/00_eva-asset_资产卡协议.md",
+    ],
+    "eva-lens": [
+        "references/lens/00_entry_入口与模式.md",
+        "references/lens/01_quick_快速补光.md",
+        "references/lens/02_deep_深度审视.md",
+        "references/lens/03_evidence_证据与出口边界.md",
     ],
 }
 
@@ -254,8 +271,8 @@ def check_peer_skills(base: Path) -> tuple[list[str], list[str], dict]:
     if schema_path.exists():
         version = str(read_json(schema_path).get("version", ""))
         data["eva_shared_asset_types_version"] = version
-        if not version.startswith("2.0."):
-            errors.append(f"schemas/asset-types.json version must be 2.0.x, got {version or '<missing>'}")
+        if not version.startswith("2.1."):
+            errors.append(f"schemas/asset-types.json version must be 2.1.x, got {version or '<missing>'}")
 
     peer_status: dict[str, dict] = {}
     for skill_name, referenced_paths in REQUIRED_PEER_SKILLS.items():
@@ -271,7 +288,7 @@ def check_peer_skills(base: Path) -> tuple[list[str], list[str], dict]:
             errors.append(f"missing peer skill: ../{skill_name}/SKILL.md")
             continue
         skill_text = skill_file.read_text(encoding="utf-8")
-        if skill_name != "eva" and "../eva-shared" not in skill_text:
+        if skill_name not in ("eva", "eva-lens") and "../eva-shared" not in skill_text:
             warnings.append(f"../{skill_name}/SKILL.md does not reference ../eva-shared")
         for relative in referenced_paths:
             target = (skill_root / relative).resolve()
@@ -282,7 +299,7 @@ def check_peer_skills(base: Path) -> tuple[list[str], list[str], dict]:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Check Eva Shared 2.0.5 structure and dependencies.")
+    parser = argparse.ArgumentParser(description="Check Eva Shared 2.1.0 structure and dependencies.")
     parser.add_argument("--base", default=".", help="Base folder containing schemas/ and scripts/.")
     parser.add_argument("--link", action="append", help="Optional Link config path to note in report.")
     add_common_arguments(parser)
@@ -329,7 +346,7 @@ def main() -> None:
         result(
             ok,
             "doctor",
-            "Eva Shared 2.0.5结构正常" if ok else "Eva Shared 2.0.5结构异常",
+            "Eva Shared 2.1.0结构正常" if ok else "Eva Shared 2.1.0结构异常",
             errors,
             warnings,
             data,

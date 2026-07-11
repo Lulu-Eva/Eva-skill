@@ -1,5 +1,5 @@
 {
-  "version": "2.0.5",
+  "version": "2.1.0",
   "targets": [
     "eva",
     "eva-learn",
@@ -8,11 +8,15 @@
     "eva-create",
     "eva-memory",
     "eva-link",
+    "eva-review",
+    "eva-lens",
     "learn",
     "think",
     "create",
     "memory",
     "link",
+    "review",
+    "lens",
     "title",
     "opening",
     "script"

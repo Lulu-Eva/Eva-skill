@@ -127,6 +127,17 @@
         "type": "string"
       }
     },
+    "alternative_explanations": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1
+    },
+    "falsification_condition": {
+      "type": "string",
+      "minLength": 1
+    },
     "next_test_action": {
       "type": "string"
     },

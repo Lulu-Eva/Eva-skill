@@ -34,6 +34,7 @@ references/link/03_eva-link-builder-templates_生成模板.md
 
 - 不修改 Eva 核心 Skill。
 - 不覆盖 `eva-think`、`eva-learn`、`eva-create`、`eva-brief`。
+- 不覆盖 `eva-review` 或 `eva-lens`；外部 Link 输出需要补视角时可交 Lens，需要复盘发布结果时可交 Review。
 - 不自动抢占模糊需求。
 - Link 输出接回 Eva 时，按 shared 预加载协议轻量预检表达资产，避免外部模块输出滑向通用腔。
 - 不绕过 Link 校验。

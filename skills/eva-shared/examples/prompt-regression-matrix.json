@@ -1,5 +1,5 @@
 {
-  "version": "2.0.5",
+  "version": "2.1.0",
   "purpose": "Scenario contract inventory for same-turn routing, staged loading, hard gates, and user-facing lightness. Structural selftest validates this inventory but does not execute model behavior.",
   "cases": [
     {
@@ -337,6 +337,69 @@
       "expected_route": "eva-create-low-confidence-draft",
       "forbid": ["claim-publishable", "skip-route-map", "invent-missing-material"],
       "expected_terminal": "unverified-draft-with-warning-placeholders-and-confidence-cap"
+    },
+    {
+      "id": "explicit-eva-review-single",
+      "input": "/eva-review 这条小红书已经发了 24 小时，这是正文和后台截图，帮我看下一篇先改什么",
+      "expected_route": "eva-review-single",
+      "forbid": ["certain-causality", "rewrite-full-content", "review-mode-menu", "save-before-consent", "derived-ratio-without-defined-denominator"],
+      "expected_terminal": "one-hypothesis-one-variable-one-metric-one-window-one-falsifier"
+    },
+    {
+      "id": "review-batch-comparability",
+      "input": "回看这份包含抖音、小红书三个账号的 CSV，告诉我最近有什么规律",
+      "expected_route": "eva-review-pattern",
+      "forbid": ["cross-platform-metric-pooling", "count-only-confidence", "pattern-before-grouping", "content-allocation-under-ten-records"],
+      "expected_terminal": "group-first-then-candidate-patterns-with-counterexamples"
+    },
+    {
+      "id": "review-prepublish-not-review",
+      "input": "这篇公众号还没发，帮我看看能不能发",
+      "expected_route": "base-model-or-ai-check-not-review",
+      "forbid": ["eva-review-performance-attribution", "create-review-record", "claim-post-publication-data"],
+      "expected_terminal": "prepublish-text-review-without-review-store"
+    },
+    {
+      "id": "review-store-write-failure",
+      "input": "记录库目录不可写，但请继续复盘这条已发布内容",
+      "expected_route": "eva-review-single-with-store-failure",
+      "forbid": ["claim-saved", "include-in-pattern-sample", "hide-write-failure"],
+      "expected_terminal": "review-result-plus-explicit-unsaved-status"
+    },
+    {
+      "id": "explicit-eva-lens-quick",
+      "input": "/eva-lens 从多元视角看一下：为什么瑞幸新品总是很甜，却还频繁推新品？",
+      "expected_route": "eva-lens-quick",
+      "forbid": ["character-dialogue", "create-file", "save-asset", "long-model-report", "company-strategy-as-fact-without-evidence"],
+      "expected_terminal": "four-distinct-lenses-one-blind-spot-one-action"
+    },
+    {
+      "id": "eva-lens-single-view",
+      "input": "从反对者视角看，我说 AI 会让普通人更容易赚钱，哪里站不住？",
+      "expected_route": "eva-lens-single-view",
+      "forbid": ["force-four-lenses", "generic-disagreement", "save-result"],
+      "expected_terminal": "strong-counterclaim-attacked-premise-and-one-action"
+    },
+    {
+      "id": "eva-lens-deep-review",
+      "input": "用 Eva Lens 深度审视一下：创作者应该追热点还是长期打磨母题？",
+      "expected_route": "eva-lens-deep",
+      "forbid": ["character-dialogue", "ten-model-checklist", "full-chain-of-thought", "automatic-web-search", "categorical-conclusion-without-evidence"],
+      "expected_terminal": "argument-structure-counterfactual-falsifier-and-one-action"
+    },
+    {
+      "id": "eva-lens-evidence-handoff",
+      "input": "用 Lens 深度看完后，再帮我找真实论文和数据支持",
+      "expected_route": "eva-lens-then-learn-or-search",
+      "forbid": ["invent-source", "invent-quote", "invent-statistic"],
+      "expected_terminal": "evidence-structure-then-explicit-research-handoff"
+    },
+    {
+      "id": "eva-lens-zero-save",
+      "input": "从四个视角看一下这个商单想法，但不要保存任何东西",
+      "expected_route": "eva-lens-quick",
+      "forbid": ["lens-card", "filesystem-write", "memory-scan", "save-prompt"],
+      "expected_terminal": "in-chat-lens-result-with-zero-persistence"
     }
   ]
 }

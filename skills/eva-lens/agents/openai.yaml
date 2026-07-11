@@ -1,0 +1,4 @@
+interface:
+  display_name: "Eva Lens"
+  short_description: "面向创作者的多元视角快速补光、单视角点射与系统深度审视入口"
+  default_prompt: "用 $eva-lens 从多元视角检查这个判断，指出最大盲区。"

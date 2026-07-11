@@ -87,7 +87,7 @@ internal：辅助模块或系统内部件，默认不向用户展示字段。
 | commercial-constraint-card | Brief / Commerce | bridge |
 | content-task-card | Create / Brief / Commerce | bridge |
 | content-asset-card | Create / Link | surface |
-| review-card | Internal Pending / 历史兼容 | bridge |
+| review-card | Eva Review | bridge |
 | persona-card | Memory | bridge |
 | voice-card | Memory | bridge |
 
@@ -132,16 +132,21 @@ evidence：验证线索、对标来源、用户原始素材或 Brief
 
 `commercial-constraint-card` 的 `valid_next` 可以包含 `eva-brief`，但只表示字段缺失、低置信度待确认、稿件身份不明或需要对照 Brief 检查时回补。字段完整且用户目标是标题、开头、脚本或成稿时，不回流 Brief，应交给 Eva 主创作链的 Title、Opening 或 Script 上游分支。
 
-### 历史复盘卡兼容输出
+### Review 跨模块交接输出
 
 ```text
 asset_type：review-card / user-question-card / idea-card
 core_content：复盘判断、评论区问题池、下一步调整
 user_question：这次复盘要回答什么
 evidence：数据、评论、原稿、标题承诺或发布反馈
+hypothesis：当前待验证假设
+alternative_explanations：至少一个竞争解释
+next_test_action：下一篇只测试的动作
+observation_window：观察窗口
+falsification_condition：什么结果会推翻当前判断
 ```
 
-本段只用于历史 `review-card` 兼容，不作为 Eva 2.0 主链路主动产物。每类资产允许的 `valid_next` 以 `schemas/asset-types.json` 为准；目标名是否合法以 `schemas/handoff-targets.json` 为准。
+`review-card` 只由 Eva Review 在跨模块交接时生成。账号记录库中的 `review-record` 不使用本卡替代，也不要求每次复盘都生成 shared Asset。每类资产允许的 `valid_next` 以 `schemas/asset-types.json` 为准；目标名是否合法以 `schemas/handoff-targets.json` 为准。
 
 ### Link 输出
 

@@ -1,7 +1,7 @@
 ---
 name: eva-create
 description: |
-  Eva Create 2.0.5 独立短视频生产入口。只处理短视频、视频标题、视频开头、视频正文、短视频对标拆解、视频稿 AI 味检测和资料转短视频；不处理朋友圈、微博、公众号或其他普通写作。触发：/eva-create、/eva-shortvideo、/eva-title、/eva-script、优化视频开头、前三秒、写视频完整稿、做一条短视频、资料做成短视频。
+  Eva Create 2.1.0 独立短视频生产入口。只处理短视频、视频标题、视频开头、视频正文、短视频对标拆解、视频稿 AI 味检测和资料转短视频；不处理朋友圈、微博、公众号或其他普通写作。触发：/eva-create、/eva-shortvideo、/eva-title、/eva-script、优化视频开头、前三秒、写视频完整稿、做一条短视频、资料做成短视频。
 ---
 
 # Eva Create
@@ -48,3 +48,5 @@ references/create/shortvideo/script/00_eva-script_思维流爆款内容创作.md
 - 只做 AI 味检测时，不顺手改完整稿。
 - 对标拆解只能迁移结构，不能照搬。
 - 生成交接卡、资产卡、保存或跨模块交接前，必须读取 `asset-types.json` 和 Asset 协议并校验；轻启动不等于取消资产闸门。
+- 用户要求从读者、反对者、现实行业或创作者视角检查当前选题/稿件时，交给 `eva-lens`，Lens 返回一个修改点后再继续 Create。
+- 用户提供的是已发布内容及结果数据，目标是复盘下一篇先改什么时，交给 `eva-review`；Create 不解释发布表现。

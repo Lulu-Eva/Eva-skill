@@ -1,7 +1,7 @@
 ---
 name: eva-think
 description: |
-  Eva Think 2.0.5 独立思考陪练和诊断入口。用于陪着聊、梳理思路、拆开纠结、澄清概念、归位内容问题、识别人群、拆对标样本、检查一般文字 AI 味、发散灵感、保存或回捞点子、提取文风和诊断人设资格；不要抢占明确的代码、财务、文件处理或其他专业执行任务。触发：/eva-think、/eva-reframe、/eva-audience-finder、/eva-benchmark-copy、/eva-memory、/eva-persona-memory、/eva-user-voice、/eva-ai-check、帮我想想、陪我聊聊、脑子乱、这个话题讲给谁、对标拆解、AI 味检测、保存这个想法、提取我朋友圈的语气、人设立不住。
+  Eva Think 2.1.0 独立思考陪练和诊断入口。用于陪着聊、梳理思路、拆开纠结、澄清概念、归位内容问题、识别人群、拆对标样本、检查一般文字 AI 味、发散灵感、保存或回捞点子、提取文风和诊断人设资格；不要抢占明确的代码、财务、文件处理或其他专业执行任务。触发：/eva-think、/eva-reframe、/eva-audience-finder、/eva-benchmark-copy、/eva-memory、/eva-persona-memory、/eva-user-voice、/eva-ai-check、帮我想想、陪我聊聊、脑子乱、这个话题讲给谁、对标拆解、AI 味检测、保存这个想法、提取我朋友圈的语气、人设立不住。
 ---
 
 # Eva Think
@@ -48,3 +48,5 @@ references/think/01_eva-reframe_表象问题归位.md
 - 用户要保存、沉淀、人设或文风时，读取 shared Memory；生成资产、保存或跨模块交接前必须追加读取 `asset-types.json` 和 Asset 协议，保存必须由用户明确确认。
 - 七个 1.7.4 兼容入口只重定向到上述现有真源，不在 Think 内复制第二套流程。
 - 用户只是想聊清楚，也是一种完成，不强推成稿。
+- 用户已经有明确判断并要求“多元视角、从不同视角看、深度审视”时，交给 `eva-lens`；Think 不复制 Lens 的四视角或深度审视流程。
+- 用户要复盘已经发布的内容、回填结果或回看一批历史表现时，交给 `eva-review`；Think 不做发布数据归因。

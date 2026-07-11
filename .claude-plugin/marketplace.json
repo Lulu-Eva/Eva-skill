@@ -4,19 +4,19 @@
     "name": "Lulu-Eva"
   },
   "metadata": {
-    "description": "Eva-skill v2.0.5 创作者工作台。一个同轮路由入口连接 Think、短视频 Create、Learn、Brief 和 Link，兼容 1.7.4 高频触发，并保留建档与质量校验。",
-    "version": "2.0.5"
+    "description": "Eva-skill v2.1.0 创作者工作台。一个同轮路由入口连接七个能力入口，并保留建档与质量校验。",
+    "version": "2.1.0"
   },
   "plugins": [
     {
       "name": "eva",
-      "description": "Eva-skill v2.0.5 创作者工作台。包含 eva 路由、Think、短视频 Create、Learn、Brief、Link、1.7.4 高频触发兼容，以及随同安装的 shared 真源包。",
+      "description": "Eva-skill v2.1.0 创作者工作台。包含 eva 路由、Think、短视频 Create、Learn、Brief、Link、Review、Lens 和 shared 真源包。",
       "source": "./",
       "strict": false,
-      "version": "2.0.5",
+      "version": "2.1.0",
       "category": "content-creation",
-      "keywords": ["creator", "short-video", "xiaohongshu", "script", "script-structure", "content-writing", "title", "body-title", "audience", "thinking", "reframe", "benchmark-copy", "commercial-brief", "brand-brief", "sponsored-content", "memory", "persona", "persona-memory", "user-voice", "voice-card", "ai-check", "learn", "learning", "reading", "research", "study", "thought-seed-card", "voice", "chinese"],
-      "skills": ["./skills/eva", "./skills/eva-shared", "./skills/eva-think", "./skills/eva-create", "./skills/eva-learn", "./skills/eva-brief", "./skills/eva-link"]
+      "keywords": ["creator", "short-video", "xiaohongshu", "script", "script-structure", "content-writing", "title", "body-title", "audience", "thinking", "reframe", "benchmark-copy", "commercial-brief", "brand-brief", "sponsored-content", "memory", "persona", "persona-memory", "user-voice", "voice-card", "ai-check", "learn", "learning", "reading", "research", "study", "review", "content-review", "multi-perspective", "lens", "thought-seed-card", "voice", "chinese"],
+      "skills": ["./skills/eva", "./skills/eva-shared", "./skills/eva-think", "./skills/eva-create", "./skills/eva-learn", "./skills/eva-brief", "./skills/eva-link", "./skills/eva-review", "./skills/eva-lens"]
     }
   ]
 }

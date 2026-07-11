@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Eva 2.0.5 structural checks and prompt scenario-contract validation."""
+"""Eva 2.1.0 structural checks and prompt scenario-contract validation."""
 
 from __future__ import annotations
 
@@ -89,6 +89,15 @@ REQUIRED_SCENARIO_CASES = {
     "ai-check-rewrite-combination",
     "long-material-final-verb",
     "low-confidence-draft-not-publishable",
+    "explicit-eva-review-single",
+    "review-batch-comparability",
+    "review-prepublish-not-review",
+    "review-store-write-failure",
+    "explicit-eva-lens-quick",
+    "eva-lens-single-view",
+    "eva-lens-deep-review",
+    "eva-lens-evidence-handoff",
+    "eva-lens-zero-save",
 }
 
 REQUIRED_ROUTER_MARKERS = {
@@ -97,6 +106,8 @@ REQUIRED_ROUTER_MARKERS = {
     "eva-learn": "Router must route explicit Eva Learn requests to eva-learn",
     "eva-brief": "Router must route Brief and sponsored-content constraints to eva-brief",
     "eva-link": "Router must route explicit Link requests to eva-link",
+    "eva-review": "Router must route published-content review requests to eva-review",
+    "eva-lens": "Router must route multi-perspective requests to eva-lens",
     "带我系统学": "Router must route semantic learning requests to eva-learn",
     "提取我朋友圈的语气": "Router must disambiguate moments voice extraction from creation",
     "人设立不住": "Router must expose persona credibility diagnosis through eva-think",
@@ -114,6 +125,8 @@ REQUIRED_ROUTER_MARKERS = {
     "/eva-ai-check": "Router must preserve the 1.7.4 AI-check alias",
     "长文档按最终动词": "Router must resolve long material by the user's final verb",
     "AI Check + 改稿": "Router must resolve combined AI-check and rewrite intent",
+    "Review + 改下一篇": "Router must keep Review separate from content production",
+    "Review + 补盲区": "Router must hand Review conclusions to Lens without redoing attribution",
 }
 
 REQUIRED_ARCHITECTURE_PATHS = (
@@ -126,6 +139,12 @@ REQUIRED_ARCHITECTURE_PATHS = (
     "../eva-brief/SKILL.md",
     "../eva-link/SKILL.md",
     "../eva-link/references/link/00_eva-link_本地模块连接.md",
+    "../eva-review/SKILL.md",
+    "../eva-review/references/review/00_entry_入口与模式路由.md",
+    "../eva-review/references/review/06_store_记录库与保存协议.md",
+    "../eva-lens/SKILL.md",
+    "../eva-lens/references/lens/01_quick_快速补光.md",
+    "../eva-lens/references/lens/02_deep_深度审视.md",
     "references/audience/00_eva-audience-finder_话题人群识别器.md",
     "references/benchmark/00_eva-benchmark-copy_对标文案拆解.md",
     "references/quality/00_eva-ai-check_表达真实性审查.md",
@@ -143,6 +162,8 @@ RUNTIME_VERSION_FREE_PATHS = (
     "../eva-learn/SKILL.md",
     "../eva-brief/SKILL.md",
     "../eva-link/SKILL.md",
+    "../eva-review/SKILL.md",
+    "../eva-lens/SKILL.md",
 )
 
 EXPRESSION_PRELOAD_REQUIRED_ENTRIES = (
@@ -262,6 +283,8 @@ def main() -> None:
         "control_plan": "selftest",
         "adjustment_variables": ["selftest"],
         "hypothesis": "selftest",
+        "alternative_explanations": ["selftest"],
+        "falsification_condition": "selftest",
         "confounders": ["selftest"],
         "metric_spec": [
             {
@@ -280,6 +303,13 @@ def main() -> None:
     }
     if not validate_asset(bad_review_source, schema, base):
         errors.append("negative review-card example unexpectedly passed active source_module")
+
+    valid_review = dict(bad_review_source)
+    valid_review["source_module"] = "eva-review"
+    valid_review["valid_next"] = ["eva-lens", "eva-create"]
+    valid_review_errors = validate_asset(valid_review, schema, base)
+    if valid_review_errors:
+        errors.append("valid eva-review review-card failed: " + "; ".join(valid_review_errors))
 
     scenario_contract_path = base / "examples" / "prompt-regression-matrix.json"
     if not scenario_contract_path.exists():
@@ -379,6 +409,7 @@ def main() -> None:
         "../eva-learn/SKILL.md": "需要生成、保存或交接正式 Eva Asset",
         "../eva-brief/SKILL.md": "生成正式商单约束卡、保存或交回创作链路前",
         "../eva-link/SKILL.md": "Link 生成资产或交接前",
+        "../eva-review/SKILL.md": "只有把复盘结论交给",
     }
     for relative, gate_marker in staged_asset_gate_markers.items():
         entry_path = (base / relative).resolve()
@@ -586,13 +617,57 @@ def main() -> None:
             if marker not in persona_text:
                 errors.append(f"persona-memory missing credibility diagnosis marker: {marker}")
 
-    live_review_dir = base / "references" / "review"
-    if live_review_dir.exists():
-        errors.append("references/review must not exist in Eva 2.0.5; keep inactive drafts outside this skill")
-
     internal_pending_dir = base / "references" / "internal-pending"
     if internal_pending_dir.exists():
-        errors.append("references/internal-pending must not exist in Eva 2.0.5; move upgrade drafts outside this skill")
+        errors.append("references/internal-pending must not exist in Eva 2.1.0; move upgrade drafts outside this skill")
+
+    review_path = (base / "../eva-review/SKILL.md").resolve()
+    if review_path.exists():
+        review_text = review_path.read_text(encoding="utf-8")
+        for marker in (
+            "单篇检查、批量回溯和结果回填都是本 Skill 的内部模式",
+            "少于 10 条可比记录",
+            "./eva-review/",
+            "不等于 shared `review-card`",
+            "发布前短视频改稿交给 Create",
+        ):
+            if marker not in review_text:
+                errors.append(f"eva-review missing product-boundary marker: {marker}")
+        single_review_text = (base / "../eva-review/references/review/02_single_单篇复盘.md").resolve().read_text(encoding="utf-8")
+        if "不得自行用点赞、评论或其他互动数充当分母" not in single_review_text:
+            errors.append("eva-review must forbid invented proxy ratios without an exposure denominator")
+        pattern_review_text = (base / "../eva-review/references/review/03_pattern_批量规律回溯.md").resolve().read_text(encoding="utf-8")
+        if "不能给出“押注某类内容、减少某类内容、分配发布比例”" not in pattern_review_text:
+            errors.append("eva-review must forbid allocation recommendations below ten comparable records")
+    for forbidden_peer in (base / "../eva-review-check", base / "../eva-review-pattern"):
+        if forbidden_peer.resolve().exists():
+            errors.append(f"Eva 2.1 must not expose Review sub-skill: {forbidden_peer.name}")
+
+    lens_path = (base / "../eva-lens/SKILL.md").resolve()
+    if lens_path.exists():
+        lens_text = lens_path.read_text(encoding="utf-8")
+        for marker in (
+            "快速补光",
+            "单视角点射",
+            "深度审视",
+            "不创建 `lens-card`",
+            "不模拟历史人物、专家圆桌或聊天室",
+            "不自动联网搜索",
+        ):
+            if marker not in lens_text:
+                errors.append(f"eva-lens missing product-boundary marker: {marker}")
+        for forbidden in ("人物智慧讨论", "推荐人物", "多 Agent"):
+            if forbidden in lens_text:
+                errors.append(f"eva-lens still contains removed discussion mode: {forbidden}")
+        quick_lens_text = (base / "../eva-lens/references/lens/01_quick_快速补光.md").resolve().read_text(encoding="utf-8")
+        if "不得把推测写成某家公司、平台或行业已经采用的真实策略" not in quick_lens_text:
+            errors.append("eva-lens quick mode must separate mechanism inference from verified facts")
+        deep_lens_text = (base / "../eva-lens/references/lens/02_deep_深度审视.md").resolve().read_text(encoding="utf-8")
+        for marker in ("800-1200 个中文字符", "不得用“逻辑上必然成立 / 不成立”"):
+            if marker not in deep_lens_text:
+                errors.append(f"eva-lens deep mode missing calibrated-depth marker: {marker}")
+    if "lens-card" in VALID_ASSET_TYPES:
+        errors.append("Eva Lens must not add lens-card to shared asset types")
 
     chain = [
         ("audience-card", "eva-create"),
@@ -622,7 +697,7 @@ def main() -> None:
         result(
             ok,
             "selftest",
-            "Eva 2.0.5结构自检与场景契约检查通过" if ok else "Eva 2.0.5结构自检与场景契约检查失败",
+            "Eva 2.1.0结构自检与场景契约检查通过" if ok else "Eva 2.1.0结构自检与场景契约检查失败",
             errors,
             warnings,
             {
