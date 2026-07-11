@@ -20,5 +20,30 @@
     "title",
     "opening",
     "script"
-  ]
+  ],
+  "canonical_targets": [
+    "eva",
+    "eva-learn",
+    "eva-brief",
+    "eva-think",
+    "eva-create",
+    "eva-memory",
+    "eva-link",
+    "eva-review",
+    "eva-lens"
+  ],
+  "internal_stages": [
+    "title",
+    "opening",
+    "script"
+  ],
+  "aliases": {
+    "learn": "eva-learn",
+    "think": "eva-think",
+    "create": "eva-create",
+    "memory": "eva-memory",
+    "link": "eva-link",
+    "review": "eva-review",
+    "lens": "eva-lens"
+  }
 }

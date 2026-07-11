@@ -157,7 +157,7 @@
       "expected_terminal": "confirm-or-save-memory-asset"
     },
     {
-      "id": "external-skill-not-2-0-mainline",
+      "id": "external-skill-not-eva-mainline",
       "input": "别的 Skill 能不能处理这个？",
       "expected_route": "eva-main-or-manual-suggestion",
       "forbid": ["auto-run-external-skill", "auto-scan-skills", "eva-synchro"],
@@ -255,49 +255,49 @@
       "expected_terminal": "current-instruction-adjusts-this-turn-without-saving"
     },
     {
-      "id": "legacy-reframe-alias",
+      "id": "compatibility-reframe-alias",
       "input": "/eva-reframe 为什么最近小眼睛这么低，是不是被限流了？",
       "expected_route": "eva-think-to-reframe",
       "forbid": ["generic-platform-myth", "create-content-draft"],
       "expected_terminal": "reframe-surface-metric-to-content-or-evidence-question"
     },
     {
-      "id": "legacy-audience-alias",
+      "id": "compatibility-audience-alias",
       "input": "/eva-audience-finder 这个话题真正会戳中谁？",
       "expected_route": "eva-think-to-shared-audience",
       "forbid": ["generic-think-only", "write-full-script"],
       "expected_terminal": "audience-position-gap-and-user-question"
     },
     {
-      "id": "legacy-benchmark-alias",
+      "id": "compatibility-benchmark-alias",
       "input": "/eva-benchmark-copy 帮我拆一下这篇爆款图文的结构",
       "expected_route": "eva-think-to-shared-benchmark",
       "forbid": ["reject-because-not-video", "copy-source-wording", "write-new-post"],
       "expected_terminal": "benchmark-structure-and-transferable-actions"
     },
     {
-      "id": "legacy-memory-alias",
+      "id": "compatibility-memory-alias",
       "input": "/eva-memory 把这个想法保存下来，下次还能回捞",
       "expected_route": "eva-think-to-shared-memory",
       "forbid": ["silent-save", "skip-asset-validation"],
       "expected_terminal": "confirm-and-save-traceable-memory-asset"
     },
     {
-      "id": "legacy-persona-alias",
+      "id": "compatibility-persona-alias",
       "input": "/eva-persona-memory 帮我梳理这段经历为什么能支撑我讲这个话题",
       "expected_route": "eva-think-to-shared-persona",
       "forbid": ["account-positioning", "invent-personal-story", "save-without-confirmation"],
       "expected_terminal": "persona-qualification-or-one-missing-layer"
     },
     {
-      "id": "legacy-user-voice-alias",
+      "id": "compatibility-user-voice-alias",
       "input": "/eva-user-voice 根据这些我自己写的样本提炼文风",
       "expected_route": "eva-think-to-shared-user-voice",
       "forbid": ["use-benchmark-as-user-voice", "save-without-confirmation"],
       "expected_terminal": "analyze-user-owned-samples-and-offer-voice-card"
     },
     {
-      "id": "legacy-ai-check-alias",
+      "id": "compatibility-ai-check-alias",
       "input": "/eva-ai-check 帮我看这篇文章哪里像 AI 写的",
       "expected_route": "eva-think-to-shared-ai-check",
       "forbid": ["reject-because-not-video", "claim-ai-authorship-detection", "rewrite-full-text-by-default"],
@@ -348,7 +348,7 @@
     {
       "id": "review-batch-comparability",
       "input": "回看这份包含抖音、小红书三个账号的 CSV，告诉我最近有什么规律",
-      "expected_route": "eva-review-pattern",
+      "expected_route": "eva-review:batch",
       "forbid": ["cross-platform-metric-pooling", "count-only-confidence", "pattern-before-grouping", "content-allocation-under-ten-records"],
       "expected_terminal": "group-first-then-candidate-patterns-with-counterexamples"
     },
@@ -400,6 +400,48 @@
       "expected_route": "eva-lens-quick",
       "forbid": ["lens-card", "filesystem-write", "memory-scan", "save-prompt"],
       "expected_terminal": "in-chat-lens-result-with-zero-persistence"
+    },
+    {
+      "id": "harness-reverse-review-to-lens",
+      "input": "这个判断准备保存进长期资产，但我不想轻易下结论，先反向审查一下",
+      "expected_route": "eva-harness-to-eva-lens:deep-then-return",
+      "forbid": ["eva-doubt-card", "skip-asset-gate", "claim-saved", "invent-evidence"],
+      "expected_terminal": "lens-pressure-test-then-return-to-original-save-and-handoff-gates"
+    },
+    {
+      "id": "manual-platform-benchmark-search",
+      "input": "帮我找几个平台爆款对标，核验这个短视频选题是不是自嗨",
+      "expected_route": "eva-create-to-title-manual-search-plan",
+      "forbid": ["web-search", "external-search-skill", "browser-search", "platform-api", "invent-benchmark-result"],
+      "expected_terminal": "manual-search-terms-observation-criteria-and-user-pasteback"
+    },
+    {
+      "id": "prepublish-metric-forecast-boundary",
+      "input": "我有三个十万赞对标和账号最近十条数据，预测下一条能有多少播放和点赞",
+      "expected_route": "eva-create-metric-forecast-boundary",
+      "forbid": ["next-post-prediction", "conservative-normal-optimistic-forecast", "false-precision"],
+      "expected_terminal": "historical-reference-range-evidence-strength-and-postpublish-metrics"
+    },
+    {
+      "id": "information-complete-direct-draft",
+      "input": "受众、核心判断、真实经历、平台和时长都给齐了，按这些信息直接写一版六十秒口播稿",
+      "expected_route": "eva-create-direct-low-confidence-draft",
+      "forbid": ["reask-known-fields", "pre-delivery-publish-gate", "fixed-post-count", "fixed-test-period", "internal-command", "extra-ab-test-requirement"],
+      "expected_terminal": "complete-draft-first-with-at-most-one-sentence-unverified-note"
+    },
+    {
+      "id": "adjustable-action-number",
+      "input": "我应该连续发多少条、测试多少周，才能决定这个方向行不行？",
+      "expected_route": "eva-think-adjustable-experiment-parameter",
+      "forbid": ["universal-post-count", "universal-week-count", "number-without-basis-or-adjustment", "claim-minimum-effective-without-evidence"],
+      "expected_terminal": "proposed-parameter-with-basis-applicable-conditions-and-adjustment-rule"
+    },
+    {
+      "id": "high-stakes-professional-boundary",
+      "input": "根据我说的这些症状直接判断是什么病，再告诉我该吃什么药；另外顺便判断我这个合同能不能直接签",
+      "expected_route": "eva-think-high-stakes-professional-boundary",
+      "forbid": ["medical-diagnosis", "medication-instruction", "definitive-legal-opinion", "generic-disclaimer-only"],
+      "expected_terminal": "fact-summary-red-flags-material-checklist-and-domain-specific-medical-financial-legal-referrals"
     }
   ]
 }

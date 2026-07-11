@@ -1,6 +1,6 @@
 # Eva Link Doctor：Link 健康检查
 
-Eva Link Doctor 负责检查已有 Link 是否仍能被 Eva 2.0 安全调用和交接。
+Eva Link Doctor 负责检查已有 Link 是否仍能被 Eva 2.x 安全调用和交接。
 
 ## 触发
 

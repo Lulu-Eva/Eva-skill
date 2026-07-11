@@ -78,6 +78,32 @@ def handoff_targets(base: Path | None = None) -> set[str]:
     return set(load_handoff_targets(base)["targets"])
 
 
+def handoff_aliases(base: Path | None = None) -> dict[str, str]:
+    aliases = load_handoff_targets(base).get("aliases") or {}
+    if not isinstance(aliases, dict):
+        raise ValueError("schemas/handoff-targets.json aliases must be an object")
+    return {str(alias): str(target) for alias, target in aliases.items()}
+
+
+def handoff_internal_stages(base: Path | None = None) -> set[str]:
+    stages = load_handoff_targets(base).get("internal_stages") or []
+    if not isinstance(stages, list):
+        raise ValueError("schemas/handoff-targets.json internal_stages must be an array")
+    return {str(stage) for stage in stages}
+
+
+def canonical_handoff_target(target: object, base: Path | None = None) -> str:
+    value = str(target)
+    return handoff_aliases(base).get(value, value)
+
+
+def canonicalize_handoff_targets(targets: object, base: Path | None = None) -> list[str]:
+    if not isinstance(targets, (list, tuple, set)):
+        return []
+    aliases = handoff_aliases(base)
+    return [aliases.get(str(target), str(target)) for target in targets]
+
+
 def required_fields_for_asset(asset_type: str, base: Path | None = None) -> list[str]:
     assets = load_asset_types(base)["assets"]
     config = assets.get(asset_type)
@@ -101,6 +127,8 @@ def is_blank_value(value: Any) -> bool:
 
 VALID_ASSET_TYPES = asset_type_names()
 VALID_HANDOFF_TARGETS = handoff_targets()
+HANDOFF_ALIASES = handoff_aliases()
+HANDOFF_INTERNAL_STAGES = handoff_internal_stages()
 
 
 def result(

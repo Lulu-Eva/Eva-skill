@@ -18,6 +18,8 @@ from eva_common import (
     VALID_ASSET_TYPES,
     VALID_HANDOFF_TARGETS,
     add_common_arguments,
+    canonical_handoff_target,
+    canonicalize_handoff_targets,
     default_base_from_script,
     exit_with,
     is_blank_value,
@@ -63,7 +65,7 @@ REQUIRED_SCENARIO_CASES = {
     "moments-voice-extraction-not-create",
     "persona-credibility-diagnosis",
     "explicit-save",
-    "external-skill-not-2-0-mainline",
+    "external-skill-not-eva-mainline",
     "explicit-link-still-available",
     "custom-eva-skill-means-link-builder",
     "ordinary-moments-writing-not-link-builder",
@@ -77,13 +79,13 @@ REQUIRED_SCENARIO_CASES = {
     "expression-preload-create-rescan-on-change",
     "expression-preload-specific-detail-notice",
     "voice-current-instruction-priority",
-    "legacy-reframe-alias",
-    "legacy-audience-alias",
-    "legacy-benchmark-alias",
-    "legacy-memory-alias",
-    "legacy-persona-alias",
-    "legacy-user-voice-alias",
-    "legacy-ai-check-alias",
+    "compatibility-reframe-alias",
+    "compatibility-audience-alias",
+    "compatibility-benchmark-alias",
+    "compatibility-memory-alias",
+    "compatibility-persona-alias",
+    "compatibility-user-voice-alias",
+    "compatibility-ai-check-alias",
     "general-ai-check-longform",
     "general-benchmark-analysis",
     "ai-check-rewrite-combination",
@@ -98,6 +100,8 @@ REQUIRED_SCENARIO_CASES = {
     "eva-lens-deep-review",
     "eva-lens-evidence-handoff",
     "eva-lens-zero-save",
+    "harness-reverse-review-to-lens",
+    "information-complete-direct-draft",
 }
 
 REQUIRED_ROUTER_MARKERS = {
@@ -116,13 +120,13 @@ REQUIRED_ROUTER_MARKERS = {
     "同一轮": "Router must continue in the same turn",
     "基础模型": "Router must pass ordinary non-video writing to the base model",
     "不得只输出“这个交给某入口处理”后停止": "Router must not stop at a routing announcement",
-    "/eva-reframe": "Router must preserve the 1.7.4 reframe alias",
-    "/eva-audience-finder": "Router must preserve the 1.7.4 audience alias",
-    "/eva-benchmark-copy": "Router must preserve the 1.7.4 benchmark alias",
-    "/eva-memory": "Router must preserve the 1.7.4 memory alias",
-    "/eva-persona-memory": "Router must preserve the 1.7.4 persona alias",
-    "/eva-user-voice": "Router must preserve the 1.7.4 user-voice alias",
-    "/eva-ai-check": "Router must preserve the 1.7.4 AI-check alias",
+    "/eva-reframe": "Router must preserve the reframe compatibility alias",
+    "/eva-audience-finder": "Router must preserve the audience compatibility alias",
+    "/eva-benchmark-copy": "Router must preserve the benchmark compatibility alias",
+    "/eva-memory": "Router must preserve the memory compatibility alias",
+    "/eva-persona-memory": "Router must preserve the persona compatibility alias",
+    "/eva-user-voice": "Router must preserve the user-voice compatibility alias",
+    "/eva-ai-check": "Router must preserve the AI-check compatibility alias",
     "长文档按最终动词": "Router must resolve long material by the user's final verb",
     "AI Check + 改稿": "Router must resolve combined AI-check and rewrite intent",
     "Review + 改下一篇": "Router must keep Review separate from content production",
@@ -258,6 +262,26 @@ def main() -> None:
     if not validate_asset(bad_next, schema, base):
         errors.append("negative asset example unexpectedly passed invalid valid_next")
 
+    expected_aliases = {
+        "learn": "eva-learn",
+        "think": "eva-think",
+        "create": "eva-create",
+        "memory": "eva-memory",
+        "link": "eva-link",
+        "review": "eva-review",
+        "lens": "eva-lens",
+    }
+    for alias, canonical in expected_aliases.items():
+        if canonical_handoff_target(alias, base) != canonical:
+            errors.append(f"handoff alias {alias!r} must normalize to {canonical!r}")
+    if canonicalize_handoff_targets(["review", "title", "eva-create"], base) != ["eva-review", "title", "eva-create"]:
+        errors.append("handoff canonicalization must preserve internal stages and canonical targets")
+
+    compatibility_asset = dict(example_asset)
+    compatibility_asset["valid_next"] = ["create", "memory"]
+    if validate_asset(compatibility_asset, schema, base):
+        errors.append("compatibility handoff aliases must remain readable during the 2.1 cycle")
+
     bad_required = dict(example_asset)
     bad_required.pop("evidence", None)
     if not validate_asset(bad_required, schema, base):
@@ -310,6 +334,82 @@ def main() -> None:
     valid_review_errors = validate_asset(valid_review, schema, base)
     if valid_review_errors:
         errors.append("valid eva-review review-card failed: " + "; ".join(valid_review_errors))
+
+    review_common = {
+        "asset_type": "review-card",
+        "source_module": "eva-review",
+        "core_content": "selftest review conclusion",
+        "user_question": "What should the next review action be?",
+        "evidence": ["user-provided review evidence"],
+        "valid_next": ["eva-think", "eva-create", "eva-lens"],
+        "saved": False,
+        "confidence": "medium",
+        "low_confidence_reason": [],
+        "missing_fields": [],
+        "privacy_flags": [],
+    }
+    review_mode_examples = {
+        "single": {
+            "hypothesis": "The opening may not fully carry the title promise.",
+            "alternative_explanations": ["The observation window may be too short."],
+            "next_test_action": "Change only the opening in the next comparable post.",
+            "observation_window": "24 hours after publishing",
+            "falsification_condition": "The primary metric does not improve while controls remain stable.",
+        },
+        "batch": {
+            "hypothesis": "Comparable posts with concrete conflict openings may retain better.",
+            "alternative_explanations": ["Traffic source differs across the supporting records."],
+            "next_test_action": "Run one comparable post with only the opening mechanism changed.",
+            "observation_window": "the next three comparable posts",
+            "falsification_condition": "The candidate pattern disappears after grouping by traffic source.",
+        },
+        "backfill": {
+            "hypothesis": "Original hypothesis: a clearer promise improves qualified engagement.",
+            "alternative_explanations": ["The backfill changed more than one variable."],
+            "next_test_action": "Repeat the test with the original control items restored.",
+            "observation_window": "same window as the original record",
+            "falsification_condition": "The repeated controlled result does not support the original direction.",
+        },
+    }
+    for mode, fields in review_mode_examples.items():
+        review_asset = {**review_common, **fields}
+        mode_errors = validate_asset(review_asset, schema, base)
+        if mode_errors:
+            errors.append(f"valid {mode} review-card failed: " + "; ".join(mode_errors))
+
+    incomplete_review = {**review_common, **review_mode_examples["single"]}
+    incomplete_review.pop("falsification_condition")
+    if not validate_asset(incomplete_review, schema, base):
+        errors.append("review-card without falsification_condition unexpectedly passed")
+
+    initializer_schema = read_json(base / "schemas" / "initializer-card.schema.json")
+    valid_initializer = {
+        "user_goal": "restore a failed learning task",
+        "task_type": "eva-learn-recovery",
+        "definition_of_done": ["state is readable"],
+        "assets_to_generate": [],
+        "required_fields": ["project_path"],
+        "next_step": "ask for the project path",
+    }
+    if simple_schema_validate(valid_initializer, initializer_schema):
+        errors.append("valid initializer-card failed schema validation")
+    invalid_initializer = dict(valid_initializer)
+    invalid_initializer.pop("next_step")
+    if not simple_schema_validate(invalid_initializer, initializer_schema):
+        errors.append("initializer-card without next_step unexpectedly passed")
+
+    failure_schema = read_json(base / "schemas" / "failure-record.schema.json")
+    valid_failure = {
+        "failure_type": "script_or_tool_failed",
+        "summary": "link validation script could not run",
+        "recommended_action": "repair the script before saving the Link",
+    }
+    if simple_schema_validate(valid_failure, failure_schema):
+        errors.append("valid failure-record failed schema validation")
+    invalid_failure = dict(valid_failure)
+    invalid_failure["failure_type"] = "unknown_failure"
+    if not simple_schema_validate(invalid_failure, failure_schema):
+        errors.append("failure-record with unknown failure_type unexpectedly passed")
 
     scenario_contract_path = base / "examples" / "prompt-regression-matrix.json"
     if not scenario_contract_path.exists():
@@ -364,14 +464,16 @@ def main() -> None:
             errors.append(f"missing architecture path: {relative}")
 
     expected_version = VERSION.rsplit("-", 1)[-1]
-    version_paths = {"root VERSION": base.parent.parent / "VERSION"}
-    for label, version_path in version_paths.items():
-        if not version_path.exists():
-            errors.append(f"missing {label}: {version_path}")
-            continue
+    repo_root = base.parent.parent
+    version_path = repo_root / "VERSION"
+    source_checkout = (repo_root / ".git").exists() or (repo_root / ".claude-plugin" / "marketplace.json").exists()
+    layout = "source-checkout" if source_checkout else "installed-skill-bundle"
+    if version_path.exists():
         actual_version = version_path.read_text(encoding="utf-8").strip()
         if actual_version != expected_version:
-            errors.append(f"{label} must be {expected_version}, got {actual_version or '<empty>'}")
+            errors.append(f"root VERSION must be {expected_version}, got {actual_version or '<empty>'}")
+    elif source_checkout:
+        errors.append(f"missing root VERSION: {version_path}")
 
     preload_relative = "references/shared/05_expression-asset-preload_表达资产轻量预加载协议.md"
     asset_state_relative = "references/shared/01_asset-state_资产状态归一表.md"
@@ -544,11 +646,33 @@ def main() -> None:
         for marker in ("只处理短视频", "不处理朋友圈、微博、公众号"):
             if marker not in create_frontmatter:
                 errors.append(f"eva-create frontmatter missing short-video boundary: {marker}")
+        for marker in ("用户已经给齐目标人群", "直接完成草稿", "最多在稿件结尾用一句话标注"):
+            if marker not in create_entry_text:
+                errors.append(f"eva-create missing information-complete direct-draft marker: {marker}")
     if create_openai_path.exists():
         create_openai_text = create_openai_path.read_text(encoding="utf-8")
         for marker in ("图文创作入口", "普通内容创作"):
             if marker in create_openai_text:
                 errors.append(f"eva-create agents/openai.yaml still claims non-video creation: {marker}")
+
+    direct_draft_paths = {
+        "script router": (base / "../eva-create/references/create/shortvideo/script/00_eva-script_思维流爆款内容创作.md").resolve(),
+        "route map": (base / "../eva-create/references/create/shortvideo/script/04_eva-script-route-map_正文路线图.md").resolve(),
+        "script writing": (base / "../eva-create/references/create/shortvideo/script/05_eva-script-writing_正文撰写.md").resolve(),
+    }
+    for label, path in direct_draft_paths.items():
+        if not path.exists():
+            continue
+        text = path.read_text(encoding="utf-8")
+        for marker in ("固定发布条数", "测试周期"):
+            if marker not in text:
+                errors.append(f"{label} missing direct-draft numeric-threshold boundary: {marker}")
+    script_writing_path = direct_draft_paths["script writing"]
+    if script_writing_path.exists():
+        script_writing_text = script_writing_path.read_text(encoding="utf-8")
+        for marker in ("信息齐全直接成稿", "前台只输出完整内容稿", "不能替用户发明新的处方", "连续发十条"):
+            if marker not in script_writing_text:
+                errors.append(f"script writing missing direct-draft scope marker: {marker}")
 
     learn_entry_path = (base / "../eva-learn/SKILL.md").resolve()
     learn_source_path = (base / "references/learn/00_eva-learn.md").resolve()
@@ -608,7 +732,7 @@ def main() -> None:
                 errors.append(f"eva-think missing deep-thinking marker: {marker}")
         for marker in ("专项诊断转接", "shared Benchmark", "shared AI Check", "通用表达诊断"):
             if marker not in think_text:
-                errors.append(f"eva-think missing legacy diagnostic routing marker: {marker}")
+                errors.append(f"eva-think missing compatibility diagnostic routing marker: {marker}")
 
     persona_path = (base / "references/memory/01_eva-persona-memory_人设记忆采集.md").resolve()
     if persona_path.exists():
@@ -639,6 +763,10 @@ def main() -> None:
         pattern_review_text = (base / "../eva-review/references/review/03_pattern_批量规律回溯.md").resolve().read_text(encoding="utf-8")
         if "不能给出“押注某类内容、减少某类内容、分配发布比例”" not in pattern_review_text:
             errors.append("eva-review must forbid allocation recommendations below ten comparable records")
+        record_review_text = (base / "../eva-review/references/review/05_record_记录字段真源.md").resolve().read_text(encoding="utf-8")
+        for marker in ("字段表是持久化规范", "Markdown 记录模板是人读映射", "不得只更新其中一处"):
+            if marker not in record_review_text:
+                errors.append(f"eva-review record/template mapping missing marker: {marker}")
     for forbidden_peer in (base / "../eva-review-check", base / "../eva-review-pattern"):
         if forbidden_peer.resolve().exists():
             errors.append(f"Eva 2.1 must not expose Review sub-skill: {forbidden_peer.name}")
@@ -663,9 +791,18 @@ def main() -> None:
         if "不得把推测写成某家公司、平台或行业已经采用的真实策略" not in quick_lens_text:
             errors.append("eva-lens quick mode must separate mechanism inference from verified facts")
         deep_lens_text = (base / "../eva-lens/references/lens/02_deep_深度审视.md").resolve().read_text(encoding="utf-8")
-        for marker in ("800-1200 个中文字符", "不得用“逻辑上必然成立 / 不成立”"):
+        for marker in ("800-1200 个中文字符", "不得用“逻辑上必然成立 / 不成立”", "Harness 交接输入", "交回原入口继续校验"):
             if marker not in deep_lens_text:
                 errors.append(f"eva-lens deep mode missing calibrated-depth marker: {marker}")
+    harness_path = (base / "references/harness/00_eva-harness_状态与交接校验.md").resolve()
+    if harness_path.exists():
+        harness_text = harness_path.read_text(encoding="utf-8")
+        for marker in ("认知反向审查交接", "交给 `eva-lens` 的深度审视模式", "Lens 结果不能绕过 Harness 闸门"):
+            if marker not in harness_text:
+                errors.append(f"Harness missing Lens handoff marker: {marker}")
+        for removed_marker in ("## Eva Doubt", "反向审查卡：", "启动 Doubt"):
+            if removed_marker in harness_text:
+                errors.append(f"Harness still maintains duplicate Eva Doubt protocol: {removed_marker}")
     if "lens-card" in VALID_ASSET_TYPES:
         errors.append("Eva Lens must not add lens-card to shared asset types")
 
@@ -702,6 +839,7 @@ def main() -> None:
             warnings,
             {
                 "base": str(base),
+                "layout": layout,
                 "positive_example": "examples/asset-card.example.json",
                 "prompt_scenario_contract": "examples/prompt-regression-matrix.json",
                 "required_scenario_cases": sorted(REQUIRED_SCENARIO_CASES),

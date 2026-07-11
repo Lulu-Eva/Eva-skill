@@ -1,6 +1,6 @@
 # Eva Asset：资产卡协议
 
-Eva 2.0 的交接中心不是模块，而是资产卡。
+Eva 2.x 的交接中心不是模块，而是资产卡。
 
 资产卡默认是后台协议，不是默认用户界面。前台外显条件按 `../eva-shared/references/shared/04_light-interaction_轻交互协议.md` 执行。
 
@@ -62,6 +62,16 @@ Link / Memory 写入前
 ## 主要资产类型
 
 资产类型、每类资产的 `valid_next`、`required_fields` 和可见性真源是 `schemas/asset-types.json`。合法下游目标真源是 `schemas/handoff-targets.json`。本表只做人读说明；新增、改名、调整下游或调整可见性时，先改对应 schema，再让 `scripts/eva_doctor.py` 检查漂移。
+
+`handoff-targets.json` 把目标分为三类：
+
+```text
+canonical_targets：公开入口或正式模块名，新资产必须写这一类名称。
+internal_stages：Title、Opening、Script 等 Create 内部阶段。
+aliases：只用于读取旧资产和旧 Link；校验时归一到 canonical target。
+```
+
+新生成的资产不得继续写 `create / think / review / lens` 等兼容别名；旧资产保留可读，但校验器应提示改用对应 `eva-*` 规范名。
 
 资产可见性分三档：
 

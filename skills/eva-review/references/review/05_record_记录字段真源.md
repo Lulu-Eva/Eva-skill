@@ -2,6 +2,8 @@
 
 `review-record` 是 Eva Review 内部持久化记录，不是 shared Asset。
 
+下方字段表是持久化规范，Markdown 记录模板是人读映射。调整字段时必须同步检查模板对应项，不得只更新其中一处；在正式 schema 或模板生成器落地前，两者都保留。
+
 ## 最小字段
 
 ```text

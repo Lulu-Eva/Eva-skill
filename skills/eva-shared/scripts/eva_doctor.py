@@ -14,6 +14,8 @@ from eva_common import (
     add_common_arguments,
     asset_type_names,
     exit_with,
+    handoff_aliases,
+    handoff_internal_stages,
     handoff_targets,
     normalize_path,
     read_json,
@@ -153,11 +155,20 @@ def check_asset_type_truth(base: Path) -> tuple[list[str], list[str], dict]:
     schema_fields = set(schema.get("properties", {}).keys())
     common_assets = asset_type_names(base)
     common_handoff_targets = handoff_targets(base)
+    common_handoff_aliases = handoff_aliases(base)
+    common_internal_stages = handoff_internal_stages(base)
+    raw_aliases = handoff_registry.get("aliases") or {}
+    raw_canonical_targets = handoff_registry.get("canonical_targets") or []
+    raw_internal_stages = handoff_registry.get("internal_stages") or []
+    canonical_targets = set(raw_canonical_targets) if isinstance(raw_canonical_targets, list) else set()
+    internal_stages = set(raw_internal_stages) if isinstance(raw_internal_stages, list) else set()
 
     data["asset_types_count"] = len(registry_assets)
     data["asset_types"] = sorted(registry_assets)
     data["handoff_targets_count"] = len(handoff_registry_targets)
     data["handoff_targets"] = sorted(handoff_registry_targets)
+    data["handoff_aliases"] = raw_aliases
+    data["handoff_internal_stages"] = sorted(internal_stages)
 
     expected_version = VERSION.rsplit("-", 1)[-1]
     registry_version = str(registry.get("version", ""))
@@ -192,6 +203,49 @@ def check_asset_type_truth(base: Path) -> tuple[list[str], list[str], dict]:
         data["handoff_registry_minus_common"] = sorted(handoff_registry_targets - common_handoff_targets)
         data["handoff_common_minus_registry"] = sorted(common_handoff_targets - handoff_registry_targets)
 
+    if not isinstance(raw_aliases, dict):
+        errors.append("handoff-targets.json aliases must be an object")
+        raw_aliases = {}
+    if not isinstance(raw_canonical_targets, list) or not raw_canonical_targets:
+        errors.append("handoff-targets.json canonical_targets must be a non-empty array")
+    if not isinstance(raw_internal_stages, list):
+        errors.append("handoff-targets.json internal_stages must be an array")
+    if raw_aliases != common_handoff_aliases:
+        errors.append("handoff alias drift: eva_common differs from handoff-targets.json")
+    if internal_stages != common_internal_stages:
+        errors.append("handoff internal-stage drift: eva_common differs from handoff-targets.json")
+
+    invalid_alias_names = sorted(set(raw_aliases) - handoff_registry_targets)
+    invalid_alias_targets = sorted(set(raw_aliases.values()) - handoff_registry_targets)
+    if invalid_alias_names:
+        errors.append("handoff alias name(s) missing from targets: " + ", ".join(invalid_alias_names))
+    if invalid_alias_targets:
+        errors.append("handoff alias canonical target(s) missing from targets: " + ", ".join(invalid_alias_targets))
+    invalid_canonical_targets = sorted(canonical_targets - handoff_registry_targets)
+    if invalid_canonical_targets:
+        errors.append("canonical handoff target(s) missing from targets: " + ", ".join(invalid_canonical_targets))
+    required_canonical_targets = {
+        "eva",
+        "eva-learn",
+        "eva-brief",
+        "eva-think",
+        "eva-create",
+        "eva-memory",
+        "eva-link",
+        "eva-review",
+        "eva-lens",
+    }
+    missing_canonical_targets = sorted(required_canonical_targets - canonical_targets)
+    if missing_canonical_targets:
+        errors.append("canonical_targets missing Eva entry/module name(s): " + ", ".join(missing_canonical_targets))
+    invalid_internal_stages = sorted(internal_stages - handoff_registry_targets)
+    if invalid_internal_stages:
+        errors.append("internal handoff stage(s) missing from targets: " + ", ".join(invalid_internal_stages))
+    classified_targets = canonical_targets | set(raw_aliases) | internal_stages
+    unclassified_targets = sorted(handoff_registry_targets - classified_targets)
+    if unclassified_targets:
+        errors.append("handoff target(s) lack canonical/alias/internal classification: " + ", ".join(unclassified_targets))
+
     if schema_low_confidence_reasons != VALID_LOW_CONFIDENCE_REASONS:
         errors.append(
             "low_confidence_reason drift: eva_common VALID_LOW_CONFIDENCE_REASONS differs from asset-card.schema.json"
@@ -213,6 +267,12 @@ def check_asset_type_truth(base: Path) -> tuple[list[str], list[str], dict]:
         if visibility not in visibility_values:
             errors.append(f"asset type {name} has invalid visibility: {visibility}")
         missing = [field for field in ["produced_by", "valid_next", "required_fields", "is_handoff", "visibility"] if field not in config]
+        alias_targets = sorted(set(config.get("valid_next") or []) & set(raw_aliases))
+        if alias_targets:
+            errors.append(
+                f"asset type {name} uses compatibility alias(es) in valid_next; new registry entries must use canonical names: "
+                + ", ".join(alias_targets)
+            )
         if missing:
             errors.append(f"asset type {name} missing config field(s): {', '.join(missing)}")
         required_fields = config.get("required_fields") or []

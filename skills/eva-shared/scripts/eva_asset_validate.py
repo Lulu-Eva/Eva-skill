@@ -12,6 +12,8 @@ from eva_common import (
     VALID_HANDOFF_TARGETS,
     VALID_LOW_CONFIDENCE_REASONS,
     add_common_arguments,
+    canonical_handoff_target,
+    canonicalize_handoff_targets,
     coerce_asset_from_markdown,
     default_base_from_script,
     exit_with,
@@ -101,8 +103,20 @@ def main() -> None:
     if invalid_next:
         errors.append("valid_next contains invalid handoff target(s): " + ", ".join(invalid_next))
 
+    normalized_valid_next = canonicalize_handoff_targets(valid_next, base)
+    compatibility_aliases = sorted(
+        str(target) for target in valid_next
+        if canonical_handoff_target(target, base) != str(target)
+    )
+    if compatibility_aliases:
+        warnings.append(
+            "valid_next uses compatibility alias(es); new assets should write canonical target names: "
+            + ", ".join(compatibility_aliases)
+        )
+
     if args.downstream:
-        if args.downstream not in valid_next:
+        normalized_downstream = canonical_handoff_target(args.downstream, base)
+        if normalized_downstream not in normalized_valid_next:
             errors.append(f"downstream '{args.downstream}' is not listed in valid_next")
 
     confidence = asset.get("confidence")
@@ -138,6 +152,7 @@ def main() -> None:
                 "schema_path": str(schema_path),
                 "asset_type": asset_type,
                 "valid_next": valid_next,
+                "normalized_valid_next": normalized_valid_next,
                 "required_fields": required_fields_for_asset(str(asset_type), base) if asset_type in VALID_ASSET_TYPES else [],
                 "low_confidence_reason": low_confidence_reason,
             },

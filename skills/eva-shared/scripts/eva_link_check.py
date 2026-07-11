@@ -12,6 +12,8 @@ from eva_common import (
     VALID_HANDOFF_TARGETS,
     VALID_LOW_CONFIDENCE_REASONS,
     add_common_arguments,
+    canonical_handoff_target,
+    canonicalize_handoff_targets,
     default_base_from_script,
     exit_with,
     is_blank_value,
@@ -97,8 +99,9 @@ def validate_expected_asset(path: Path, base: Path, link_config: dict | None = N
         source_module = asset.get("source_module")
         if link_id and source_module != link_id:
             errors.append(f"expected_asset source_module {source_module!r} must equal Link id {link_id!r}")
-        asset_valid_next = set(asset.get("valid_next") or [])
-        invalid_for_link = sorted(asset_valid_next - handoff_to)
+        asset_valid_next = set(canonicalize_handoff_targets(asset.get("valid_next") or [], base))
+        normalized_handoff_to = set(canonicalize_handoff_targets(handoff_to, base))
+        invalid_for_link = sorted(asset_valid_next - normalized_handoff_to)
         if handoff_to and invalid_for_link:
             errors.append(
                 "expected_asset valid_next contains target(s) not declared in Link handoff_to: "
@@ -123,6 +126,17 @@ def validate_link_manifest_semantics(link_config: dict, context: str = "Link") -
     broad_aliases = sorted({item for item in entry_aliases if item in BROAD_DEFAULT_INTENTS or len(item) <= 2})
     if broad_aliases:
         warnings.append(f"{context} entry_aliases may be too broad: " + ", ".join(broad_aliases))
+
+    handoff_to = [str(item) for item in (link_config.get("handoff_to") or [])]
+    compatibility_aliases = sorted(
+        target for target in handoff_to
+        if canonical_handoff_target(target) != target
+    )
+    if compatibility_aliases:
+        warnings.append(
+            f"{context} handoff_to uses compatibility alias(es); new Link manifests should use canonical names: "
+            + ", ".join(compatibility_aliases)
+        )
 
     return errors, warnings
 
