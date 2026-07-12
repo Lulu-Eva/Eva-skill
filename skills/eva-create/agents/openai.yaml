@@ -1,4 +1,4 @@
 interface:
   display_name: "Eva Create"
-  short_description: "短视频、视频标题、开头、正文和对标拆解入口"
-  default_prompt: "用 $eva-create 处理短视频、视频标题、开头、正文或视频稿检查。"
+  short_description: "短视频与非虚构自媒体文章的内容创作入口"
+  default_prompt: "用 $eva-create 把想法或材料做成短视频，或写成一篇非虚构自媒体文章。"

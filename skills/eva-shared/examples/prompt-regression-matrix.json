@@ -1,5 +1,5 @@
 {
-  "version": "2.1.1",
+  "version": "2.1.2",
   "purpose": "Scenario contract inventory for same-turn routing, staged loading, hard gates, and user-facing lightness. Structural selftest validates this inventory but does not execute model behavior.",
   "cases": [
     {
@@ -15,6 +15,14 @@
       "expected_route": "eva-new-user-scan-installed-skills",
       "forbid": ["assume-installed-features", "fixed-full-course", "ask-name", "save-new-user-status"],
       "expected_terminal": "ask-current-goal-or-offer-one-high-frequency-start"
+    },
+    {
+      "id": "new-user-minimum-success-loop",
+      "input": "我是第一次用 Eva，我想先学怎么把一个模糊想法做成短视频",
+      "expected_route": "eva-new-user-goal-specific-minimum-loop",
+      "forbid": ["show-full-feature-menu", "repeat-known-goal-question", "complete-full-production-chain", "teach-internal-module-fields"],
+      "must_include": ["one-minimum-demo", "one-user-practice-prompt", "what-the-user-will-get"],
+      "expected_terminal": "demonstrate-then-invite-one-sentence-practice"
     },
     {
       "id": "eva-new-user-skip",
@@ -97,7 +105,7 @@
       "id": "material-to-create",
       "input": "把这份资料做成一条短视频",
       "expected_route": "eva-create-material-to-short-video",
-      "forbid": ["create-learning-project"],
+      "forbid": ["create-learning-project", "eva-create-article"],
       "expected_terminal": "short-video-gates-before-draft"
     },
     {
@@ -111,7 +119,7 @@
       "id": "commercial-content-not-brief-entry",
       "input": "这个商单怎么写成一条视频",
       "expected_route": "eva-main-commerce-to-title-or-script",
-      "forbid": ["stop-at-eva-brief-only", "write-before-constraint-card"],
+      "forbid": ["stop-at-eva-brief-only", "write-before-constraint-card", "eva-create-article"],
       "expected_terminal": "commerce-constraint-then-title-or-script"
     },
     {
@@ -202,7 +210,7 @@
       "id": "ordinary-moments-writing-not-link-builder",
       "input": "我不想写口播，我就想写一条朋友圈",
       "expected_route": "base-model-direct-writing",
-      "forbid": ["eva-create", "eva-link-builder", "auto-call-local-link", "set-default-link", "claim-eva-validated-asset"],
+      "forbid": ["eva-create", "eva-create-article", "eva-link-builder", "auto-call-local-link", "set-default-link", "claim-eva-validated-asset"],
       "expected_terminal": "direct-moments-draft-without-eva-gates"
     },
     {
@@ -328,14 +336,14 @@
       "id": "general-ai-check-longform",
       "input": "帮我检查这篇公众号文章有没有 AI 味，先不要改",
       "expected_route": "eva-think-to-shared-ai-check",
-      "forbid": ["base-model-generic-review", "eva-create-short-video-only-rejection", "rewrite-text"],
+      "forbid": ["base-model-generic-review", "eva-create-short-video-only-rejection", "eva-create-article", "rewrite-text"],
       "expected_terminal": "single-point-or-longform-authenticity-report"
     },
     {
       "id": "general-benchmark-analysis",
       "input": "这是一篇爆款图文，只拆它的标题承诺、用户疑问和正文结构",
       "expected_route": "eva-think-to-shared-benchmark",
-      "forbid": ["force-short-video-create", "write-new-content", "copy-source-wording"],
+      "forbid": ["force-short-video-create", "eva-create-article", "write-new-content", "copy-source-wording"],
       "expected_terminal": "diagnostic-benchmark-deconstruction"
     },
     {
@@ -346,11 +354,113 @@
       "expected_terminal": "diagnose-first-then-rewrite-authorized-local-part"
     },
     {
+      "id": "ai-check-rewrite-no-scope-or-form",
+      "input": "这段 AI 味很重，检测完直接改成一版：……",
+      "expected_route": "eva-think-to-shared-ai-check-single-disambiguation",
+      "forbid": ["choose-local-rewrite-without-scope", "choose-full-create-without-form", "ask-multiple-questions"],
+      "must_include": ["one-disambiguation-question"],
+      "expected_terminal": "ask-diagnose-and-rewrite-worst-part-or-rewrite-which-content-form"
+    },
+    {
       "id": "long-material-final-verb",
       "input": "这是同一份课程资料：不要带我学习，把它做成一条短视频",
       "expected_route": "eva-create-material-to-short-video",
-      "forbid": ["eva-learn", "create-learning-project", "route-by-material-type-only"],
+      "forbid": ["eva-learn", "eva-create-article", "create-learning-project", "route-by-material-type-only"],
       "expected_terminal": "route-by-final-verb-and-apply-short-video-gates"
+    },
+    {
+      "id": "article-information-complete-direct-draft",
+      "input": "我要写一篇公众号文章：核心判断是开源 Eva-skill 改变了自媒体培训的竞争方式，我的经历、三段逻辑和结尾想介绍答疑社群都给齐了，直接写完整稿。",
+      "expected_route": "eva-create-article-direct-draft",
+      "forbid": ["short-video-title-gate", "ask-known-fields", "outline-only", "fixed-word-count", "invent-facts"],
+      "must_include": ["same-turn-complete-article", "body-first-title-after", "dynamic-length"],
+      "expected_terminal": "complete-nonfiction-article-with-post-draft-title"
+    },
+    {
+      "id": "article-critical-gap-one-question",
+      "input": "帮我写一篇公众号文章，主题是 AI 改变了创作。",
+      "expected_route": "eva-create-article-one-critical-question",
+      "forbid": ["multiple-questions", "invent-author-experience", "short-video-title-search", "generic-full-draft"],
+      "must_include": ["one-critical-question"],
+      "expected_terminal": "ask-one-question-that-changes-the-article-direction"
+    },
+    {
+      "id": "article-short-topic-dynamic-length",
+      "input": "写一篇短文：我只想说明好工具不需要每天打开，只要在关键任务上反复帮到你就够了。逻辑闭环就停，不要凑字数。",
+      "expected_route": "eva-create-article-dynamic-short",
+      "forbid": ["pad-to-800", "repeat-same-point", "fixed-word-count"],
+      "must_include": ["stop-at-argument-closure", "shorter-than-default-when-warranted"],
+      "expected_terminal": "concise-complete-article-without-padding"
+    },
+    {
+      "id": "article-long-topic-dynamic-length",
+      "input": "写一篇长文，说清从 APP 时代的日活竞争到 Agent 时代 Token 消耗与真实留存的变化，需要完整展开前提、反例和边界，不要为了 1200 字破坏论证。",
+      "expected_route": "eva-create-article-dynamic-long",
+      "forbid": ["compress-to-1200", "drop-counterargument", "fixed-word-count"],
+      "must_include": ["allow-over-default-length", "complete-argument-chain"],
+      "expected_terminal": "longer-complete-article-when-complexity-requires"
+    },
+    {
+      "id": "article-fact-judgment-separation",
+      "input": "我听说 90% 的 AI 产品都没有留存，想把这句写进文章，再加上我对 Agent 竞争的判断。",
+      "expected_route": "eva-create-article-fact-layering",
+      "forbid": ["invent-source", "present-hearsay-as-fact", "erase-author-judgment"],
+      "must_include": ["fact-experience-inference-rhetoric-separation", "pending-verification-marker"],
+      "expected_terminal": "article-draft-with-unverified-claim-clearly-marked-or-removed"
+    },
+    {
+      "id": "article-cta-missing-details",
+      "input": "结尾介绍一下我的答疑社群，但我还没给你价格、名额、截止时间和加入方式。",
+      "expected_route": "eva-create-article-cta-safe-draft",
+      "forbid": ["invent-price", "invent-quota", "invent-deadline", "invent-join-method"],
+      "must_include": ["one-question-or-pending-placeholder", "first-party-cta-only"],
+      "expected_terminal": "article-with-truthful-cta-or-clearly-marked-missing-details"
+    },
+    {
+      "id": "article-local-edit-scope",
+      "input": "只改这篇文章的第二段，让逻辑更顺；其他段落、标题和结尾都不要动。",
+      "expected_route": "eva-create-article-local-edit",
+      "forbid": ["rewrite-full-article", "change-title", "change-cta", "expand-edit-scope"],
+      "must_include": ["authorized-section-only"],
+      "expected_terminal": "return-only-the-revised-second-paragraph"
+    },
+    {
+      "id": "article-long-material-final-verb",
+      "input": "这是同一份课程资料：不要带我学习，也不要做口播，把它写成一篇公众号文章。",
+      "expected_route": "eva-create-material-to-article",
+      "forbid": ["eva-learn", "eva-create-short-video", "route-by-material-type-only"],
+      "must_include": ["route-by-final-output-form"],
+      "expected_terminal": "article-route-before-writing"
+    },
+    {
+      "id": "learn-to-article-direct-handoff",
+      "input": "我已经在 Eva Learn 里形成了核心判断，支持证据、反对证据和不确定处也都整理好了。不要保存思想种子卡，直接同轮写成完整公众号文章。",
+      "expected_route": "eva-learn-to-eva-create-article-same-turn",
+      "forbid": ["force-thought-seed-card", "short-video-audience-gate", "short-video-title-gate", "short-video-first-line-gate", "short-video-route-map"],
+      "must_include": ["judgment-evidence-counterevidence-uncertainty-handoff", "same-turn-article-handoff"],
+      "expected_terminal": "same-turn-complete-article-without-short-video-gates"
+    },
+    {
+      "id": "article-professional-writing-exclusion",
+      "input": "把这份接口定义整理成一份给开发者看的 API 技术文档，包含参数、返回值和错误码。",
+      "expected_route": "professional-technical-writing-not-eva-article",
+      "forbid": ["eva-create-article", "nonfiction-media-article-template", "invent-api-behavior"],
+      "expected_terminal": "professional-technical-documentation-path"
+    },
+    {
+      "id": "article-single-sample-current-task-only",
+      "input": "这是我自己以前写的一篇文章，这次照着它的节奏写，但不要保存成我的长期文风。",
+      "expected_route": "eva-create-article-current-sample",
+      "forbid": ["save-voice-card", "claim-stable-user-style", "copy-sample-wording"],
+      "must_include": ["current-task-style-reference-only"],
+      "expected_terminal": "article-draft-with-current-sample-rhythm-and-zero-persistence"
+    },
+    {
+      "id": "article-sponsored-brief-exclusion",
+      "input": "这是一篇公众号品牌商单，品牌给了必提卖点和禁区，直接帮我写完整文章。",
+      "expected_route": "eva-brief-or-commerce-constraint-only-for-sponsored-article",
+      "forbid": ["direct-article-before-constraint-card", "article-draft-after-constraint-card", "continue-to-article-after-brief", "invent-brand-claim", "ignore-brand-prohibition"],
+      "expected_terminal": "brief-constraint-only-no-article-draft-in-2.1.2"
     },
     {
       "id": "low-confidence-draft-not-publishable",
@@ -445,17 +555,35 @@
     },
     {
       "id": "information-complete-direct-draft",
-      "input": "受众、核心判断、真实经历、平台和时长都给齐了，按这些信息直接写一版六十秒口播稿",
+      "input": "我要做一条小红书口播，受众、核心判断、真实经历和时长都给齐了，按这些信息直接写一版完整稿",
       "expected_route": "eva-create-title-manual-search-first",
-      "forbid": ["direct-draft-on-first-request", "reask-known-content-fields", "claim-title-validated", "invent-benchmark-result"],
-      "expected_terminal": "manual-title-search-plan-before-any-draft"
+      "forbid": ["direct-draft-on-first-request", "reask-known-content-fields", "claim-title-validated", "eva-create-article", "invent-benchmark-result", "rule-only-refusal", "empty-search-template"],
+      "must_include": ["tailored-search-terms", "observation-criteria", "candidate-pasteback-request"],
+      "expected_terminal": "tailored-manual-title-search-plan-before-any-draft"
+    },
+    {
+      "id": "douyin-information-complete-direct-draft",
+      "input": "我要做一条 60 秒抖音口播，受众、核心判断和真实经历都给齐了，请直接写完整稿",
+      "expected_route": "eva-create-douyin-first-line-then-script",
+      "forbid": ["force-platform-title-search", "apply-two-turn-title-rule", "ask-for-cover-title", "eva-create-article", "write-without-first-line-or-route"],
+      "must_include": ["first-line-content-entry", "compact-or-full-route", "complete-draft"],
+      "expected_terminal": "first-line-handoff-and-compact-or-full-route-then-complete-draft"
+    },
+    {
+      "id": "shipinhao-information-complete-direct-draft",
+      "input": "我要做一条 60 秒视频号口播，这个账号没有依靠封面标题点击的入口；受众、核心判断和真实经历都给齐了，请直接写完整稿。",
+      "expected_route": "eva-create-shipinhao-first-line-then-script",
+      "forbid": ["force-platform-title-search", "apply-two-turn-title-rule", "ask-for-cover-title", "eva-create-article", "write-without-first-line-or-route"],
+      "must_include": ["first-line-content-entry", "compact-or-full-route", "complete-draft"],
+      "expected_terminal": "first-line-handoff-and-compact-or-full-route-then-complete-draft"
     },
     {
       "id": "second-explicit-draft-request",
       "input": "你已经提醒过我标题没验证了。我知道这版不能直接发，但现在仍然先按现有材料写一版",
       "expected_route": "eva-create-second-request-low-confidence-draft",
       "forbid": ["repeat-title-search-block", "claim-publishable", "invent-missing-material", "fixed-post-count", "fixed-test-period"],
-      "expected_terminal": "complete-unverified-draft-after-compact-or-full-route"
+      "must_include": ["【未验证结构草案｜不可直接发布】", "current-missing-evidence", "one-upgrade-action"],
+      "expected_terminal": "prominently-labeled-complete-unverified-draft-after-compact-or-full-route"
     },
     {
       "id": "adjustable-action-number",
