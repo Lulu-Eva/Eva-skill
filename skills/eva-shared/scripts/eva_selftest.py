@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Eva 2.1.1 structural checks and prompt scenario-contract validation."""
+"""Eva 2.1.2 structural checks and prompt scenario-contract validation."""
 
 from __future__ import annotations
 
@@ -45,6 +45,7 @@ def source_allowed_for_asset(source_module: object, allowed_sources: list) -> bo
 REQUIRED_SCENARIO_CASES = {
     "default-start",
     "explicit-eva-new-user",
+    "new-user-minimum-success-loop",
     "eva-new-user-skip",
     "eva-new-user-to-real-task",
     "direct-think-luckin",
@@ -92,6 +93,7 @@ REQUIRED_SCENARIO_CASES = {
     "general-ai-check-longform",
     "general-benchmark-analysis",
     "ai-check-rewrite-combination",
+    "ai-check-rewrite-no-scope-or-form",
     "long-material-final-verb",
     "low-confidence-draft-not-publishable",
     "explicit-eva-review-single",
@@ -105,13 +107,108 @@ REQUIRED_SCENARIO_CASES = {
     "eva-lens-zero-save",
     "harness-reverse-review-to-lens",
     "information-complete-direct-draft",
+    "douyin-information-complete-direct-draft",
+    "shipinhao-information-complete-direct-draft",
     "second-explicit-draft-request",
 }
+
+REQUIRED_ARTICLE_CASE_CONTRACTS = {
+    "article-information-complete-direct-draft": {
+        "expected_route": "eva-create-article-direct-draft",
+        "expected_terminal": "complete-nonfiction-article-with-post-draft-title",
+        "forbid": {"short-video-title-gate", "outline-only", "fixed-word-count", "invent-facts"},
+        "must_include": {"same-turn-complete-article", "body-first-title-after", "dynamic-length"},
+    },
+    "article-critical-gap-one-question": {
+        "expected_route": "eva-create-article-one-critical-question",
+        "expected_terminal": "ask-one-question-that-changes-the-article-direction",
+        "forbid": {"multiple-questions", "invent-author-experience", "short-video-title-search"},
+        "must_include": {"one-critical-question"},
+    },
+    "article-short-topic-dynamic-length": {
+        "expected_route": "eva-create-article-dynamic-short",
+        "expected_terminal": "concise-complete-article-without-padding",
+        "forbid": {"pad-to-800", "repeat-same-point", "fixed-word-count"},
+        "must_include": {"stop-at-argument-closure", "shorter-than-default-when-warranted"},
+    },
+    "article-long-topic-dynamic-length": {
+        "expected_route": "eva-create-article-dynamic-long",
+        "expected_terminal": "longer-complete-article-when-complexity-requires",
+        "forbid": {"compress-to-1200", "drop-counterargument", "fixed-word-count"},
+        "must_include": {"allow-over-default-length", "complete-argument-chain"},
+    },
+    "article-fact-judgment-separation": {
+        "expected_route": "eva-create-article-fact-layering",
+        "expected_terminal": "article-draft-with-unverified-claim-clearly-marked-or-removed",
+        "forbid": {"invent-source", "present-hearsay-as-fact"},
+        "must_include": {"fact-experience-inference-rhetoric-separation", "pending-verification-marker"},
+    },
+    "article-cta-missing-details": {
+        "expected_route": "eva-create-article-cta-safe-draft",
+        "expected_terminal": "article-with-truthful-cta-or-clearly-marked-missing-details",
+        "forbid": {"invent-price", "invent-quota", "invent-deadline", "invent-join-method"},
+        "must_include": {"one-question-or-pending-placeholder", "first-party-cta-only"},
+    },
+    "article-local-edit-scope": {
+        "expected_route": "eva-create-article-local-edit",
+        "expected_terminal": "return-only-the-revised-second-paragraph",
+        "forbid": {"rewrite-full-article", "change-title", "change-cta", "expand-edit-scope"},
+        "must_include": {"authorized-section-only"},
+    },
+    "article-long-material-final-verb": {
+        "expected_route": "eva-create-material-to-article",
+        "expected_terminal": "article-route-before-writing",
+        "forbid": {"eva-learn", "eva-create-short-video", "route-by-material-type-only"},
+        "must_include": {"route-by-final-output-form"},
+    },
+    "learn-to-article-direct-handoff": {
+        "expected_route": "eva-learn-to-eva-create-article-same-turn",
+        "expected_terminal": "same-turn-complete-article-without-short-video-gates",
+        "forbid": {
+            "force-thought-seed-card",
+            "short-video-audience-gate",
+            "short-video-title-gate",
+            "short-video-first-line-gate",
+            "short-video-route-map",
+        },
+        "must_include": {
+            "judgment-evidence-counterevidence-uncertainty-handoff",
+            "same-turn-article-handoff",
+        },
+    },
+    "article-professional-writing-exclusion": {
+        "expected_route": "professional-technical-writing-not-eva-article",
+        "expected_terminal": "professional-technical-documentation-path",
+        "forbid": {"eva-create-article", "nonfiction-media-article-template", "invent-api-behavior"},
+        "must_include": set(),
+    },
+    "article-single-sample-current-task-only": {
+        "expected_route": "eva-create-article-current-sample",
+        "expected_terminal": "article-draft-with-current-sample-rhythm-and-zero-persistence",
+        "forbid": {"save-voice-card", "claim-stable-user-style", "copy-sample-wording"},
+        "must_include": {"current-task-style-reference-only"},
+    },
+    "article-sponsored-brief-exclusion": {
+        "expected_route": "eva-brief-or-commerce-constraint-only-for-sponsored-article",
+        "expected_terminal": "brief-constraint-only-no-article-draft-in-2.1.2",
+        "forbid": {
+            "direct-article-before-constraint-card",
+            "article-draft-after-constraint-card",
+            "continue-to-article-after-brief",
+            "invent-brand-claim",
+            "ignore-brand-prohibition",
+        },
+        "must_include": set(),
+    },
+}
+
+REQUIRED_SCENARIO_CASES.update(REQUIRED_ARTICLE_CASE_CONTRACTS)
 
 REQUIRED_ROUTER_MARKERS = {
     "eva-new-user": "Router must expose the adaptive new-user tutorial",
     "eva-think": "Router must expose eva-think as the default light entry",
-    "eva-create": "Router must expose short-video creation through eva-create",
+    "eva-create": "Router must expose content creation through eva-create",
+    "非虚构自媒体文章": "Router must expose nonfiction article creation through eva-create",
     "eva-learn": "Router must route explicit Eva Learn requests to eva-learn",
     "eva-brief": "Router must route Brief and sponsored-content constraints to eva-brief",
     "eva-link": "Router must route explicit Link requests to eva-link",
@@ -145,6 +242,9 @@ REQUIRED_ARCHITECTURE_PATHS = (
     "../eva-think/references/think/00_eva-think_思考助理.md",
     "../eva-create/SKILL.md",
     "../eva-create/references/create/00_eva-create_创作主入口.md",
+    "../eva-create/references/create/article/00_eva-article_文章主入口.md",
+    "../eva-create/references/create/article/01_eva-article-argument_观点与论证路线.md",
+    "../eva-create/references/create/article/02_eva-article-writing_文章撰写与长度调节.md",
     "../eva-create/references/create/shortvideo/script/03_eva-script-runtime_普通正文简版路线.md",
     "../eva-learn/SKILL.md",
     "../eva-brief/SKILL.md",
@@ -451,6 +551,46 @@ def main() -> None:
                     errors.append(f"prompt scenario case {case.get('id', index)!r} field {field} must be a string")
             if "forbid" in case and not isinstance(case["forbid"], list):
                 errors.append(f"prompt scenario case {case.get('id', index)!r} forbid must be an array")
+            if "must_include" in case and not isinstance(case["must_include"], list):
+                errors.append(f"prompt scenario case {case.get('id', index)!r} must_include must be an array")
+
+        case_by_id = {
+            case.get("id"): case
+            for case in cases
+            if isinstance(case, dict) and isinstance(case.get("id"), str)
+        }
+        required_case_markers = {
+            "new-user-minimum-success-loop": ("one-minimum-demo", "one-user-practice-prompt"),
+            "information-complete-direct-draft": ("tailored-search-terms", "observation-criteria"),
+            "douyin-information-complete-direct-draft": ("first-line-content-entry", "complete-draft"),
+            "shipinhao-information-complete-direct-draft": ("first-line-content-entry", "complete-draft"),
+            "second-explicit-draft-request": ("【未验证结构草案｜不可直接发布】", "one-upgrade-action"),
+        }
+        for case_id, markers in required_case_markers.items():
+            must_include = case_by_id.get(case_id, {}).get("must_include") or []
+            missing_markers = [marker for marker in markers if marker not in must_include]
+            if missing_markers:
+                errors.append(
+                    f"prompt scenario case {case_id!r} missing must_include marker(s): "
+                    + ", ".join(missing_markers)
+                )
+
+        for case_id, contract in REQUIRED_ARTICLE_CASE_CONTRACTS.items():
+            case = case_by_id.get(case_id) or {}
+            for scalar_field in ("expected_route", "expected_terminal"):
+                if case.get(scalar_field) != contract[scalar_field]:
+                    errors.append(
+                        f"prompt scenario case {case_id!r} {scalar_field} must be "
+                        f"{contract[scalar_field]!r}"
+                    )
+            for list_field in ("forbid", "must_include"):
+                actual = set(case.get(list_field) or [])
+                missing_markers = sorted(contract[list_field] - actual)
+                if missing_markers:
+                    errors.append(
+                        f"prompt scenario case {case_id!r} missing {list_field} marker(s): "
+                        + ", ".join(missing_markers)
+                    )
 
     shared_skill_path = base / "SKILL.md"
     if not shared_skill_path.exists():
@@ -481,6 +621,22 @@ def main() -> None:
             errors.append(f"root VERSION must be {expected_version}, got {actual_version or '<empty>'}")
     elif source_checkout:
         errors.append(f"missing root VERSION: {version_path}")
+
+    readme_path = repo_root / "README.md"
+    if readme_path.exists():
+        readme_text = readme_path.read_text(encoding="utf-8")
+        for marker in (
+            "# Eva Skill v2.1.2",
+            "## 按你想完成的事使用 Eva",
+            "## 一个短视频从想法到成稿",
+            "## 一篇文章从判断到成稿",
+            "## 常见问题",
+            "## 2.1.2 新增",
+        ):
+            if marker not in readme_text:
+                errors.append(f"README missing 2.1.2 user-guide marker: {marker}")
+    elif source_checkout:
+        errors.append(f"missing root README: {readme_path}")
 
     preload_relative = "references/shared/05_expression-asset-preload_表达资产轻量预加载协议.md"
     asset_state_relative = "references/shared/01_asset-state_资产状态归一表.md"
@@ -649,18 +805,87 @@ def main() -> None:
         create_frontmatter = create_entry_text.split("---", 2)[1] if create_entry_text.startswith("---") else ""
         for marker in ("普通图文", "图文创作入口", "普通内容创作"):
             if marker in create_frontmatter:
-                errors.append(f"eva-create frontmatter still claims non-video creation: {marker}")
-        for marker in ("只处理短视频", "不处理朋友圈、微博、公众号"):
+                errors.append(f"eva-create frontmatter claims unsupported generic creation: {marker}")
+        for marker in ("短视频", "非虚构自媒体文章", "公众号文章", "不处理朋友圈、微博"):
             if marker not in create_frontmatter:
-                errors.append(f"eva-create frontmatter missing short-video boundary: {marker}")
+                errors.append(f"eva-create frontmatter missing supported-content boundary: {marker}")
+        for stale_marker in ("独立短视频生产入口", "只处理短视频", "不处理朋友圈、微博、公众号"):
+            if stale_marker in create_frontmatter:
+                errors.append(f"eva-create frontmatter keeps stale short-video-only boundary: {stale_marker}")
+        for marker in (
+            "references/create/article/00_eva-article_文章主入口.md",
+            "references/create/article/01_eva-article-argument_观点与论证路线.md",
+            "references/create/article/02_eva-article-writing_文章撰写与长度调节.md",
+        ):
+            if marker not in create_entry_text:
+                errors.append(f"eva-create missing conditional Article read: {marker}")
         for marker in ("第一次要求", "标题搜索方案", "第二次明确", "不能包装成可直接发布的终稿"):
             if marker not in create_entry_text:
                 errors.append(f"eva-create missing two-turn draft boundary marker: {marker}")
+        for marker in ("依赖封面或标题点击", "抖音、视频号", "不强制搜索平台标题"):
+            if marker not in create_entry_text:
+                errors.append(f"eva-create missing platform-specific title boundary marker: {marker}")
     if create_openai_path.exists():
         create_openai_text = create_openai_path.read_text(encoding="utf-8")
         for marker in ("图文创作入口", "普通内容创作"):
             if marker in create_openai_text:
-                errors.append(f"eva-create agents/openai.yaml still claims non-video creation: {marker}")
+                errors.append(f"eva-create agents/openai.yaml claims unsupported generic creation: {marker}")
+        for marker in ("$eva-create", "非虚构自媒体文章"):
+            if marker not in create_openai_text:
+                errors.append(f"eva-create agents/openai.yaml missing Article marker: {marker}")
+
+    create_router_path = (base / "../eva-create/references/create/00_eva-create_创作主入口.md").resolve()
+    if create_router_path.exists():
+        create_router_text = create_router_path.read_text(encoding="utf-8")
+        for marker in (
+            "references/create/shortvideo/00_eva-shortvideo_主入口.md",
+            "references/create/article/00_eva-article_文章主入口.md",
+            "最终输出形式优先于输入材料形式",
+        ):
+            if marker not in create_router_text:
+                errors.append(f"eva-create router missing content-form split marker: {marker}")
+
+    article_paths = {
+        "entry": (base / "../eva-create/references/create/article/00_eva-article_文章主入口.md").resolve(),
+        "argument": (base / "../eva-create/references/create/article/01_eva-article-argument_观点与论证路线.md").resolve(),
+        "writing": (base / "../eva-create/references/create/article/02_eva-article-writing_文章撰写与长度调节.md").resolve(),
+    }
+    article_markers = {
+        "entry": (
+            "信息充分",
+            "同一轮直接交付完整文章",
+            "最多只问一个关键问题",
+            "宽泛主题",
+            "不得由 Article 自行挑一个泛化观点",
+            "正式品牌商单",
+        ),
+        "argument": ("事实", "亲历", "推论", "修辞", "最短闭环论证路径"),
+        "writing": ("800–1200", "论证闭环", "先写正文，后定标题", "[待核验]", "[待补]", "CTA"),
+    }
+    for label, path in article_paths.items():
+        if not path.exists():
+            continue
+        text = path.read_text(encoding="utf-8")
+        for marker in article_markers[label]:
+            if marker not in text:
+                errors.append(f"Article {label} protocol missing marker: {marker}")
+        for forbidden_coupling in ("shortvideo/title/", "shortvideo/opening/", "/eva-title", "/eva-script"):
+            if forbidden_coupling in text:
+                errors.append(f"Article {label} protocol must not couple to short-video gate: {forbidden_coupling}")
+
+    forbidden_article_skill = (repo_root / "skills" / "eva-article").resolve()
+    if forbidden_article_skill.exists():
+        errors.append(f"Eva 2.1.2 must not expose a top-level Article skill: {forbidden_article_skill}")
+    asset_registry = read_json(base / "schemas" / "asset-types.json")
+    registered_assets = set((asset_registry.get("assets") or {}).keys())
+    if "article-card" in registered_assets:
+        errors.append("Article must reuse content-task-card/content-asset-card; article-card is forbidden")
+    for required_asset in ("content-task-card", "content-asset-card"):
+        if required_asset not in registered_assets:
+            errors.append(f"Article requires existing shared asset type to remain available: {required_asset}")
+    handoff_registry = read_json(base / "schemas" / "handoff-targets.json")
+    if "eva-article" in set(handoff_registry.get("targets") or []):
+        errors.append("Article must remain an internal eva-create branch; eva-article handoff target is forbidden")
 
     direct_draft_paths = {
         "script router": (base / "../eva-create/references/create/shortvideo/script/00_eva-script_思维流爆款内容创作.md").resolve(),
@@ -678,9 +903,17 @@ def main() -> None:
     script_writing_path = direct_draft_paths["script writing"]
     if script_writing_path.exists():
         script_writing_text = script_writing_path.read_text(encoding="utf-8")
-        for marker in ("二次坚持后的未验证草稿", "前台只输出完整内容稿", "不能替用户发明新的处方", "连续发十条"):
+        for marker in (
+            "二次坚持后的未验证草稿",
+            "前台只输出完整内容稿",
+            "不能替用户发明新的处方",
+            "连续发十条",
+            "【未验证结构草案｜不可直接发布】",
+        ):
             if marker not in script_writing_text:
                 errors.append(f"script writing missing direct-draft scope marker: {marker}")
+        if "只允许在完整稿件之后追加一句事实说明" in script_writing_text:
+            errors.append("script writing must place the unverified-draft warning before the draft body")
 
     learn_entry_path = (base / "../eva-learn/SKILL.md").resolve()
     learn_source_path = (base / "references/learn/00_eva-learn.md").resolve()
@@ -714,7 +947,14 @@ def main() -> None:
         "references/learn/01_探索式学习.md": ("第一讲前只创建", "展示给用户前创建", "创建或写入失败"),
         "references/learn/02_资料带学.md": ("第一讲前只创建", "展示给用户前", "创建、资料保存或写入失败"),
         "references/learn/03_主题式阅读.md": ("完整建档", "写入失败"),
-        "references/learn/04_思想种子卡与内容链路交接.md": ("先创建", "写入失败"),
+        "references/learn/04_思想种子卡与内容链路交接.md": (
+            "先创建",
+            "写入失败",
+            "Article 交接优先",
+            "不强制生成思想种子卡",
+            "短视频成熟度判断",
+            "短视频交接禁止",
+        ),
     }
     for relative, markers in learn_journey_markers.items():
         journey_path = (base / relative).resolve()
@@ -753,14 +993,49 @@ def main() -> None:
 
     internal_pending_dir = base / "references" / "internal-pending"
     if internal_pending_dir.exists():
-        errors.append("references/internal-pending must not exist in Eva 2.1.1; move upgrade drafts outside this skill")
+        errors.append("references/internal-pending must not exist in Eva 2.1.2; move upgrade drafts outside this skill")
 
     new_user_path = (base / "../eva-new-user/SKILL.md").resolve()
     if new_user_path.exists():
         new_user_text = new_user_path.read_text(encoding="utf-8")
-        for marker in ("开始前扫描", "跳过", "指定提前学习的功能", "正式处理", "不先判断或记录用户是不是新手"):
+        for marker in (
+            "开始前扫描",
+            "跳过",
+            "指定提前学习的功能",
+            "正式处理",
+            "不先判断或记录用户是不是新手",
+            "三分钟最小闭环",
+            "演示",
+            "跟做",
+            "独立",
+        ):
             if marker not in new_user_text:
                 errors.append(f"eva-new-user missing adaptive tutorial marker: {marker}")
+
+    light_interaction_path = (base / "references/shared/04_light-interaction_轻交互协议.md").resolve()
+    if light_interaction_path.exists():
+        light_interaction_text = light_interaction_path.read_text(encoding="utf-8")
+        for marker in (
+            "价值优先响应",
+            "一次只暴露一个决策点",
+            "不得只复述规则",
+            "【未验证结构草案｜不可直接发布】",
+            "不新增资产类型、状态字段或 schema",
+        ):
+            if marker not in light_interaction_text:
+                errors.append(f"light-interaction protocol missing 2.1.2 marker: {marker}")
+
+    low_confidence_path = (base / "references/shared/02_low-confidence_低置信度授权协议.md").resolve()
+    if low_confidence_path.exists():
+        low_confidence_text = low_confidence_path.read_text(encoding="utf-8")
+        for marker in (
+            "【未验证结构草案｜不可直接发布】",
+            "当前缺失：",
+            "升级动作：",
+            "草案正文之前",
+        ):
+            if marker not in low_confidence_text:
+                errors.append(f"low-confidence protocol missing visible draft boundary marker: {marker}")
 
     review_path = (base / "../eva-review/SKILL.md").resolve()
     if review_path.exists():
@@ -851,7 +1126,7 @@ def main() -> None:
         result(
             ok,
             "selftest",
-            "Eva 2.1.1结构自检与场景契约检查通过" if ok else "Eva 2.1.1结构自检与场景契约检查失败",
+            "Eva 2.1.2结构自检与场景契约检查通过" if ok else "Eva 2.1.2结构自检与场景契约检查失败",
             errors,
             warnings,
             {

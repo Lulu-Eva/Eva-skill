@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Check Eva Shared 2.1.1 local structure and dependencies."""
+"""Check Eva Shared 2.1.2 local structure and dependencies."""
 
 from __future__ import annotations
 
@@ -57,6 +57,9 @@ REQUIRED_PEER_SKILLS = {
     ],
     "eva-create": [
         "references/create/00_eva-create_创作主入口.md",
+        "references/create/article/00_eva-article_文章主入口.md",
+        "references/create/article/01_eva-article-argument_观点与论证路线.md",
+        "references/create/article/02_eva-article-writing_文章撰写与长度调节.md",
         "../eva-shared/references/audience/00_eva-audience-finder_话题人群识别器.md",
         "../eva-shared/references/benchmark/00_eva-benchmark-copy_对标文案拆解.md",
         "../eva-shared/references/quality/00_eva-ai-check_表达真实性审查.md",
@@ -360,7 +363,7 @@ def check_peer_skills(base: Path) -> tuple[list[str], list[str], dict]:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Check Eva Shared 2.1.1 structure and dependencies.")
+    parser = argparse.ArgumentParser(description="Check Eva Shared 2.1.2 structure and dependencies.")
     parser.add_argument("--base", default=".", help="Base folder containing schemas/ and scripts/.")
     parser.add_argument("--link", action="append", help="Optional Link config path to note in report.")
     add_common_arguments(parser)
@@ -407,7 +410,7 @@ def main() -> None:
         result(
             ok,
             "doctor",
-            "Eva Shared 2.1.1结构正常" if ok else "Eva Shared 2.1.1结构异常",
+            "Eva Shared 2.1.2结构正常" if ok else "Eva Shared 2.1.2结构异常",
             errors,
             warnings,
             data,

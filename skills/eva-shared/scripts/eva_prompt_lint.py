@@ -117,6 +117,18 @@ LIGHT_INTERACTION_CONDITIONS_ALLOWED = (
     "../eva-shared/references/shared/04_light-interaction_轻交互协议.md",
 )
 
+ARTICLE_FORBIDDEN_SHORTVIDEO_COUPLINGS = (
+    "shortvideo/title/",
+    "shortvideo/opening/",
+    "/eva-title",
+    "/eva-script",
+)
+
+SHORTVIDEO_FORBIDDEN_ARTICLE_COUPLINGS = (
+    "references/create/article/",
+    "/eva-article",
+)
+
 SEMANTIC_DUPLICATE_PATTERNS = (
     {
         "name": "commercial full-draft boundary",
@@ -259,6 +271,16 @@ def lint(base: Path) -> dict:
         for pattern in REMOVED_CAPABILITY_PATTERNS:
             if pattern in text:
                 errors.append(f"{path_rel}: contains removed internal-pending marker: {pattern}")
+
+        normalized_path = path.as_posix()
+        if "/eva-create/references/create/article/" in normalized_path:
+            for coupling in ARTICLE_FORBIDDEN_SHORTVIDEO_COUPLINGS:
+                if coupling in text:
+                    errors.append(f"{path_rel}: Article protocol couples to short-video gate: {coupling}")
+        if "/eva-create/references/create/shortvideo/" in normalized_path:
+            for coupling in SHORTVIDEO_FORBIDDEN_ARTICLE_COUPLINGS:
+                if coupling in text:
+                    errors.append(f"{path_rel}: short-video protocol couples to Article branch: {coupling}")
 
         for rule in SEMANTIC_DUPLICATE_PATTERNS:
             patterns = rule["patterns"]
