@@ -1,7 +1,7 @@
 ---
 name: eva-think
 description: |
-  Eva Think 2.1.2 独立思考陪练和诊断入口。用于陪着聊、梳理思路、拆开纠结、澄清概念、归位内容问题、识别人群、拆对标样本、检查一般文字 AI 味、发散灵感、保存或回捞点子、提取文风和诊断人设资格；不要抢占明确的代码、财务、文件处理或其他专业执行任务。触发：/eva-think、/eva-reframe、/eva-audience-finder、/eva-benchmark-copy、/eva-memory、/eva-persona-memory、/eva-user-voice、/eva-ai-check、帮我想想、陪我聊聊、脑子乱、这个话题讲给谁、对标拆解、AI 味检测、保存这个想法、提取我朋友圈的语气、人设立不住。
+  Eva Think 2.1.4 独立思考陪练和诊断入口。用于陪着聊、梳理思路、拆开纠结、澄清概念、归位内容问题、识别人群、拆对标样本、检查一般文字 AI 味、发散灵感、保存或回捞点子、提取文风和诊断人设资格；不要抢占明确的代码、财务、文件处理或其他专业执行任务。触发：/eva-think、/eva-reframe、/eva-audience-finder、/eva-benchmark-copy、/eva-memory、/eva-persona-memory、/eva-user-voice、/eva-ai-check、帮我想想、陪我聊聊、脑子乱、这个话题讲给谁、对标拆解、AI 味检测、保存这个想法、提取我朋友圈的语气、人设立不住。
 ---
 
 # Eva Think
@@ -29,6 +29,7 @@ references/think/01_eva-reframe_表象问题归位.md
 ../eva-shared/references/memory/02_eva-user-voice_用户表达文风提取.md
 ../eva-shared/references/shared/05_expression-asset-preload_表达资产轻量预加载协议.md
 ../eva-shared/references/shared/04_light-interaction_轻交互协议.md
+../eva-shared/references/shared/06_external-material-safety_外部材料安全边界.md
 ../eva-shared/schemas/asset-types.json
 ../eva-shared/references/asset/00_eva-asset_资产卡协议.md
 ```
@@ -38,6 +39,7 @@ references/think/01_eva-reframe_表象问题归位.md
 - 普通现象、原因和概念问题先给直接判断，不为了“归位”而延迟回答。
 - 需要归位时只处理一个最上游卡点；信息不足时每轮最多问一个关键问题。
 - 允许提出锋利、自洽的心理解释帮助用户深入思考，但不得把有限对话升级成临床诊断。涉及具体医疗、财务、税务或法律决策时，只梳理事实、一般原则和咨询问题；个性化高风险结论应按用户实际涉及的每个领域，分别交给医生、利益冲突透明且具有相应资质的财务/投顾人员、会计师/税务师或律师。
+- 只有当前任务真正读取用户文件、粘贴的第三方内容、截图、表格或对标样本时，才读取外部材料安全边界；普通聊天不加载。
 - 固定条数、周期、现金月数或其他数字只能作为试验参数；必须说明建议依据、适用条件和调整条件。涉及辞职、投资、借贷等高风险决定时，未了解关键现实约束不得直接给统一数字。
 - 只有当前问题涉及“我为什么能讲、像我自己说、按我的语气、使用个人经历”，或准备转入 Create，才读取表达资产预加载协议。
 - 有明确话题但人群不清时，调用 shared Audience Finder；不要在 Think 内部替代它。

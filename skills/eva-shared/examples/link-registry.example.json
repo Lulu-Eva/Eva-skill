@@ -3,8 +3,11 @@
   "links": [
     {
       "id": "local.weibo-copy",
-      "path": "examples/local.weibo-copy",
-      "enabled": true
+      "path": "local.weibo-copy",
+      "enabled": true,
+      "approved_sha256": "42689830f5b057f852029a7501aaf7270fdb7b01026046902e26ede8ac9c75d4",
+      "approved_at": "2026-07-04T09:55:00+08:00",
+      "approved_phrase": "我确认启用 local.weibo-copy，它只读当前输入、上游资产和 Link 自身文件，不联网、不写入、不保存用户数据"
     }
   ],
   "defaults": [

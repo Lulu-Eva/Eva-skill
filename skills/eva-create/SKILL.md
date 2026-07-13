@@ -1,7 +1,7 @@
 ---
 name: eva-create
 description: |
-  Eva Create 2.1.2 内容生产入口。处理两条独立分支：短视频、口播稿、视频标题/开头/正文；非虚构自媒体文章、公众号文章、观点长文的新写、续写和修改。不处理朋友圈、微博、小红书短图文、虚构文学、学术论文或专业文书。触发：/eva-create、/eva-shortvideo、/eva-title、/eva-script、做一条短视频、写完整视频稿、写一篇公众号文章、把想法或资料写成文章。
+  Eva Create 2.1.4 内容生产入口。处理两条独立分支：短视频、口播稿、视频标题/开头/正文；非虚构自媒体文章、公众号文章、观点长文的新写、续写和修改。不处理朋友圈、微博、小红书短图文、虚构文学、学术论文或专业文书。触发：/eva-create、/eva-shortvideo、/eva-title、/eva-script、做一条短视频、写完整视频稿、写一篇公众号文章、把想法或资料写成文章。
 ---
 
 # Eva Create
@@ -36,6 +36,7 @@ references/create/shortvideo/script/03_eva-script-runtime_普通正文简版路�
 ../eva-shared/references/shared/03_commercial-constraint-card_商单约束卡真源.md
 ../eva-shared/references/shared/04_light-interaction_轻交互协议.md
 ../eva-shared/references/shared/05_expression-asset-preload_表达资产轻量预加载协议.md
+../eva-shared/references/shared/06_external-material-safety_外部材料安全边界.md
 ../eva-shared/schemas/asset-types.json
 ../eva-shared/references/asset/00_eva-asset_资产卡协议.md
 ```
@@ -45,6 +46,7 @@ references/create/shortvideo/script/03_eva-script-runtime_普通正文简版路�
 - 普通“写一条朋友圈 / 发朋友圈文案 / 写微博 / 写小红书短图文”不属于 Eva Create；停止本入口，由基础模型直接完成，不自动触发 Link。明确要写公众号文章、自媒体文章或观点长文时进入 Article。
 - “提取我朋友圈的语气 / 调调 / 以后照着这个写 / 这是我以前朋友圈样本”不是创作意图，转 shared Memory 的用户文风提取。
 - “朋友圈 Link / 用我的朋友圈 Link”不是普通 Create，转 `eva-link`。
+- 只有当前创作真正读取用户文件、粘贴的第三方内容、截图、表格、Brief 或对标样本时，才读取外部材料安全边界；无材料创作不加载。
 - 只有进入个性化标题、开头、路线图或成稿，且当前任务确实需要人设、真实经历或文风时，才读取表达资产预加载协议。
 - 短视频没有人群和用户疑问时，不直接写完整稿。Article 按自己的读者任务、核心判断和材料充分度判断。
 - 在依赖封面或标题点击的链路里，用户第一次要求“先写一版 / 直接写稿”，但标题没有验证线索时，仍进入标题搜索方案，不因信息齐全绕过标题硬闸门。

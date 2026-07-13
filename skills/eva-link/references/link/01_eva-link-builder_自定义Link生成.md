@@ -88,6 +88,7 @@ Link 定义卡：
 接收哪些 Eva 上游资产：
 输出交给 Eva 的哪个下游：
 还缺什么：
+权限说明：要读哪些材料、写到哪里、是否联网、是否保存用户数据
 ```
 
 定义卡必须用用户语言写，不要把用户一上来就推到 `accepts / produces / handoff_to` 这些字段里。机器字段只在生成文件时转换。
@@ -103,7 +104,7 @@ Link 定义卡：
 文件生成后，不要马上设为默认。先做两件事：
 
 ```text
-1. 运行 strict Link 校验。
+1. 运行 strict Link 校验，包括模块夹带指令检查和权限检查。
 2. 让用户选择试跑一次，或直接查看 Link 定义卡。
 ```
 
@@ -111,6 +112,7 @@ Link 定义卡：
 
 ```text
 这个 Link 已经生成并通过基础检查。
+权限：{read_scope / write_scope / network / save_user_data 的人话摘要}
 
 下一步你要先试跑一次，还是直接启用？
 ```
@@ -129,7 +131,10 @@ Link 定义卡：
     {
       "id": "local.private-moments",
       "path": "local-modules/local.private-moments",
-      "enabled": true
+      "enabled": true,
+      "approved_sha256": "<strict 校验输出的 data.link_sha256>",
+      "approved_at": "<用户确认时间>",
+      "approved_phrase": "我确认启用 local.private-moments 的当前版本和权限"
     }
   ]
 }
@@ -226,6 +231,10 @@ Link 定义卡：
 成功样例：
 失败样例或不要做什么：
 是否涉及隐私、商业秘密、内部资料：
+需要读取什么范围：
+需要写入哪里：
+是否需要联网：
+是否需要保存用户数据：
 ```
 
 进阶字段：
@@ -266,13 +275,13 @@ local.{short-name}
 4. 提炼并输出 Link 定义卡。
 5. 等用户确认定义卡；未确认前不生成文件。
 6. 生成 link-id。
-7. 生成 eva.link.json。
+7. 生成带最小 `permissions` 的 eva.link.json。
 8. 生成 module.md。
 9. 生成 input.example.md 和 expected-asset.example.json。
 10. 运行 link check。
 11. 运行 asset validate。
 12. 引导用户试跑或查看定义。
-13. 用户确认后，写入或更新 `.eva/links.json` 的 enabled Link。
+13. 向用户展示一次 Link 定义和权限摘要；用户确认后，把 strict 输出的 `data.link_sha256`、确认时间和用户确认语与 enabled Link 一起写入 `.eva/links.json`。
 14. 二次确认是否设置默认；确认后才写入 `.eva/links.json` 的 defaults。
 15. 输出安装位置、显式调用方式、默认状态、可交接下游、低置信度限制。
 ```
@@ -287,6 +296,8 @@ module.md 明确解决/不解决什么。
 tests/input.example.md 存在。
 tests/expected-asset.example.json 能通过资产校验。
 Link 没有覆盖核心入口。
+Link 已声明最小权限，模块内容无夹带指令或隐藏动作。
+当前 `link_sha256` 已在用户确认后写入 registry；未确认前不标记 enabled。
 输出资产能交给至少一个下游。
 隐私或商业秘密已标注。
 启用状态写入项目级 `.eva/links.json`，而不是写入 `eva.link.json`。
