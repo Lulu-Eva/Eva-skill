@@ -1,7 +1,7 @@
 ---
 name: eva-think
 description: |
-  Eva Think 2.1.2 独立思考陪练和诊断入口。用于陪着聊、梳理思路、拆开纠结、澄清概念、归位内容问题、识别人群、拆对标样本、检查一般文字 AI 味、发散灵感、保存或回捞点子、提取文风和诊断人设资格；不要抢占明确的代码、财务、文件处理或其他专业执行任务。触发：/eva-think、/eva-reframe、/eva-audience-finder、/eva-benchmark-copy、/eva-memory、/eva-persona-memory、/eva-user-voice、/eva-ai-check、帮我想想、陪我聊聊、脑子乱、这个话题讲给谁、对标拆解、AI 味检测、保存这个想法、提取我朋友圈的语气、人设立不住。
+  Eva Think 2.1.3 独立思考陪练和诊断入口。用于陪着聊、梳理思路、拆开纠结、澄清概念、归位内容问题、识别人群、拆对标样本、检查一般文字 AI 味、发散灵感、保存或回捞点子、提取文风和诊断人设资格；不要抢占明确的代码、财务、文件处理或其他专业执行任务。触发：/eva-think、/eva-reframe、/eva-audience-finder、/eva-benchmark-copy、/eva-memory、/eva-persona-memory、/eva-user-voice、/eva-ai-check、帮我想想、陪我聊聊、脑子乱、这个话题讲给谁、对标拆解、AI 味检测、保存这个想法、提取我朋友圈的语气、人设立不住。
 ---
 
 # Eva Think

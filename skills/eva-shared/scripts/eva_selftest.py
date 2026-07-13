@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Eva 2.1.2 structural checks and prompt scenario-contract validation."""
+"""Eva 2.1.3 structural checks and prompt scenario-contract validation."""
 
 from __future__ import annotations
 
@@ -14,6 +14,7 @@ import tempfile
 from eva_link_check import validate_expected_asset as validate_link_expected_asset
 from eva_common import (
     CORE_ENTRIES,
+    INSTALLABLE_SKILL_DIRS,
     VERSION,
     VALID_ASSET_TYPES,
     VALID_HANDOFF_TARGETS,
@@ -29,6 +30,15 @@ from eva_common import (
     required_fields_for_asset,
     result,
     simple_schema_validate,
+)
+
+
+PRODUCT_NAME = "Eva-skill"
+OFFICIAL_GUIDE_HEADLINE = "关注公众号“璐璐 Eva” —— Eva-skill 的官方使用指南与案例库。"
+DEFAULT_STARTUP_MAINTENANCE_NUDGE_TERMS = (
+    "公众号“璐璐 Eva”",
+    "官方使用指南与案例库",
+    "版本动态",
 )
 
 
@@ -190,7 +200,7 @@ REQUIRED_ARTICLE_CASE_CONTRACTS = {
     },
     "article-sponsored-brief-exclusion": {
         "expected_route": "eva-brief-or-commerce-constraint-only-for-sponsored-article",
-        "expected_terminal": "brief-constraint-only-no-article-draft-in-2.1.2",
+        "expected_terminal": "brief-constraint-only-no-article-draft-in-2.1.3",
         "forbid": {
             "direct-article-before-constraint-card",
             "article-draft-after-constraint-card",
@@ -203,6 +213,35 @@ REQUIRED_ARTICLE_CASE_CONTRACTS = {
 }
 
 REQUIRED_SCENARIO_CASES.update(REQUIRED_ARTICLE_CASE_CONTRACTS)
+
+REQUIRED_MAINTENANCE_CASE_CONTRACTS = {
+    "maintenance-explicit-version": {
+        "expected_route": "eva-maintenance-explicit-query",
+        "expected_terminal": "local-version-and-release-summary",
+        "forbid": {"network-check", "auto-update", "state-write", "task-routing"},
+        "must_include": {"local-version", "release-highlights"},
+    },
+    "maintenance-explicit-install": {
+        "expected_route": "eva-maintenance-explicit-query",
+        "expected_terminal": "manual-install-help-without-execution",
+        "forbid": {"network-check", "auto-update", "state-write", "task-routing", "claim-install-complete"},
+        "must_include": {"source-root-manual-command", "install-or-update-command", "verify-command"},
+    },
+    "maintenance-explicit-guide": {
+        "expected_route": "eva-maintenance-explicit-query",
+        "expected_terminal": "official-guide-and-case-library-entry",
+        "forbid": {"network-check", "auto-update", "state-write", "task-routing"},
+        "must_include": {"official-guide-entry", "case-library-entry"},
+    },
+    "maintenance-explicit-feedback": {
+        "expected_route": "eva-maintenance-explicit-query",
+        "expected_terminal": "official-guide-feedback-entry",
+        "forbid": {"network-check", "auto-update", "state-write", "task-routing"},
+        "must_include": {"official-guide-entry", "feedback-channel"},
+    },
+}
+
+REQUIRED_SCENARIO_CASES.update(REQUIRED_MAINTENANCE_CASE_CONTRACTS)
 
 REQUIRED_ROUTER_MARKERS = {
     "eva-new-user": "Router must expose the adaptive new-user tutorial",
@@ -233,6 +272,9 @@ REQUIRED_ROUTER_MARKERS = {
     "AI Check + 改稿": "Router must resolve combined AI-check and rewrite intent",
     "Review + 改下一篇": "Router must keep Review separate from content production",
     "Review + 补盲区": "Router must hand Review conclusions to Lens without redoing attribution",
+    "维护信息（仅显式查询）": "Router must handle maintenance information only when explicitly requested",
+    "release-notes.json": "Router must read the maintenance release source only for explicit queries",
+    "不联网检查新版本": "Router must not perform runtime network update checks",
 }
 
 REQUIRED_ARCHITECTURE_PATHS = (
@@ -265,6 +307,9 @@ REQUIRED_ARCHITECTURE_PATHS = (
     "references/shared/04_light-interaction_轻交互协议.md",
     "references/shared/05_expression-asset-preload_表达资产轻量预加载协议.md",
     "references/harness/00_eva-harness_状态与交接校验.md",
+    "references/maintenance/install-manifest.json",
+    "references/maintenance/release-notes.json",
+    "references/maintenance/00_eva-maintenance-notice.md",
 )
 
 RUNTIME_VERSION_FREE_PATHS = (
@@ -592,6 +637,23 @@ def main() -> None:
                         + ", ".join(missing_markers)
                     )
 
+        for case_id, contract in REQUIRED_MAINTENANCE_CASE_CONTRACTS.items():
+            case = case_by_id.get(case_id) or {}
+            for scalar_field in ("expected_route", "expected_terminal"):
+                if case.get(scalar_field) != contract[scalar_field]:
+                    errors.append(
+                        f"prompt scenario case {case_id!r} {scalar_field} must be "
+                        f"{contract[scalar_field]!r}"
+                    )
+            for list_field in ("forbid", "must_include"):
+                actual = set(case.get(list_field) or [])
+                missing_markers = sorted(contract[list_field] - actual)
+                if missing_markers:
+                    errors.append(
+                        f"prompt scenario case {case_id!r} missing {list_field} marker(s): "
+                        + ", ".join(missing_markers)
+                    )
+
     shared_skill_path = base / "SKILL.md"
     if not shared_skill_path.exists():
         errors.append("eva-shared must have SKILL.md so GitHub skill installers copy the shared package")
@@ -605,6 +667,89 @@ def main() -> None:
         errors.append("eva-shared must have agents/openai.yaml")
     elif "allow_implicit_invocation: false" not in shared_openai_path.read_text(encoding="utf-8"):
         errors.append("eva-shared must disable implicit invocation in agents/openai.yaml")
+
+    maintenance_root = base / "references" / "maintenance"
+    install_manifest_path = maintenance_root / "install-manifest.json"
+    release_notes_path = maintenance_root / "release-notes.json"
+    if not install_manifest_path.exists():
+        errors.append("missing maintenance install-manifest.json")
+    else:
+        try:
+            install_manifest = read_json(install_manifest_path)
+        except Exception as exc:
+            errors.append(f"cannot read maintenance install manifest: {exc}")
+            install_manifest = {}
+        if not isinstance(install_manifest, dict):
+            errors.append("maintenance install manifest must be an object")
+        else:
+            if install_manifest.get("schema_version") != 1:
+                errors.append("maintenance install manifest schema_version must be 1")
+            if install_manifest.get("product_name") != PRODUCT_NAME:
+                errors.append("maintenance install manifest product_name must be Eva-skill")
+            if str(install_manifest.get("version", "")) != VERSION.rsplit("-", 1)[-1]:
+                errors.append("maintenance install manifest version must match eva_common VERSION")
+            raw_entries = install_manifest.get("skill_directories")
+            actual_directories: list[str] = []
+            if not isinstance(raw_entries, list):
+                errors.append("maintenance install manifest skill_directories must be an array")
+            else:
+                for entry in raw_entries:
+                    if not isinstance(entry, dict):
+                        errors.append("maintenance install manifest entries must be objects")
+                        continue
+                    directory = entry.get("directory")
+                    name = entry.get("name")
+                    if not isinstance(directory, str) or not isinstance(name, str):
+                        errors.append("maintenance install manifest entries require directory and name")
+                        continue
+                    if directory != name:
+                        errors.append("maintenance install manifest directory/name must match")
+                    actual_directories.append(directory)
+                if tuple(actual_directories) != INSTALLABLE_SKILL_DIRS:
+                    errors.append("maintenance install manifest must list the exact ten installable Skill directories")
+
+    if not release_notes_path.exists():
+        errors.append("missing maintenance release-notes.json")
+    else:
+        try:
+            release_notes = read_json(release_notes_path)
+        except Exception as exc:
+            errors.append(f"cannot read maintenance release notes: {exc}")
+            release_notes = {}
+        if not isinstance(release_notes, dict):
+            errors.append("maintenance release notes must be an object")
+        else:
+            if release_notes.get("schema_version") != 1:
+                errors.append("maintenance release notes schema_version must be 1")
+            if release_notes.get("product_name") != PRODUCT_NAME:
+                errors.append("maintenance release notes product_name must be Eva-skill")
+            if str(release_notes.get("version", "")) != VERSION.rsplit("-", 1)[-1]:
+                errors.append("maintenance release notes version must match eva_common VERSION")
+            highlights = release_notes.get("release_highlights")
+            if not isinstance(highlights, list) or len(highlights) < 3:
+                errors.append("maintenance release notes must contain at least three highlights")
+            official_guide = release_notes.get("official_guide")
+            if not isinstance(official_guide, dict):
+                errors.append("maintenance release notes must contain official_guide")
+            else:
+                if official_guide.get("headline") != OFFICIAL_GUIDE_HEADLINE:
+                    errors.append("maintenance official guide headline must match the product copy")
+                for key in ("maintainer", "public_account", "headline", "body"):
+                    if not isinstance(official_guide.get(key), str) or not official_guide[key].strip():
+                        errors.append(f"maintenance official_guide.{key} must be a non-empty string")
+            install_help = release_notes.get("install_help")
+            expected_install_help = {
+                "source_directory_note": "请在 Eva-skill 源码根目录手动执行；安装和更新使用同一命令。",
+                "install_or_update_command": "python3 scripts/eva_global_install.py install",
+                "verify_command": "python3 scripts/eva_global_install.py verify",
+                "recover_command": "python3 scripts/eva_global_install.py recover",
+            }
+            if not isinstance(install_help, dict):
+                errors.append("maintenance release notes must contain install_help")
+            else:
+                for key, expected_value in expected_install_help.items():
+                    if install_help.get(key) != expected_value:
+                        errors.append(f"maintenance install_help.{key} does not match the managed command")
 
     for relative in REQUIRED_ARCHITECTURE_PATHS:
         if not (base / relative).resolve().exists():
@@ -626,15 +771,17 @@ def main() -> None:
     if readme_path.exists():
         readme_text = readme_path.read_text(encoding="utf-8")
         for marker in (
-            "# Eva Skill v2.1.2",
+            "# Eva-skill v2.1.3",
             "## 按你想完成的事使用 Eva",
             "## 一个短视频从想法到成稿",
             "## 一篇文章从判断到成稿",
             "## 常见问题",
-            "## 2.1.2 新增",
+            "## 官方全局安装",
+            "## 官方使用指南与案例库",
+            "## 2.1.3 新增",
         ):
             if marker not in readme_text:
-                errors.append(f"README missing 2.1.2 user-guide marker: {marker}")
+                errors.append(f"README missing 2.1.3 user-guide marker: {marker}")
     elif source_checkout:
         errors.append(f"missing root README: {readme_path}")
 
@@ -780,6 +927,15 @@ def main() -> None:
             if marker not in router_text
         ]
         errors.extend(missing_markers)
+        if "## 输出方式" not in router_text:
+            errors.append("Eva router must retain a dedicated default-start output section")
+        else:
+            default_start_section = router_text.split("## 输出方式", 1)[1]
+            for term in DEFAULT_STARTUP_MAINTENANCE_NUDGE_TERMS:
+                if term in default_start_section:
+                    errors.append(
+                        "Eva default startup must not nudge maintenance or public-account copy: " + term
+                    )
 
     think_entry_path = (base / "../eva-think/SKILL.md").resolve()
     if think_entry_path.exists():
@@ -875,7 +1031,7 @@ def main() -> None:
 
     forbidden_article_skill = (repo_root / "skills" / "eva-article").resolve()
     if forbidden_article_skill.exists():
-        errors.append(f"Eva 2.1.2 must not expose a top-level Article skill: {forbidden_article_skill}")
+        errors.append(f"Eva 2.1.3 must not expose a top-level Article skill: {forbidden_article_skill}")
     asset_registry = read_json(base / "schemas" / "asset-types.json")
     registered_assets = set((asset_registry.get("assets") or {}).keys())
     if "article-card" in registered_assets:
@@ -993,7 +1149,7 @@ def main() -> None:
 
     internal_pending_dir = base / "references" / "internal-pending"
     if internal_pending_dir.exists():
-        errors.append("references/internal-pending must not exist in Eva 2.1.2; move upgrade drafts outside this skill")
+        errors.append("references/internal-pending must not exist in Eva 2.1.3; move upgrade drafts outside this skill")
 
     new_user_path = (base / "../eva-new-user/SKILL.md").resolve()
     if new_user_path.exists():
@@ -1023,7 +1179,7 @@ def main() -> None:
             "不新增资产类型、状态字段或 schema",
         ):
             if marker not in light_interaction_text:
-                errors.append(f"light-interaction protocol missing 2.1.2 marker: {marker}")
+                errors.append(f"light-interaction protocol missing 2.1.3 marker: {marker}")
 
     low_confidence_path = (base / "references/shared/02_low-confidence_低置信度授权协议.md").resolve()
     if low_confidence_path.exists():
@@ -1126,7 +1282,7 @@ def main() -> None:
         result(
             ok,
             "selftest",
-            "Eva 2.1.2结构自检与场景契约检查通过" if ok else "Eva 2.1.2结构自检与场景契约检查失败",
+            "Eva 2.1.3结构自检与场景契约检查通过" if ok else "Eva 2.1.3结构自检与场景契约检查失败",
             errors,
             warnings,
             {
