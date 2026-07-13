@@ -1,7 +1,7 @@
 ---
 name: eva
 description: |
-  EvaSkill 2.1.2 的极薄路由入口。仅在用户明确调用 /eva、进入 Eva 模式、点名 Eva 子入口，或明确提出 Eva 的思考梳理、表达诊断、短视频、非虚构自媒体文章、带学、商单 Brief、发布复盘、多元视角、Memory、Link、新手教程任务时使用；不要抢占代码、财务、文件处理或其他无关任务。判断后同轮执行 eva-new-user、eva-think、eva-learn、eva-create、eva-brief、eva-link、eva-review 或 eva-lens。
+  EvaSkill 2.1.4 的极薄路由入口。仅在用户明确调用 /eva、进入 Eva 模式、点名 Eva 子入口，或明确提出 Eva 的思考梳理、表达诊断、短视频、非虚构自媒体文章、带学、商单 Brief、发布复盘、多元视角、Memory、Link、新手教程任务时使用；不要抢占代码、财务、文件处理或其他无关任务。判断后同轮执行 eva-new-user、eva-think、eva-learn、eva-create、eva-brief、eva-link、eva-review 或 eva-lens。
   当前入口：/eva、/eva-new-user、/eva-think、/eva-create、/eva-learn、/eva-brief、/eva-link、/eva-review、/eva-lens。兼容入口：/eva-reframe、/eva-audience-finder、/eva-benchmark-copy、/eva-memory、/eva-persona-memory、/eva-user-voice、/eva-ai-check。自然语言触发包括：开启新手教程、我是新用户、教我怎么用 Eva、帮我想想、问题归位、这个话题讲给谁、对标拆解、AI 味检测、人设梳理、提炼我的文风、保存或回捞点子、带我学懂、做一条短视频、写一篇公众号文章、把资料写成观点长文、拆品牌 Brief、发布后复盘、多元视角、深度审视、把提示词接进 Eva。
 ---
 

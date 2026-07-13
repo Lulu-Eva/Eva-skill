@@ -18,6 +18,16 @@
   "handoff_to": [
     "eva-memory"
   ],
+  "permissions": {
+    "network": false,
+    "read_scope": [
+      "current-input",
+      "declared-upstream-assets",
+      "link-package"
+    ],
+    "write_scope": [],
+    "save_user_data": false
+  },
   "entry_aliases": [
     "微博文案",
     "weibo-copy"

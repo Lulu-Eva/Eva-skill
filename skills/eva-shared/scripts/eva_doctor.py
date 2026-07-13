@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Check Eva Shared 2.1.2 local structure and dependencies."""
+"""Check Eva Shared 2.1.4 local structure and dependencies."""
 
 from __future__ import annotations
 
@@ -54,6 +54,7 @@ REQUIRED_PEER_SKILLS = {
         "../eva-shared/references/audience/00_eva-audience-finder_话题人群识别器.md",
         "../eva-shared/references/benchmark/00_eva-benchmark-copy_对标文案拆解.md",
         "../eva-shared/references/quality/00_eva-ai-check_表达真实性审查.md",
+        "../eva-shared/references/shared/06_external-material-safety_外部材料安全边界.md",
     ],
     "eva-create": [
         "references/create/00_eva-create_创作主入口.md",
@@ -67,6 +68,7 @@ REQUIRED_PEER_SKILLS = {
         "../eva-shared/references/shared/00_handoff-cards_交接卡字段真源.md",
         "../eva-shared/references/shared/02_low-confidence_低置信度授权协议.md",
         "../eva-shared/references/shared/03_commercial-constraint-card_商单约束卡真源.md",
+        "../eva-shared/references/shared/06_external-material-safety_外部材料安全边界.md",
     ],
     "eva-brief": [
         "../eva-shared/schemas/asset-types.json",
@@ -79,6 +81,7 @@ REQUIRED_PEER_SKILLS = {
         "../eva-shared/references/commerce/02_constraint-card_商单约束卡生成.md",
         "../eva-shared/references/commerce/03_draft-check_已有商单稿检查.md",
         "../eva-shared/references/commerce/04_sample-transfer_对标样本迁移.md",
+        "../eva-shared/references/shared/06_external-material-safety_外部材料安全边界.md",
     ],
     "eva-learn": [
         "../eva-shared/schemas/asset-types.json",
@@ -87,6 +90,7 @@ REQUIRED_PEER_SKILLS = {
         "../eva-shared/references/shared/04_light-interaction_轻交互协议.md",
         "../eva-shared/references/asset/00_eva-asset_资产卡协议.md",
         "../eva-shared/references/harness/00_eva-harness_状态与交接校验.md",
+        "../eva-shared/references/shared/06_external-material-safety_外部材料安全边界.md",
     ],
     "eva-link": [
         "references/link/00_eva-link_本地模块连接.md",
@@ -96,6 +100,7 @@ REQUIRED_PEER_SKILLS = {
         "../eva-shared/references/asset/00_eva-asset_资产卡协议.md",
         "../eva-shared/references/harness/00_eva-harness_状态与交接校验.md",
         "../eva-shared/references/audience/00_eva-audience-finder_话题人群识别器.md",
+        "../eva-shared/references/shared/06_external-material-safety_外部材料安全边界.md",
     ],
     "eva-review": [
         "references/review/00_entry_入口与模式路由.md",
@@ -107,12 +112,14 @@ REQUIRED_PEER_SKILLS = {
         "references/review/06_store_记录库与保存协议.md",
         "../eva-shared/schemas/asset-types.json",
         "../eva-shared/references/asset/00_eva-asset_资产卡协议.md",
+        "../eva-shared/references/shared/06_external-material-safety_外部材料安全边界.md",
     ],
     "eva-lens": [
         "references/lens/00_entry_入口与模式.md",
         "references/lens/01_quick_快速补光.md",
         "references/lens/02_deep_深度审视.md",
         "references/lens/03_evidence_证据与出口边界.md",
+        "../eva-shared/references/shared/06_external-material-safety_外部材料安全边界.md",
     ],
 }
 
@@ -363,7 +370,7 @@ def check_peer_skills(base: Path) -> tuple[list[str], list[str], dict]:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Check Eva Shared 2.1.2 structure and dependencies.")
+    parser = argparse.ArgumentParser(description="Check Eva Shared 2.1.4 structure and dependencies.")
     parser.add_argument("--base", default=".", help="Base folder containing schemas/ and scripts/.")
     parser.add_argument("--link", action="append", help="Optional Link config path to note in report.")
     add_common_arguments(parser)
@@ -410,7 +417,7 @@ def main() -> None:
         result(
             ok,
             "doctor",
-            "Eva Shared 2.1.2结构正常" if ok else "Eva Shared 2.1.2结构异常",
+            "Eva Shared 2.1.4结构正常" if ok else "Eva Shared 2.1.4结构异常",
             errors,
             warnings,
             data,

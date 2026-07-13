@@ -1,14 +1,14 @@
 ---
 name: eva-shared
 description: |
-  EvaSkill 2.1.2 shared support package. Install alongside eva, eva-think, eva-create, eva-learn, eva-brief, eva-link, eva-review, and eva-lens so sibling Eva skills can read shared schemas, references, examples, and validation scripts. Do not use directly for user tasks.
+  EvaSkill 2.1.4 shared support package. Install alongside eva, eva-think, eva-create, eva-learn, eva-brief, eva-link, eva-review, and eva-lens so sibling Eva skills can read shared schemas, references, examples, and validation scripts. Do not use directly for user tasks.
 ---
 
 # Eva Shared
 
 This is not a user-facing Eva entry.
 
-`eva-shared` exists so the installer copies the shared Eva 2.1.2 source files into the same `skills/` folder as the sibling Eva skills. The sibling skills read this directory through relative paths such as:
+`eva-shared` exists so the installer copies the shared Eva 2.1.4 source files into the same `skills/` folder as the sibling Eva skills. The sibling skills read this directory through relative paths such as:
 
 ```text
 ../eva-shared/schemas/asset-types.json
@@ -26,5 +26,5 @@ This is not a user-facing Eva entry.
 ## Direct Invocation Response
 
 ```text
-eva-shared 只是 Eva 2.1.2 的共享真源包，不是可直接使用的入口。请用 /eva、eva-think、eva-create、eva-learn、eva-brief、eva-link、eva-review 或 eva-lens。
+eva-shared 只是 Eva 2.1.4 的共享真源包，不是可直接使用的入口。请用 /eva、eva-think、eva-create、eva-learn、eva-brief、eva-link、eva-review 或 eva-lens。
 ```

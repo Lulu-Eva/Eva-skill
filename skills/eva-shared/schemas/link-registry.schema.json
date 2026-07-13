@@ -33,6 +33,21 @@
           },
           "enabled": {
             "type": "boolean"
+          },
+          "approved_sha256": {
+            "description": "SHA-256 fingerprint of the reviewed eva.link.json plus module.md. Any change requires review and a new fingerprint.",
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "approved_at": {
+            "description": "When the current user approved this exact Link fingerprint and permission summary.",
+            "type": "string",
+            "minLength": 1
+          },
+          "approved_phrase": {
+            "description": "Auditable record of the user's enablement confirmation. It is not a cryptographic identity proof.",
+            "type": "string",
+            "minLength": 1
           }
         },
         "additionalProperties": true

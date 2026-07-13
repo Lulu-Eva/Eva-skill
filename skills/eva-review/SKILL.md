@@ -1,7 +1,7 @@
 ---
 name: eva-review
 description: |
-  Eva Review 2.1.2 全平台发布后复盘入口。用于复盘一篇已经发布的短视频、小红书图文、公众号等内容，读取后台截图、Excel、CSV、Markdown 表格或多篇历史记录，决定下一篇优先测试什么，并在用户首次授权后持续维护当前项目的账号复盘记录库。触发：/eva-review、Eva Review、复盘这条已发布内容、看看这条发布后哪里可能卡住、回填上次结果、回看最近内容、总结最近内容规律、我讲什么更容易表现好。发布前改稿、直接写新内容和没有发布对象的平台玄学问题不进入本 Skill。
+  Eva Review 2.1.4 全平台发布后复盘入口。用于复盘一篇已经发布的短视频、小红书图文、公众号等内容，读取后台截图、Excel、CSV、Markdown 表格或多篇历史记录，决定下一篇优先测试什么，并在用户首次授权后持续维护当前项目的账号复盘记录库。触发：/eva-review、Eva Review、复盘这条已发布内容、看看这条发布后哪里可能卡住、回填上次结果、回看最近内容、总结最近内容规律、我讲什么更容易表现好。发布前改稿、直接写新内容和没有发布对象的平台玄学问题不进入本 Skill。
 ---
 
 # Eva Review
@@ -40,6 +40,8 @@ references/review/01_frontstage_前台语言.md
 references/review/05_record_记录字段真源.md
 references/review/06_store_记录库与保存协议.md
 ```
+
+实际读取后台截图、Excel、CSV、Markdown 表格、评论或历史记录时，同时读取 `../eva-shared/references/shared/06_external-material-safety_外部材料安全边界.md`；只有自然语言且没有外部材料时不加载。
 
 只有把复盘结论交给 Think、Create、Lens 或 Memory 时，才读取：
 

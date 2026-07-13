@@ -4,6 +4,8 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
+import re
 from pathlib import Path
 
 from eva_common import (
@@ -21,6 +23,7 @@ from eva_common import (
     read_json,
     required_fields_for_asset,
     result,
+    sha256_file,
     simple_schema_validate,
 )
 
@@ -37,6 +40,37 @@ FORBIDDEN_LINK_PREFERENCE_FIELDS = {
 }
 
 BROAD_DEFAULT_INTENTS = {"写", "写内容", "创作", "帮我写", "写一条", "生成内容", "做内容", "内容创作"}
+
+REQUIRED_MODULE_SECTIONS = {
+    "解决什么": ("解决什么",),
+    "不解决什么": ("不解决什么",),
+    "输入要求": ("输入要求",),
+    "工作流程": ("工作流程",),
+    "输出格式": ("输出格式", "模块内部输出格式"),
+    "禁止": ("禁止", "禁止事项"),
+}
+
+INSTRUCTION_HIJACK_PATTERNS = (
+    re.compile(
+        r"ignore\s+(?:all\s+)?(?:(?:previous|prior)\s+)?"
+        r"(?:(?:system|developer|user)\s+)?(?:instructions?|messages?)",
+        re.I,
+    ),
+    re.compile(r"忽略.{0,20}(?:之前|以上|系统|开发者|用户).{0,12}(?:指令|要求|消息)"),
+    re.compile(r"覆盖.{0,12}(?:系统|开发者|用户).{0,12}(?:指令|要求)"),
+)
+
+HIDDEN_ACTION_PATTERN = re.compile(
+    r"(?:不要|不必|无需).{0,10}(?:告诉|告知|展示给).{0,8}用户"
+    r".{0,50}(?:读取|上传|发送|调用|保存|写入|删除)"
+)
+
+NETWORK_ACTION_PATTERN = re.compile(
+    r"(?:必须|需要|然后|直接|请)?\s*(?:执行\s+curl|运行\s+wget|调用外部\s*API|上传.{0,20}https?://)",
+    re.I,
+)
+
+NEGATING_PREFIX_PATTERN = re.compile(r"(?:do\s+not|don't|never|不得|不要|禁止|不能|不可|无需)\s*$", re.I)
 
 
 def find_link_config(path: Path) -> Path:
@@ -138,7 +172,72 @@ def validate_link_manifest_semantics(link_config: dict, context: str = "Link") -
             + ", ".join(compatibility_aliases)
         )
 
+    permissions = link_config.get("permissions") or {}
+    if isinstance(permissions, dict):
+        if permissions.get("network") is True:
+            warnings.append(f"{context} requests network access; runtime must obtain current-user authorization")
+        if "project-files" in (permissions.get("read_scope") or []):
+            warnings.append(f"{context} requests project-wide read access; runtime must obtain current-user authorization")
+        if permissions.get("write_scope"):
+            warnings.append(f"{context} requests write access; runtime must obtain current-user authorization")
+        if permissions.get("save_user_data") is True:
+            warnings.append(f"{context} requests user-data persistence; runtime must obtain current-user authorization")
+
     return errors, warnings
+
+
+def link_sha256(link_config_path: Path, module_path: Path) -> str:
+    """Fingerprint both the capability declaration and executable instructions."""
+    digest = hashlib.sha256()
+    for label, path in ((b"eva.link.json\0", link_config_path), (b"module.md\0", module_path)):
+        digest.update(label)
+        digest.update(path.read_bytes())
+        digest.update(b"\0")
+    return digest.hexdigest()
+
+
+def has_non_negated_match(pattern: re.Pattern, text: str) -> bool:
+    for match in pattern.finditer(text):
+        prefix = text[max(0, match.start() - 20):match.start()]
+        if not NEGATING_PREFIX_PATTERN.search(prefix):
+            return True
+    return False
+
+
+def audit_module(module_path: Path, permissions: dict | None = None) -> tuple[list[str], list[str], dict]:
+    errors: list[str] = []
+    warnings: list[str] = []
+    data: dict = {"module_path": str(module_path)}
+    try:
+        text = module_path.read_text(encoding="utf-8")
+    except Exception as exc:
+        return [f"module.md cannot be read: {exc}"], warnings, data
+
+    headings = {
+        match.group(1).strip()
+        for match in re.finditer(r"^#{2,6}\s+(.+?)\s*$", text, flags=re.M)
+    }
+    missing_sections = [
+        label for label, aliases in REQUIRED_MODULE_SECTIONS.items()
+        if not any(alias in headings for alias in aliases)
+    ]
+    if missing_sections:
+        errors.append("module.md missing required section(s): " + ", ".join(missing_sections))
+
+    for pattern in INSTRUCTION_HIJACK_PATTERNS:
+        if has_non_negated_match(pattern, text):
+            errors.append("module.md contains an instruction-hijack pattern")
+            break
+    if HIDDEN_ACTION_PATTERN.search(text):
+        errors.append("module.md contains a hidden-action instruction")
+
+    permissions = permissions if isinstance(permissions, dict) else {}
+    if permissions.get("network") is not True and has_non_negated_match(NETWORK_ACTION_PATTERN, text):
+        errors.append("module.md requests a network action but permissions.network is false")
+
+    data["module_sha256"] = sha256_file(module_path)
+    data["sections"] = sorted(headings)
+    return errors, warnings, data
 
 
 def registry_project_root(path: Path) -> Path:
@@ -152,15 +251,19 @@ def resolve_registry_link_path(raw_path: str, registry_path: Path, base: Path) -
     if path.is_absolute():
         return path.resolve()
     project_root = registry_project_root(registry_path)
-    candidates = [
-        project_root / path,
-        registry_path.parent / path,
-        base / path,
-    ]
+    candidates = [project_root / path, registry_path.parent / path]
     for candidate in candidates:
         if candidate.exists():
             return candidate.resolve()
     return (project_root / path).resolve()
+
+
+def is_within(path: Path, root: Path) -> bool:
+    try:
+        path.resolve().relative_to(root.resolve())
+        return True
+    except ValueError:
+        return False
 
 
 def validate_link_registry(path: Path, base: Path) -> tuple[list[str], list[str], dict]:
@@ -194,6 +297,8 @@ def validate_link_registry(path: Path, base: Path) -> tuple[list[str], list[str]
     known_link_ids: list[str] = []
     known_links: set[str] = set()
     link_paths: dict[str, str] = {}
+    link_fingerprints: dict[str, str] = {}
+    project_root = registry_project_root(path).resolve()
     for item in links:
         if not isinstance(item, dict):
             continue
@@ -206,6 +311,9 @@ def validate_link_registry(path: Path, base: Path) -> tuple[list[str], list[str]
         if raw_path:
             resolved = resolve_registry_link_path(raw_path, path, base)
             link_paths[link_id] = str(resolved)
+            if not is_within(resolved, project_root):
+                errors.append(f"registry link path escapes project root for {link_id}: {resolved}")
+                continue
             if not resolved.exists():
                 errors.append(f"registry link path does not exist for {link_id}: {resolved}")
                 continue
@@ -229,6 +337,32 @@ def validate_link_registry(path: Path, base: Path) -> tuple[list[str], list[str]
             conflicting = sorted((entry_aliases | id_parts) & CORE_ENTRIES)
             if conflicting:
                 errors.append(f"registry link {link_id} must not override core Eva entries: " + ", ".join(conflicting))
+            module_path = link_config_path.parent / "module.md"
+            if not module_path.exists():
+                errors.append(f"registry link {link_id} missing module.md")
+                continue
+            module_errors, module_warnings, _ = audit_module(module_path, link_config.get("permissions"))
+            errors.extend([f"registry link {link_id}: {message}" for message in module_errors])
+            warnings.extend([f"registry link {link_id}: {message}" for message in module_warnings])
+            actual_fingerprint = link_sha256(link_config_path, module_path)
+            link_fingerprints[link_id] = actual_fingerprint
+            approved_fingerprint = str(item.get("approved_sha256", ""))
+            if item.get("enabled") is True and not approved_fingerprint:
+                errors.append(f"registry enabled link {link_id} missing approved_sha256")
+            elif item.get("enabled") is True and approved_fingerprint != actual_fingerprint:
+                errors.append(
+                    f"registry link {link_id} changed after approval: approved_sha256 does not match current Link"
+                )
+            elif approved_fingerprint and approved_fingerprint != actual_fingerprint:
+                warnings.append(f"registry disabled link {link_id} has a stale approved_sha256")
+            if item.get("enabled") is True:
+                if not str(item.get("approved_at", "")).strip():
+                    errors.append(f"registry enabled link {link_id} missing approved_at")
+                approval_phrase = str(item.get("approved_phrase", "")).strip()
+                if not approval_phrase:
+                    errors.append(f"registry enabled link {link_id} missing approved_phrase")
+                elif link_id not in approval_phrase:
+                    warnings.append(f"registry link {link_id} approved_phrase should mention the Link id")
 
     duplicate_link_ids = sorted({item for item in known_link_ids if item and known_link_ids.count(item) > 1})
     if duplicate_link_ids:
@@ -272,6 +406,7 @@ def validate_link_registry(path: Path, base: Path) -> tuple[list[str], list[str]
         if isinstance(item, dict)
     ]
     data["link_paths"] = link_paths
+    data["link_sha256"] = link_fingerprints
     return errors, warnings, data
 
 
@@ -302,6 +437,9 @@ def main() -> None:
     accepts = []
     handoff_to = []
     strict_files: dict[str, str | None] = {}
+    module_audit: dict = {}
+    module_sha256: str | None = None
+    current_link_sha256: str | None = None
     if link_input:
         if not link_input.exists():
             exit_with(result(False, "link_check", "Link 路径不存在", [str(link_input)]))
@@ -358,6 +496,15 @@ def main() -> None:
         if missing_strict:
             errors.append("strict Link check missing file(s): " + ", ".join(missing_strict))
         expected_asset = required_paths["expected_asset"]
+        module_path = required_paths["module"]
+        if module_path.exists():
+            module_errors, module_warnings, module_audit = audit_module(
+                module_path, link_config.get("permissions")
+            )
+            errors.extend(module_errors)
+            warnings.extend(module_warnings)
+            module_sha256 = module_audit.get("module_sha256")
+            current_link_sha256 = link_sha256(link_path, module_path)
         if expected_asset.exists():
             strict_asset_errors = validate_expected_asset(expected_asset, base, link_config)
             errors.extend(strict_asset_errors)
@@ -391,6 +538,10 @@ def main() -> None:
                 "handoff_to": handoff_to,
                 "strict": args.strict,
                 "strict_files": strict_files,
+                "permissions": link_config.get("permissions"),
+                "module_sha256": module_sha256,
+                "link_sha256": current_link_sha256,
+                "module_audit": module_audit,
                 "registry": registry_data,
             },
         )

@@ -10,7 +10,8 @@
     "accepts",
     "requires",
     "produces",
-    "handoff_to"
+    "handoff_to",
+    "permissions"
   ],
   "properties": {
     "id": {
@@ -55,6 +56,49 @@
         "type": "string"
       },
       "minItems": 1
+    },
+    "permissions": {
+      "description": "Explicit least-privilege boundary for this Link. Runtime actions still require the current user's authorization.",
+      "type": "object",
+      "required": [
+        "network",
+        "read_scope",
+        "write_scope",
+        "save_user_data"
+      ],
+      "properties": {
+        "network": {
+          "type": "boolean"
+        },
+        "read_scope": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "current-input",
+              "declared-upstream-assets",
+              "link-package",
+              "user-specified-files",
+              "project-files"
+            ]
+          }
+        },
+        "write_scope": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "user-specified-path",
+              "project-link-output",
+              "eva-memory"
+            ]
+          }
+        },
+        "save_user_data": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false
     },
     "entry_aliases": {
       "description": "Explicit point-name aliases users can use to call this Link. Do not put ordinary creation commands such as 写朋友圈 here; defaults belong in .eva/links.json.",

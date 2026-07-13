@@ -53,6 +53,16 @@ assets/          # 只有模板、图片、表格等真实资产时才需要
   "handoff_to": [
     "eva-memory"
   ],
+  "permissions": {
+    "network": false,
+    "read_scope": [
+      "current-input",
+      "declared-upstream-assets",
+      "link-package"
+    ],
+    "write_scope": [],
+    "save_user_data": false
+  },
   "entry_aliases": [
     "微博文案",
     "weibo-copy"
@@ -66,6 +76,8 @@ assets/          # 只有模板、图片、表格等真实资产时才需要
 python3 "<EVA_SHARED_ROOT>/scripts/eva_link_check.py" --link "<PROJECT_ROOT>/local-modules/{link-id}/" --strict
 ```
 
+strict 输出中的 `data.link_sha256` 是 `eva.link.json + module.md` 的联合指纹。启用前先向用户展示 Link 定义和权限摘要；用户确认后才能把该指纹、确认时间和确认语写入 registry。
+
 ## .eva/links.json 模板
 
 只有用户确认启用 Link 时才写入或更新 `links`；只有用户二次确认默认时才写入或更新 `defaults`。
@@ -77,7 +89,10 @@ python3 "<EVA_SHARED_ROOT>/scripts/eva_link_check.py" --link "<PROJECT_ROOT>/loc
     {
       "id": "local.weibo-copy",
       "path": "local-modules/local.weibo-copy",
-      "enabled": true
+      "enabled": true,
+      "approved_sha256": "<strict 校验输出的 data.link_sha256>",
+      "approved_at": "<用户确认时间>",
+      "approved_phrase": "我确认启用 local.weibo-copy 的当前版本和权限"
     }
   ],
   "defaults": []
