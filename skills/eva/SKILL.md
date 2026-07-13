@@ -1,8 +1,8 @@
 ---
 name: eva
 description: |
-  EvaSkill 2.1.2 的极薄路由入口。仅在用户明确调用 /eva、进入 Eva 模式、点名 Eva 子入口，或明确提出 Eva 的思考梳理、表达诊断、短视频、非虚构自媒体文章、带学、商单 Brief、发布复盘、多元视角、Memory、Link、新手教程任务时使用；不要抢占代码、财务、文件处理或其他无关任务。判断后同轮执行 eva-new-user、eva-think、eva-learn、eva-create、eva-brief、eva-link、eva-review 或 eva-lens。
-  当前入口：/eva、/eva-new-user、/eva-think、/eva-create、/eva-learn、/eva-brief、/eva-link、/eva-review、/eva-lens。兼容入口：/eva-reframe、/eva-audience-finder、/eva-benchmark-copy、/eva-memory、/eva-persona-memory、/eva-user-voice、/eva-ai-check。自然语言触发包括：开启新手教程、我是新用户、教我怎么用 Eva、帮我想想、问题归位、这个话题讲给谁、对标拆解、AI 味检测、人设梳理、提炼我的文风、保存或回捞点子、带我学懂、做一条短视频、写一篇公众号文章、把资料写成观点长文、拆品牌 Brief、发布后复盘、多元视角、深度审视、把提示词接进 Eva。
+  Eva-skill 2.1.3 的极薄路由入口。仅在用户明确调用 /eva、进入 Eva 模式、点名 Eva 子入口，或明确提出 Eva 的思考梳理、表达诊断、短视频、非虚构自媒体文章、带学、商单 Brief、发布复盘、多元视角、Memory、Link、新手教程任务时使用；不要抢占代码、财务、文件处理或其他无关任务。判断后同轮执行 eva-new-user、eva-think、eva-learn、eva-create、eva-brief、eva-link、eva-review 或 eva-lens。
+  当前入口：/eva、/eva-new-user、/eva-think、/eva-create、/eva-learn、/eva-brief、/eva-link、/eva-review、/eva-lens。兼容入口：/eva-reframe、/eva-audience-finder、/eva-benchmark-copy、/eva-memory、/eva-persona-memory、/eva-user-voice、/eva-ai-check。自然语言触发包括：开启新手教程、我是新用户、教我怎么用 Eva、帮我想想、问题归位、这个话题讲给谁、对标拆解、AI 味检测、人设梳理、提炼我的文风、保存或回捞点子、带我学懂、做一条短视频、写一篇公众号文章、把资料写成观点长文、拆品牌 Brief、发布后复盘、多元视角、深度审视、把提示词接进 Eva、查询 Eva-skill 当前版本、安装或更新 Eva-skill、查找 Eva-skill 官方指南、使用案例或反馈渠道。
 ---
 
 # Eva：极薄路由
@@ -20,6 +20,7 @@ description: |
 
 | 用户信号 | 路由到 | 说明 |
 |---|---|---|
+| 明确问 Eva-skill 当前版本、更新内容、安装、官方指南、使用案例、反馈渠道或维护方 | 本文件维护信息 | 只读取 shared 的发布说明并回答当前问题，不进入任务链路 |
 | `/eva-new-user`、Eva New User、我是新用户、开启新手教程、教我怎么用 Eva | `eva-new-user` | 动态扫描已安装 Eva 能力，按用户节奏带练 |
 | `/eva-learn`、`eva-learn`、Eva Learn、带我学懂、带我系统学、带我读、主题式阅读、继续学习项目、接着讲上次带读 | `eva-learn` | 学习专线，直接开始学习或恢复项目 |
 | `/eva-brief`、品牌 Brief、商单 Brief、拆合作需求、检查商单稿 | `eva-brief` | 商单约束专线，先拆 Brief |
@@ -40,6 +41,16 @@ description: |
 | 写朋友圈、微博、小红书短图文、邮件、虚构文学或其他非 Article 普通写作，且没有点名 Link | 基础模型或对应专业能力 | 不加载 Eva Create 成稿链路，不标记为 Eva 已验证资产 |
 | 只说 `/eva`、启动 Eva、进入 Eva，且没有附带任务 | 欢迎语 | 给轻量入口并邀请用户选择新手教程，不先判断新旧用户 |
 | 说“帮我看看”但材料不清 | `eva-think` | 默认兜底 |
+
+## 维护信息（仅显式查询）
+
+只有当用户明确询问 Eva-skill 的版本、更新、安装、官方指南、案例、反馈或维护方时，才读取 ../eva-shared/references/maintenance/release-notes.json。
+
+- 根据用户的问题，只返回当前本地版本、发布变化、手动安装命令、官方指南入口或反馈渠道中必要的部分；不要借题展示完整模块菜单。
+- 用户询问如何安装或更新时，读取 `install_help`，说明命令必须在 Eva-skill 源码根目录手动执行；不要假装当前聊天已经完成安装。
+- 不联网检查新版本，不自动安装、升级或写入安装状态；这些动作只属于仓库根目录的受管安装脚本。
+- 普通 /eva 启动、任何业务任务的路由、任务进行中和任务结束时，都不读取这份发布说明，也不主动展示维护提示。
+- 用户随后给出真实创作、学习、商单、复盘或 Link 任务时，立即回到路由表；维护信息不占用任务链路。
 
 ## 冲突规则
 

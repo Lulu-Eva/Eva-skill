@@ -1,13 +1,45 @@
 {
-  "version": "2.1.2",
+  "version": "2.1.3",
   "purpose": "Scenario contract inventory for same-turn routing, staged loading, hard gates, and user-facing lightness. Structural selftest validates this inventory but does not execute model behavior.",
   "cases": [
     {
       "id": "default-start",
       "input": "/eva",
       "expected_route": "eva-light-welcome",
-      "forbid": ["Initializer Card", "asset_type", "valid_next", "route-only-response", "feature-menu"],
+      "forbid": ["Initializer Card", "asset_type", "valid_next", "route-only-response", "feature-menu", "公众号“璐璐 Eva”", "官方使用指南与案例库", "版本动态", "auto-update", "network-check"],
       "expected_terminal": "welcome-and-optional-new-user-tutorial"
+    },
+    {
+      "id": "maintenance-explicit-version",
+      "input": "Eva-skill 当前是什么版本？这次更新了什么？",
+      "expected_route": "eva-maintenance-explicit-query",
+      "forbid": ["network-check", "auto-update", "state-write", "task-routing"],
+      "must_include": ["local-version", "release-highlights"],
+      "expected_terminal": "local-version-and-release-summary"
+    },
+    {
+      "id": "maintenance-explicit-install",
+      "input": "Eva-skill 怎么安装或更新？",
+      "expected_route": "eva-maintenance-explicit-query",
+      "forbid": ["network-check", "auto-update", "state-write", "task-routing", "claim-install-complete"],
+      "must_include": ["source-root-manual-command", "install-or-update-command", "verify-command"],
+      "expected_terminal": "manual-install-help-without-execution"
+    },
+    {
+      "id": "maintenance-explicit-guide",
+      "input": "Eva-skill 的官方指南和使用案例在哪里？",
+      "expected_route": "eva-maintenance-explicit-query",
+      "forbid": ["network-check", "auto-update", "state-write", "task-routing"],
+      "must_include": ["official-guide-entry", "case-library-entry"],
+      "expected_terminal": "official-guide-and-case-library-entry"
+    },
+    {
+      "id": "maintenance-explicit-feedback",
+      "input": "Eva-skill 遇到问题或有新用法，应该去哪里反馈？",
+      "expected_route": "eva-maintenance-explicit-query",
+      "forbid": ["network-check", "auto-update", "state-write", "task-routing"],
+      "must_include": ["official-guide-entry", "feedback-channel"],
+      "expected_terminal": "official-guide-feedback-entry"
     },
     {
       "id": "explicit-eva-new-user",
@@ -460,7 +492,7 @@
       "input": "这是一篇公众号品牌商单，品牌给了必提卖点和禁区，直接帮我写完整文章。",
       "expected_route": "eva-brief-or-commerce-constraint-only-for-sponsored-article",
       "forbid": ["direct-article-before-constraint-card", "article-draft-after-constraint-card", "continue-to-article-after-brief", "invent-brand-claim", "ignore-brand-prohibition"],
-      "expected_terminal": "brief-constraint-only-no-article-draft-in-2.1.2"
+      "expected_terminal": "brief-constraint-only-no-article-draft-in-2.1.3"
     },
     {
       "id": "low-confidence-draft-not-publishable",
