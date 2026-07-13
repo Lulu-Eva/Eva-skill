@@ -1,36 +1,10 @@
-# Eva-skill v2.1.3
+# Eva Skill v2.1.2
 
-当前版本：`2.1.3`。
+当前版本：`2.1.2`。
 
 Eva Skill 帮助创作者把模糊想法梳理成更清楚、更有依据的判断，并把它们做成短视频或非虚构自媒体文章。它同时提供学习、商单拆解、本地工作流接入、发布后复盘和多元视角补充能力。
 
 安装时必须同时安装 `eva`、八个用户入口和 `eva-shared`。`eva-shared` 不是用户入口，只提供共享协议、schema、脚本和示例。
-
-## 官方全局安装
-
-在 Eva-skill 源码目录中执行下面的命令，即可把十个 Eva 模块安装为宿主可发现的真实同级目录：
-
-    python3 scripts/eva_global_install.py install
-
-当前安装器面向 macOS / Linux，需要 Python 3.9 或更高版本。默认安装到 `~/.agents/skills`；如宿主使用其他 Skill 根目录，可显式传入 `--target-root /你的/skills/目录`。安装器必须从完整的 Eva-skill 源码仓库根目录运行，不会在聊天过程中联网下载或自动更新。
-
-安装脚本只管理 eva、eva-new-user、eva-think、eva-create、eva-learn、eva-brief、eva-link、eva-review、eva-lens 和 eva-shared；不会移动整个源码仓库、不会使用 symlink，也不会删除同目录下的其他 Skill。安装前会在临时目录中校验，失败会恢复此前受管版本。
-
-安装后可执行：
-
-    python3 scripts/eva_global_install.py verify
-
-如需处理一次中断的受管安装，可执行：
-
-    python3 scripts/eva_global_install.py recover
-
-成功安装、升级、迁移或修复时，安装脚本只展示一次版本提示；普通 Eva 任务不会自动检查更新或反复弹出提示。
-
-## 官方使用指南与案例库
-
-关注公众号“璐璐 Eva” —— Eva-skill 的官方使用指南与案例库。
-
-这里会持续更新真实案例、使用教程、实操技巧与版本动态；遇到问题或发现新的用法，也欢迎留言交流。
 
 ## 按你想完成的事使用 Eva
 
@@ -180,7 +154,7 @@ Eva 会完成当前证据允许的部分，例如暂定判断、人群切口、�
 
 ### 商单只有产品名和卖点，能直接写吗？
 
-不能直接生成正式商单稿。当前可以先做低置信度卖点拆解；补齐品牌 Brief、必提项、禁区和可用真实素材后，商单短视频再进入标题或第一句话链路。正式品牌赞助文章在当前版本只完成 Brief / 约束交接，不继续进入 Article 成稿。
+不能直接生成正式商单稿。当前可以先做低置信度卖点拆解；补齐品牌 Brief、必提项、禁区和可用真实素材后，商单短视频再进入标题或第一句话链路。正式品牌赞助文章在 2.1.2 首版只完成 Brief / 约束交接，不继续进入 Article 成稿。
 
 ### 为什么写朋友圈没有进入 Eva Create？
 
@@ -209,13 +183,6 @@ skills/
 ├── eva-lens/         # 多元视角快速补光与深度审视
 └── eva-shared/       # 共享协议、schema、脚本和示例
 ```
-
-## 2.1.3 新增
-
-- **受管全局安装**：提供独立安装、校验、恢复和提示确认脚本；只安装十个真实 Skill 目录，拒绝 symlink 与不完整包。
-- **稳定的一次性升级提示**：仅在受管安装成功后显示一次版本卡片；普通 /eva 启动和真实任务链路不会被更新信息打断。
-- **显式维护信息入口**：用户明确询问版本、安装、官方指南、案例或反馈时才读取发布说明；不联网检查、不自动升级、不写入用户内容。
-- **官方使用指南与案例库**：将真实案例、教程、技巧和版本动态集中到官方维护入口，不把运营引导塞进创作、学习或复盘流程。
 
 ## 2.1.2 新增
 
@@ -263,5 +230,4 @@ python3 skills/eva-shared/scripts/eva_selftest.py --base skills/eva-shared
 python3 skills/eva-shared/scripts/eva_link_check.py --link skills/eva-shared/examples/eva.link.example.json
 python3 skills/eva-shared/scripts/eva_link_check.py --link skills/eva-shared/examples/local.weibo-copy/ --strict
 PYTHONPYCACHEPREFIX=/private/tmp/eva-shared-pycache python3 -m py_compile skills/eva-shared/scripts/*.py
-python3 scripts/test_eva_global_install.py
 ```

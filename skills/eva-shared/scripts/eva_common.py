@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Common helpers for Eva Shared 2.1.3 scripts."""
+"""Common helpers for Eva Shared 2.1.2 scripts."""
 
 from __future__ import annotations
 
@@ -26,19 +26,6 @@ CORE_ENTRIES = {
     "eva-lens",
 }
 
-INSTALLABLE_SKILL_DIRS = (
-    "eva",
-    "eva-new-user",
-    "eva-think",
-    "eva-create",
-    "eva-learn",
-    "eva-brief",
-    "eva-link",
-    "eva-review",
-    "eva-lens",
-    "eva-shared",
-)
-
 VALID_LOW_CONFIDENCE_REASONS = {
     "title-unverified",
     "brief-incomplete",
@@ -55,7 +42,7 @@ VALID_LOW_CONFIDENCE_REASONS = {
     "unverified-causality",
 }
 
-VERSION = "eva-shared-2.1.3"
+VERSION = "eva-shared-2.1.2"
 
 
 def default_base_from_script(script_path: str) -> Path:

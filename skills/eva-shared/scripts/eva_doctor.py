@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Check Eva Shared 2.1.3 local structure and dependencies."""
+"""Check Eva Shared 2.1.2 local structure and dependencies."""
 
 from __future__ import annotations
 
@@ -8,7 +8,6 @@ import re
 from pathlib import Path
 
 from eva_common import (
-    INSTALLABLE_SKILL_DIRS,
     VALID_ASSET_TYPES,
     VALID_LOW_CONFIDENCE_REASONS,
     VERSION,
@@ -21,15 +20,6 @@ from eva_common import (
     normalize_path,
     read_json,
     result,
-)
-
-
-PRODUCT_NAME = "Eva-skill"
-OFFICIAL_GUIDE_HEADLINE = "关注公众号“璐璐 Eva” —— Eva-skill 的官方使用指南与案例库。"
-REQUIRED_MAINTENANCE_FILES = (
-    "references/maintenance/install-manifest.json",
-    "references/maintenance/release-notes.json",
-    "references/maintenance/00_eva-maintenance-notice.md",
 )
 
 
@@ -314,145 +304,6 @@ def check_asset_type_truth(base: Path) -> tuple[list[str], list[str], dict]:
     return errors, warnings, data
 
 
-def check_installable_skill_bundle(base: Path) -> tuple[list[str], list[str], dict]:
-    errors: list[str] = []
-    warnings: list[str] = []
-    data: dict = {}
-
-    if base.name != "eva-shared":
-        warnings.append("installable Skill bundle checks skipped because --base is not the eva-shared folder")
-        return errors, warnings, data
-
-    expected_version = VERSION.rsplit("-", 1)[-1]
-    manifest_path = base / "references" / "maintenance" / "install-manifest.json"
-    release_notes_path = base / "references" / "maintenance" / "release-notes.json"
-    for relative in REQUIRED_MAINTENANCE_FILES:
-        if not (base / relative).exists():
-            errors.append(f"missing maintenance source: {relative}")
-
-    manifest: dict = {}
-    release_notes: dict = {}
-    if manifest_path.exists():
-        try:
-            loaded_manifest = read_json(manifest_path)
-        except Exception as exc:
-            errors.append(f"cannot read maintenance install manifest: {exc}")
-            loaded_manifest = {}
-        if not isinstance(loaded_manifest, dict):
-            errors.append("maintenance install manifest must be an object")
-        else:
-            manifest = loaded_manifest
-            if manifest.get("schema_version") != 1:
-                errors.append("maintenance install manifest schema_version must be 1")
-            if manifest.get("product_name") != PRODUCT_NAME:
-                errors.append("maintenance install manifest product_name must be Eva-skill")
-            if str(manifest.get("version", "")) != expected_version:
-                errors.append("maintenance install manifest version must match eva_common VERSION")
-
-    if release_notes_path.exists():
-        try:
-            loaded_release_notes = read_json(release_notes_path)
-        except Exception as exc:
-            errors.append(f"cannot read maintenance release notes: {exc}")
-            loaded_release_notes = {}
-        if not isinstance(loaded_release_notes, dict):
-            errors.append("maintenance release notes must be an object")
-        else:
-            release_notes = loaded_release_notes
-            if release_notes.get("schema_version") != 1:
-                errors.append("maintenance release notes schema_version must be 1")
-            if release_notes.get("product_name") != PRODUCT_NAME:
-                errors.append("maintenance release notes product_name must be Eva-skill")
-            if str(release_notes.get("version", "")) != expected_version:
-                errors.append("maintenance release notes version must match eva_common VERSION")
-            highlights = release_notes.get("release_highlights")
-            if not isinstance(highlights, list) or len(highlights) < 3:
-                errors.append("maintenance release notes must contain at least three highlights")
-            guide = release_notes.get("official_guide")
-            if not isinstance(guide, dict):
-                errors.append("maintenance release notes must contain official_guide")
-            else:
-                if guide.get("headline") != OFFICIAL_GUIDE_HEADLINE:
-                    errors.append("maintenance official guide headline does not match the product copy")
-                for key in ("maintainer", "public_account", "headline", "body"):
-                    if not isinstance(guide.get(key), str) or not guide[key].strip():
-                        errors.append(f"maintenance official_guide.{key} must be a non-empty string")
-            install_help = release_notes.get("install_help")
-            expected_install_help = {
-                "source_directory_note": "请在 Eva-skill 源码根目录手动执行；安装和更新使用同一命令。",
-                "install_or_update_command": "python3 scripts/eva_global_install.py install",
-                "verify_command": "python3 scripts/eva_global_install.py verify",
-                "recover_command": "python3 scripts/eva_global_install.py recover",
-            }
-            if not isinstance(install_help, dict):
-                errors.append("maintenance release notes must contain install_help")
-            else:
-                for key, expected_value in expected_install_help.items():
-                    if install_help.get(key) != expected_value:
-                        errors.append(f"maintenance install_help.{key} does not match the managed command")
-
-    declared_entries = manifest.get("skill_directories") if manifest else None
-    declared_names: list[str] = []
-    if not isinstance(declared_entries, list):
-        errors.append("maintenance install manifest skill_directories must be an array")
-    else:
-        for entry in declared_entries:
-            if not isinstance(entry, dict):
-                errors.append("maintenance install manifest entries must be objects")
-                continue
-            directory = entry.get("directory")
-            name = entry.get("name")
-            if not isinstance(directory, str) or not isinstance(name, str):
-                errors.append("maintenance install manifest entries require directory and name")
-                continue
-            if directory != name:
-                errors.append(f"maintenance install manifest directory/name drift: {directory!r} / {name!r}")
-            declared_names.append(directory)
-        if tuple(declared_names) != INSTALLABLE_SKILL_DIRS or len(set(declared_names)) != len(declared_names):
-            errors.append("maintenance install manifest must list the exact ten installable Skill directories")
-
-    skills_root = base.parent
-    installed_status: dict[str, dict] = {}
-    for skill_name in INSTALLABLE_SKILL_DIRS:
-        skill_root = skills_root / skill_name
-        skill_file = skill_root / "SKILL.md"
-        status = {
-            "directory": str(skill_root),
-            "directory_exists": skill_root.exists(),
-            "directory_is_real": skill_root.is_dir() and not skill_root.is_symlink(),
-            "skill_file": str(skill_file),
-            "skill_file_is_real": skill_file.is_file() and not skill_file.is_symlink(),
-        }
-        installed_status[skill_name] = status
-        if not skill_root.exists() or not skill_root.is_dir():
-            errors.append(f"missing installable Skill directory: ../{skill_name}")
-            continue
-        if skill_root.is_symlink():
-            errors.append(f"installable Skill directory must not be a symlink: ../{skill_name}")
-            continue
-        if not skill_file.exists() or not skill_file.is_file() or skill_file.is_symlink():
-            errors.append(f"installable Skill directory missing real top-level SKILL.md: ../{skill_name}")
-            continue
-        skill_text = skill_file.read_text(encoding="utf-8")
-        name_match = re.search(r"^name:\s*([^\s#]+)\s*$", skill_text, flags=re.MULTILINE)
-        description_match = re.search(r"^description:\s*(.*)$", skill_text, flags=re.MULTILINE)
-        if name_match is None or name_match.group(1).strip() != skill_name:
-            errors.append(f"../{skill_name}/SKILL.md frontmatter name must equal {skill_name}")
-        if description_match is None:
-            errors.append(f"../{skill_name}/SKILL.md frontmatter must contain description")
-        elif not description_match.group(1).strip() and not skill_text[description_match.end() :].strip():
-            errors.append(f"../{skill_name}/SKILL.md frontmatter description must not be empty")
-        for node in skill_root.rglob("*"):
-            if node.is_symlink():
-                errors.append(f"installable Skill directory contains a symlink: ../{skill_name}/{node.relative_to(skill_root)}")
-                break
-
-    data["installed_skill_directories"] = installed_status
-    data["install_manifest_directories"] = declared_names
-    data["maintenance_version"] = expected_version
-    return errors, warnings, data
-
-
 def check_peer_skills(base: Path) -> tuple[list[str], list[str], dict]:
     errors: list[str] = []
     warnings: list[str] = []
@@ -512,7 +363,7 @@ def check_peer_skills(base: Path) -> tuple[list[str], list[str], dict]:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Check Eva Shared 2.1.3 structure and dependencies.")
+    parser = argparse.ArgumentParser(description="Check Eva Shared 2.1.2 structure and dependencies.")
     parser.add_argument("--base", default=".", help="Base folder containing schemas/ and scripts/.")
     parser.add_argument("--link", action="append", help="Optional Link config path to note in report.")
     add_common_arguments(parser)
@@ -542,11 +393,6 @@ def main() -> None:
     warnings.extend(truth_warnings)
     data.update(truth_data)
 
-    bundle_errors, bundle_warnings, bundle_data = check_installable_skill_bundle(base)
-    errors.extend(bundle_errors)
-    warnings.extend(bundle_warnings)
-    data.update(bundle_data)
-
     peer_errors, peer_warnings, peer_data = check_peer_skills(base)
     errors.extend(peer_errors)
     warnings.extend(peer_warnings)
@@ -564,7 +410,7 @@ def main() -> None:
         result(
             ok,
             "doctor",
-            "Eva Shared 2.1.3结构正常" if ok else "Eva Shared 2.1.3结构异常",
+            "Eva Shared 2.1.2结构正常" if ok else "Eva Shared 2.1.2结构异常",
             errors,
             warnings,
             data,

@@ -4,16 +4,16 @@
     "name": "Lulu-Eva"
   },
   "metadata": {
-    "description": "Eva-skill v2.1.3 创作者工作台。新增受管全局安装校验、一次性升级提示与官方使用指南入口。",
-    "version": "2.1.3"
+    "description": "Eva-skill v2.1.2 创作者工作台。新增非虚构自媒体文章创作、动态长度与标题后置能力。",
+    "version": "2.1.2"
   },
   "plugins": [
     {
       "name": "eva",
-      "description": "Eva-skill v2.1.3 创作者工作台。包含 Eva New User、Think、短视频与文章 Create、Learn、Brief、Link、Review、Lens 和 shared 真源包。",
+      "description": "Eva-skill v2.1.2 创作者工作台。包含 Eva New User、Think、短视频与文章 Create、Learn、Brief、Link、Review、Lens 和 shared 真源包。",
       "source": "./",
       "strict": false,
-      "version": "2.1.3",
+      "version": "2.1.2",
       "category": "content-creation",
       "keywords": ["creator", "new-user", "tutorial", "short-video", "xiaohongshu", "script", "script-structure", "content-writing", "title", "body-title", "audience", "thinking", "reframe", "benchmark-copy", "commercial-brief", "brand-brief", "sponsored-content", "memory", "persona", "persona-memory", "user-voice", "voice-card", "ai-check", "learn", "learning", "reading", "research", "study", "review", "content-review", "multi-perspective", "lens", "thought-seed-card", "voice", "chinese"],
       "skills": ["./skills/eva", "./skills/eva-new-user", "./skills/eva-shared", "./skills/eva-think", "./skills/eva-create", "./skills/eva-learn", "./skills/eva-brief", "./skills/eva-link", "./skills/eva-review", "./skills/eva-lens"]

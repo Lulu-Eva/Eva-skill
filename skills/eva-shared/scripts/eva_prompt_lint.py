@@ -104,14 +104,6 @@ DEFAULT_STARTUP_ALLOWED = (
     "../eva/SKILL.md",
 )
 
-OFFICIAL_GUIDE_HEADLINE = "关注公众号“璐璐 Eva” —— Eva-skill 的官方使用指南与案例库。"
-OFFICIAL_GUIDE_PUBLIC_ACCOUNT_FRAGMENT = "公众号“璐璐 Eva”"
-DEFAULT_STARTUP_MAINTENANCE_NUDGE_TERMS = (
-    OFFICIAL_GUIDE_PUBLIC_ACCOUNT_FRAGMENT,
-    "官方使用指南与案例库",
-    "版本动态",
-)
-
 LIGHT_INTERACTION_CONDITION_MARKERS = (
     "用户明确启动 eva-learn",
     "用户提供多份资料，要求主题式阅读、研究或比较",
@@ -215,17 +207,7 @@ def rel(path: Path, base: Path) -> str:
 
 def md_files(base: Path) -> list[Path]:
     candidates = list(base.rglob("*.md"))
-    for peer in (
-        "eva",
-        "eva-new-user",
-        "eva-think",
-        "eva-create",
-        "eva-learn",
-        "eva-brief",
-        "eva-link",
-        "eva-review",
-        "eva-lens",
-    ):
+    for peer in ("eva", "eva-think", "eva-create", "eva-learn", "eva-brief", "eva-link"):
         peer_root = base.parent / peer
         if peer_root.exists():
             candidates.extend(peer_root.rglob("*.md"))
@@ -290,12 +272,6 @@ def lint(base: Path) -> dict:
             if pattern in text:
                 errors.append(f"{path_rel}: contains removed internal-pending marker: {pattern}")
 
-        if OFFICIAL_GUIDE_HEADLINE in text or OFFICIAL_GUIDE_PUBLIC_ACCOUNT_FRAGMENT in text:
-            errors.append(
-                f"{path_rel}: duplicates official public-account copy; "
-                "keep it only in maintenance/release-notes.json"
-            )
-
         normalized_path = path.as_posix()
         if "/eva-create/references/create/article/" in normalized_path:
             for coupling in ARTICLE_FORBIDDEN_SHORTVIDEO_COUPLINGS:
@@ -331,9 +307,6 @@ def lint(base: Path) -> dict:
         for forbidden in ("Link", "Synchro", "Asset", "Harness", "schema", "valid_next", "DoD", "failure-record"):
             if forbidden in default:
                 errors.append(f"SKILL.md: default startup exposes backstage/system term: {forbidden}")
-        for term in DEFAULT_STARTUP_MAINTENANCE_NUDGE_TERMS:
-            if term in default:
-                errors.append(f"SKILL.md: default startup must not nudge maintenance or public-account copy: {term}")
 
     for phrase, hits in default_phrase_hits.items():
         if len(hits) > 1:
