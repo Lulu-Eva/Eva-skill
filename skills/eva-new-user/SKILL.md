@@ -1,6 +1,6 @@
 ---
 name: eva-new-user
-description: Eva New User 2.1.4 独立新手教程。用于用户明确说 /eva-new-user、Eva New User、我是新用户、开启新手教程、教我怎么用 Eva，或在裸 /eva 欢迎语后选择新手教程时使用。开始前动态扫描当前环境已安装的 Eva 子 Skill，再围绕用户当前目标完成“演示、跟做、独立发起”的最小闭环；允许用户随时说“跳过”、指定提前学习的功能，或退出教程直接处理真实任务。
+description: Eva New User 2.1.5 独立新手教程。用于用户明确说 /eva-new-user、Eva New User、我是新用户、开启新手教程、教我怎么用 Eva，或在裸 /eva 欢迎语后选择新手教程时使用。开始前动态扫描当前环境已安装的 Eva 子 Skill，再围绕用户当前目标完成“演示、跟做、独立发起”的最小闭环；允许用户随时说“跳过”、指定提前学习的功能，或退出教程直接处理真实任务。
 ---
 
 # Eva New User
@@ -101,7 +101,8 @@ description: Eva New User 2.1.4 独立新手教程。用于用户明确说 /eva-
 路由参考：
 
 ```text
-想法梳理、人群、人设、表达真实性 -> eva-think
+想法梳理、人设、表达真实性 -> eva-think
+明确的话题人群识别 -> eva-audience-finder
 短视频、标题、开头、视频稿、公众号文章和观点长文 -> eva-create
 系统学习、带读 -> eva-learn
 品牌商单 Brief -> eva-brief

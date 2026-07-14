@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Eva 2.1.4 structural checks and prompt scenario-contract validation."""
+"""Eva 2.1.5 structural checks and prompt scenario-contract validation."""
 
 from __future__ import annotations
 
@@ -85,7 +85,15 @@ REQUIRED_SCENARIO_CASES = {
     "expression-preload-specific-detail-notice",
     "voice-current-instruction-priority",
     "compatibility-reframe-alias",
-    "compatibility-audience-alias",
+    "explicit-audience-entry",
+    "explicit-audience-natural-language",
+    "ambiguous-topic-default-think",
+    "audience-analysis-only-stops",
+    "think-internal-audience-return",
+    "create-audience-xhs-return",
+    "create-audience-douyin-return",
+    "audience-clear-no-repeat",
+    "audience-to-article-return",
     "compatibility-benchmark-alias",
     "compatibility-memory-alias",
     "compatibility-persona-alias",
@@ -208,6 +216,7 @@ REQUIRED_SCENARIO_CASES.update(REQUIRED_ARTICLE_CASE_CONTRACTS)
 REQUIRED_ROUTER_MARKERS = {
     "eva-new-user": "Router must expose the adaptive new-user tutorial",
     "eva-think": "Router must expose eva-think as the default light entry",
+    "eva-audience-finder": "Router must expose the explicit audience-finder entry",
     "eva-create": "Router must expose content creation through eva-create",
     "非虚构自媒体文章": "Router must expose nonfiction article creation through eva-create",
     "eva-learn": "Router must route explicit Eva Learn requests to eva-learn",
@@ -224,7 +233,9 @@ REQUIRED_ROUTER_MARKERS = {
     "基础模型": "Router must pass ordinary non-video writing to the base model",
     "不得只输出“这个交给某入口处理”后停止": "Router must not stop at a routing announcement",
     "/eva-reframe": "Router must preserve the reframe compatibility alias",
-    "/eva-audience-finder": "Router must preserve the audience compatibility alias",
+    "/eva-audience-finder": "Router must expose the audience-finder canonical command",
+    "出现“话题”二字本身不构成人群识别意图": "Router must keep ambiguous topic discussion in eva-think",
+    "内部调用不经过一级门牌": "Router must keep internal audience calls inside their caller",
     "/eva-benchmark-copy": "Router must preserve the benchmark compatibility alias",
     "/eva-memory": "Router must preserve the memory compatibility alias",
     "/eva-persona-memory": "Router must preserve the persona compatibility alias",
@@ -241,6 +252,7 @@ REQUIRED_ARCHITECTURE_PATHS = (
     "../eva-new-user/SKILL.md",
     "../eva-think/SKILL.md",
     "../eva-think/references/think/00_eva-think_思考助理.md",
+    "../eva-audience-finder/SKILL.md",
     "../eva-create/SKILL.md",
     "../eva-create/references/create/00_eva-create_创作主入口.md",
     "../eva-create/references/create/article/00_eva-article_文章主入口.md",
@@ -271,6 +283,7 @@ REQUIRED_ARCHITECTURE_PATHS = (
 
 RUNTIME_VERSION_FREE_PATHS = (
     "../eva-think/SKILL.md",
+    "../eva-audience-finder/SKILL.md",
     "../eva-create/SKILL.md",
     "../eva-learn/SKILL.md",
     "../eva-brief/SKILL.md",
@@ -573,6 +586,9 @@ def main() -> None:
         }
         required_case_markers = {
             "new-user-minimum-success-loop": ("one-minimum-demo", "one-user-practice-prompt"),
+            "explicit-audience-entry": ("specific-audience", "cognitive-gap", "user-question"),
+            "create-audience-xhs-return": ("tailored-search-terms", "return-to-title-search"),
+            "create-audience-douyin-return": ("first-line-content-entry", "return-to-create"),
             "information-complete-direct-draft": ("tailored-search-terms", "observation-criteria"),
             "douyin-information-complete-direct-draft": ("first-line-content-entry", "complete-draft"),
             "shipinhao-information-complete-direct-draft": ("first-line-content-entry", "complete-draft"),
@@ -638,16 +654,17 @@ def main() -> None:
     if readme_path.exists():
         readme_text = readme_path.read_text(encoding="utf-8")
         for marker in (
-            "# Eva Skill v2.1.4",
+            "# Eva Skill v2.1.5",
             "## 按你想完成的事使用 Eva",
             "## 一个短视频从想法到成稿",
             "## 一篇文章从判断到成稿",
             "## 常见问题",
+            "## 2.1.5 新增",
             "## 2.1.4 新增",
             "## 2.1.2 新增",
         ):
             if marker not in readme_text:
-                errors.append(f"README missing 2.1.4 release/user-guide marker: {marker}")
+                errors.append(f"README missing 2.1.5 release/user-guide marker: {marker}")
     elif source_checkout:
         errors.append(f"missing root README: {readme_path}")
 
@@ -917,6 +934,73 @@ def main() -> None:
         ]
         errors.extend(missing_markers)
 
+    audience_entry_path = (base / "../eva-audience-finder/SKILL.md").resolve()
+    audience_openai_path = (base / "../eva-audience-finder/agents/openai.yaml").resolve()
+    if audience_entry_path.exists():
+        audience_entry_text = audience_entry_path.read_text(encoding="utf-8")
+        for marker in (
+            "name: eva-audience-finder",
+            "../eva-shared/references/audience/00_eva-audience-finder_话题人群识别器.md",
+            "用户只要求人群分析时",
+            "泛泛选题讨论",
+            "控制权返回原调用模块",
+        ):
+            if marker not in audience_entry_text:
+                errors.append(f"eva-audience-finder thin entry missing marker: {marker}")
+        for duplicated_truth in ("### 公理 1", "## 七步识别流程", "## 默认输出格式"):
+            if duplicated_truth in audience_entry_text:
+                errors.append(f"eva-audience-finder must not duplicate shared truth: {duplicated_truth}")
+    if not audience_openai_path.exists():
+        errors.append("eva-audience-finder must include agents/openai.yaml for top-level visibility")
+    else:
+        audience_openai_text = audience_openai_path.read_text(encoding="utf-8")
+        for marker in ("Eva Audience｜话题人群识别", "$eva-audience-finder"):
+            if marker not in audience_openai_text:
+                errors.append(f"eva-audience-finder agents/openai.yaml missing marker: {marker}")
+
+    audience_truth_path = (base / "references/audience/00_eva-audience-finder_话题人群识别器.md").resolve()
+    if audience_truth_path.exists():
+        audience_truth_text = audience_truth_path.read_text(encoding="utf-8")
+        for marker in (
+            "人群清晰度三项闸门",
+            "具体人群",
+            "认知缺口",
+            "用户问题",
+            "谁调用，控制权就返回给谁",
+            "不向用户展示成问卷",
+        ):
+            if marker not in audience_truth_text:
+                errors.append(f"shared Audience Finder missing 2.1.5 marker: {marker}")
+
+    internal_audience_callers = (
+        "../eva-think/references/think/00_eva-think_思考助理.md",
+        "../eva-think/references/think/01_eva-reframe_表象问题归位.md",
+        "../eva-create/references/create/00_eva-create_创作主入口.md",
+        "../eva-create/references/create/shortvideo/00_eva-shortvideo_主入口.md",
+        "../eva-create/references/create/shortvideo/title/00_eva-title_标题即选题.md",
+        "../eva-create/references/create/shortvideo/title/01_eva-title-search-plan_爆款标题搜索方案.md",
+        "../eva-create/references/create/shortvideo/title/02_eva-title-candidate-check_爆款标题候选判断.md",
+        "../eva-create/references/create/shortvideo/title/04_eva-title-promise-check_标题承诺与原稿检查.md",
+    )
+    for relative in internal_audience_callers:
+        caller_path = (base / relative).resolve()
+        if caller_path.exists() and "/eva-audience-finder" in caller_path.read_text(encoding="utf-8"):
+            errors.append(f"internal audience caller must read shared directly instead of routing through the signboard: {relative}")
+
+    think_audience_conflict_path = (base / "../eva-think/SKILL.md").resolve()
+    if think_audience_conflict_path.exists():
+        think_frontmatter_text = think_audience_conflict_path.read_text(encoding="utf-8").split("---", 2)[1]
+        if "/eva-audience-finder" in think_frontmatter_text:
+            errors.append("eva-think frontmatter must not compete for the canonical /eva-audience-finder command")
+
+    audience_asset_registry = read_json(base / "schemas" / "asset-types.json")
+    audience_handoff_registry = read_json(base / "schemas" / "handoff-targets.json")
+    audience_asset = (audience_asset_registry.get("assets") or {}).get("audience-card") or {}
+    if "eva-audience-finder" in set(audience_asset.get("produced_by") or []):
+        errors.append("eva-audience-finder is a thin signboard and must not become a second audience-card producer")
+    if "eva-audience-finder" in set(audience_handoff_registry.get("targets") or []):
+        errors.append("eva-audience-finder must not expand the shared handoff-target contract")
+
     think_entry_path = (base / "../eva-think/SKILL.md").resolve()
     if think_entry_path.exists():
         think_entry_text = think_entry_path.read_text(encoding="utf-8")
@@ -1011,7 +1095,7 @@ def main() -> None:
 
     forbidden_article_skill = (repo_root / "skills" / "eva-article").resolve()
     if forbidden_article_skill.exists():
-        errors.append(f"Eva 2.1.4 must not expose a top-level Article skill: {forbidden_article_skill}")
+        errors.append(f"Eva 2.1.5 must not expose a top-level Article skill: {forbidden_article_skill}")
     asset_registry = read_json(base / "schemas" / "asset-types.json")
     registered_assets = set((asset_registry.get("assets") or {}).keys())
     if "article-card" in registered_assets:
@@ -1129,7 +1213,7 @@ def main() -> None:
 
     internal_pending_dir = base / "references" / "internal-pending"
     if internal_pending_dir.exists():
-        errors.append("references/internal-pending must not exist in Eva 2.1.4; move upgrade drafts outside this skill")
+        errors.append("references/internal-pending must not exist in Eva 2.1.5; move upgrade drafts outside this skill")
 
     new_user_path = (base / "../eva-new-user/SKILL.md").resolve()
     if new_user_path.exists():
@@ -1159,7 +1243,7 @@ def main() -> None:
             "不新增资产类型、状态字段或 schema",
         ):
             if marker not in light_interaction_text:
-                errors.append(f"light-interaction protocol missing 2.1.4 marker: {marker}")
+                errors.append(f"light-interaction protocol missing 2.1.5 marker: {marker}")
 
     low_confidence_path = (base / "references/shared/02_low-confidence_低置信度授权协议.md").resolve()
     if low_confidence_path.exists():
@@ -1262,7 +1346,7 @@ def main() -> None:
         result(
             ok,
             "selftest",
-            "Eva 2.1.4结构自检与场景契约检查通过" if ok else "Eva 2.1.4结构自检与场景契约检查失败",
+            "Eva 2.1.5结构自检与场景契约检查通过" if ok else "Eva 2.1.5结构自检与场景契约检查失败",
             errors,
             warnings,
             {

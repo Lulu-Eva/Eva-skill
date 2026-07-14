@@ -4,19 +4,19 @@
     "name": "Lulu-Eva"
   },
   "metadata": {
-    "description": "Eva-skill v2.1.4 创作者工作台。新增外部材料安全边界与 Link 权限声明、指纹复核护栏。",
-    "version": "2.1.4"
+    "description": "Eva-skill v2.1.5 创作者工作台。新增话题人群识别一级门牌，并明确人群闸门与创作续接。",
+    "version": "2.1.5"
   },
   "plugins": [
     {
       "name": "eva",
-      "description": "Eva-skill v2.1.4 创作者工作台。包含 Eva New User、Think、短视频与文章 Create、Learn、Brief、Link、Review、Lens 和 shared 真源包。",
+      "description": "Eva-skill v2.1.5 创作者工作台。包含 Eva New User、Think、Audience Finder、短视频与文章 Create、Learn、Brief、Link、Review、Lens 和 shared 真源包。",
       "source": "./",
       "strict": false,
-      "version": "2.1.4",
+      "version": "2.1.5",
       "category": "content-creation",
-      "keywords": ["creator", "new-user", "tutorial", "short-video", "xiaohongshu", "script", "script-structure", "content-writing", "title", "body-title", "audience", "thinking", "reframe", "benchmark-copy", "commercial-brief", "brand-brief", "sponsored-content", "memory", "persona", "persona-memory", "user-voice", "voice-card", "ai-check", "learn", "learning", "reading", "research", "study", "review", "content-review", "multi-perspective", "lens", "thought-seed-card", "voice", "chinese"],
-      "skills": ["./skills/eva", "./skills/eva-new-user", "./skills/eva-shared", "./skills/eva-think", "./skills/eva-create", "./skills/eva-learn", "./skills/eva-brief", "./skills/eva-link", "./skills/eva-review", "./skills/eva-lens"]
+      "keywords": ["creator", "new-user", "tutorial", "short-video", "xiaohongshu", "script", "script-structure", "content-writing", "title", "body-title", "audience", "audience-finder", "thinking", "reframe", "benchmark-copy", "commercial-brief", "brand-brief", "sponsored-content", "memory", "persona", "persona-memory", "user-voice", "voice-card", "ai-check", "learn", "learning", "reading", "research", "study", "review", "content-review", "multi-perspective", "lens", "thought-seed-card", "voice", "chinese"],
+      "skills": ["./skills/eva", "./skills/eva-new-user", "./skills/eva-shared", "./skills/eva-think", "./skills/eva-audience-finder", "./skills/eva-create", "./skills/eva-learn", "./skills/eva-brief", "./skills/eva-link", "./skills/eva-review", "./skills/eva-lens"]
     }
   ]
 }

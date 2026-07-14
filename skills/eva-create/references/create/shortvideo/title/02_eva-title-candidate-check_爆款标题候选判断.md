@@ -39,7 +39,7 @@
 
 如果没有候选标题，退回 `references/create/shortvideo/title/01_eva-title-search-plan_爆款标题搜索方案.md`。
 
-如果人群、真实缺口或用户疑问完全不清，先接 `../eva-shared/references/audience/00_eva-audience-finder_话题人群识别器.md`。
+如果具体人群、认知缺口或用户问题任一不清，直接读取 `../eva-shared/references/audience/00_eva-audience-finder_话题人群识别器.md`；完成后返回候选判断，不跳一级门牌。
 
 ## 一字不改可用标准
 

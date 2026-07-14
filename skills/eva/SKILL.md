@@ -1,8 +1,8 @@
 ---
 name: eva
 description: |
-  EvaSkill 2.1.4 的极薄路由入口。仅在用户明确调用 /eva、进入 Eva 模式、点名 Eva 子入口，或明确提出 Eva 的思考梳理、表达诊断、短视频、非虚构自媒体文章、带学、商单 Brief、发布复盘、多元视角、Memory、Link、新手教程任务时使用；不要抢占代码、财务、文件处理或其他无关任务。判断后同轮执行 eva-new-user、eva-think、eva-learn、eva-create、eva-brief、eva-link、eva-review 或 eva-lens。
-  当前入口：/eva、/eva-new-user、/eva-think、/eva-create、/eva-learn、/eva-brief、/eva-link、/eva-review、/eva-lens。兼容入口：/eva-reframe、/eva-audience-finder、/eva-benchmark-copy、/eva-memory、/eva-persona-memory、/eva-user-voice、/eva-ai-check。自然语言触发包括：开启新手教程、我是新用户、教我怎么用 Eva、帮我想想、问题归位、这个话题讲给谁、对标拆解、AI 味检测、人设梳理、提炼我的文风、保存或回捞点子、带我学懂、做一条短视频、写一篇公众号文章、把资料写成观点长文、拆品牌 Brief、发布后复盘、多元视角、深度审视、把提示词接进 Eva。
+  EvaSkill 2.1.5 的极薄路由入口。仅在用户明确调用 /eva、进入 Eva 模式、点名 Eva 子入口，或明确提出 Eva 的思考梳理、话题人群识别、表达诊断、短视频、非虚构自媒体文章、带学、商单 Brief、发布复盘、多元视角、Memory、Link、新手教程任务时使用；不要抢占代码、财务、文件处理或其他无关任务。判断后同轮执行 eva-new-user、eva-think、eva-audience-finder、eva-learn、eva-create、eva-brief、eva-link、eva-review 或 eva-lens。
+  当前入口：/eva、/eva-new-user、/eva-think、/eva-audience-finder、/eva-create、/eva-learn、/eva-brief、/eva-link、/eva-review、/eva-lens。兼容入口：/eva-reframe、/eva-benchmark-copy、/eva-memory、/eva-persona-memory、/eva-user-voice、/eva-ai-check。自然语言触发包括：开启新手教程、我是新用户、教我怎么用 Eva、帮我想想、问题归位、这个话题讲给谁、这个话题背后是什么人群、对标拆解、AI 味检测、人设梳理、提炼我的文风、保存或回捞点子、带我学懂、做一条短视频、写一篇公众号文章、把资料写成观点长文、拆品牌 Brief、发布后复盘、多元视角、深度审视、把提示词接进 Eva。
 ---
 
 # Eva：极薄路由
@@ -26,10 +26,10 @@ description: |
 | `/eva-link`、`eva-link-builder`、`eva-link-doctor`、自定义 Eva-Skill、把提示词接进 Eva、检查 Link、用我的某个 Link | `eva-link` | 本地工作流接入专线 |
 | `/eva-review`、Eva Review、复盘已发布内容、回填上次结果、回看最近内容、总结内容规律 | `eva-review` | 全平台发布后复盘与账号规律回溯 |
 | `/eva-lens`、Eva Lens、多元视角、从不同视角看、读者/反对者/行业现实/创作者视角、深度审视、深入推演、反向审查当前判断 | `eva-lens` | 快速补光或深度审视，不建档不保存 |
+| `/eva-audience-finder`、话题人群识别器、这个话题背后是什么人群、真正戳中了谁、这个选题讲给谁、谁会在意 | `eva-audience-finder` | 用户明确提出人群识别时直达一级门牌，读取 shared Audience Finder |
 | `/eva-ai-check`、一般文字 AI 味检测、有没有人味、表达真实性审查 | `eva-think` | 读取 shared AI Check；明确是视频稿时可由 Create 调用同一真源 |
 | `/eva-benchmark-copy`、对标拆解、拆这篇爆款内容、分析样本结构 | `eva-think` | 读取 shared Benchmark；明确要转短视频时再交 Create |
 | 帮我找/搜/刷/核验平台对标、找爆款标题、验证这个选题是不是自嗨 | `eva-create` | 读取 Title 手动搜索方案；只给搜索词、观察指标和贴回要求，用户亲自刷平台 |
-| `/eva-audience-finder`、这个话题戳中了谁、这个选题讲给谁、帮我找真正会在意的人 | `eva-think` | 读取 shared Audience Finder |
 | `/eva-memory`、保存、沉淀、回捞点子卡、下次还能用 | `eva-think` | 读取 shared Memory；保存前仍需确认和 Asset 校验 |
 | `/eva-persona-memory`、人设梳理、我的经历为什么能讲、我的故事怎么用 | `eva-think` | 读取 shared Persona Memory |
 | `/eva-user-voice`、提炼我的文风、我的语气节奏、以后按我的语气写、不要璐璐腔 | `eva-think` | 读取 shared User Voice |
@@ -49,6 +49,8 @@ description: |
 - 发布前要求预测播放、点赞、完播或转化时，不输出下一条内容的预测区间；只说明账号历史参考范围、当前证据强弱和发布后应观察的指标。已发布结果进入 Review。
 - 涉及具体医疗、财务、税务或法律问题时，Eva 可以梳理事实、解释一般原则并列出咨询问题，但不替代诊断、治疗、投资借贷决策、税务结论、合同或纠纷法律意见；需要个性化结论时，按用户实际涉及的每个领域分别点明应咨询的医生、利益冲突透明且具有相应资质的财务/投顾人员、会计师/税务师或律师。锋利的心理解释可以作为思考假设，但不能升级成临床诊断。
 - “多元视角 / 从不同视角看 / 用 Lens 看”进入 `eva-lens`；用户只说“深度想想”但问题尚未形成判断时，仍由 Think 先梳理，不把 Lens 变成陪聊入口。
+- “用话题人群识别器 / 这个话题背后是什么人群 / 戳中了谁 / 讲给谁”进入 `eva-audience-finder`；“我想到一个选题 / 帮我看看这个话题 / 想聊聊”仍进入 Think。出现“话题”二字本身不构成人群识别意图。
+- Think、Create、Learn 或 Link 在内部发现人群不清时，直接读取 shared Audience Finder，并在完成后返回原调用模块；内部调用不经过一级门牌。
 - “提取我朋友圈的语气 / 调调 / 以后照着这个写 / 这是我以前朋友圈样本”不是创作意图，路由到 `eva-think`，由 Think 转 shared Memory 的文风提取。
 - “朋友圈 Link / 用我的朋友圈 Link / 默认走我的朋友圈 Link”是 Link 意图，路由到 `eva-link`。
 - 用户显式触发 `eva-learn`、`eva-brief`、`eva-link` 时，不回主路由二次判断。
@@ -62,6 +64,7 @@ description: |
 ```text
 eva-new-user -> ../eva-new-user/SKILL.md
 eva-think  -> ../eva-think/SKILL.md
+eva-audience-finder -> ../eva-audience-finder/SKILL.md
 eva-create -> ../eva-create/SKILL.md
 eva-learn  -> ../eva-learn/SKILL.md
 eva-brief  -> ../eva-brief/SKILL.md
@@ -71,7 +74,7 @@ eva-lens   -> ../eva-lens/SKILL.md
 ```
 
 - 用户显式调用某个子入口时，直接执行该入口，不回主路由复述一次。
-- 用户显式调用七个兼容入口时，按路由表读取现有 Think/Create/shared 真源；兼容入口不创建第二套实现。
+- 用户显式调用六个兼容入口时，按路由表读取现有 Think/Create/shared 真源；兼容入口不创建第二套实现。
 - 不得只输出“这个交给某入口处理”后停止。
 - 不默认向用户展示内部入口名；只有切换会改变任务边界时，才用一句自然语言说明。
 - 基础模型直写不生成 Eva Asset、不声称通过 Eva 短视频闸门；用户后来要求保存或接入 Link 时，再进入对应入口。

@@ -60,7 +60,7 @@
 - 原稿素材真实、有生命力，但标题承诺过大 -> 建议保留原稿，重写标题。
 - 双标题只是“不顺承”，但有明确分工或共同爆点词 -> 不判错，继续看内容是否兑现承诺。
 - 双标题没有共同爆点词、没有明确分工、也不围绕同一件事 -> 先回 `references/create/shortvideo/title/02_eva-title-candidate-check_爆款标题候选判断.md` 重做双标题组合。
-- 人群不清 -> 先接 `/eva-audience-finder`。
+- 具体人群、认知缺口或用户问题任一不清 -> 直接读取 shared Audience Finder，完成后返回本模块。
 - 两边都弱 -> 回到 `references/create/shortvideo/title/01_eva-title-search-plan_爆款标题搜索方案.md`，不直接写稿。
 
 如果标题没有任何验证线索，不能因为有原稿就进入正文改写。先输出搜索验证动作。
@@ -83,8 +83,8 @@
 
 ## 标题锚点检查
 
-- 人群是否清楚：
-- 真实缺口是否清楚：
+- 具体人群是否清楚：
+- 认知缺口是否清楚：
 - 用户疑问是否清楚：
 - 标题验证线索：有 / 无
 
@@ -94,7 +94,7 @@
 观察指标：
 ```
 
-如果人群、真实缺口或用户疑问任一不清，接 `/eva-audience-finder`。
+如果具体人群、认知缺口或用户问题任一不清，直接读取 shared Audience Finder；完成后返回本模块，不跳一级门牌。
 
 如果三项清楚但没有验证线索，接 `references/create/shortvideo/title/01_eva-title-search-plan_爆款标题搜索方案.md`，只给搜索验证动作。
 

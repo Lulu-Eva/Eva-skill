@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Check Eva Shared 2.1.4 local structure and dependencies."""
+"""Check Eva Shared 2.1.5 local structure and dependencies."""
 
 from __future__ import annotations
 
@@ -47,6 +47,9 @@ OPTIONAL_SCRIPTS = []
 REQUIRED_PEER_SKILLS = {
     "eva": [],
     "eva-new-user": [],
+    "eva-audience-finder": [
+        "../eva-shared/references/audience/00_eva-audience-finder_话题人群识别器.md",
+    ],
     "eva-think": [
         "references/think/00_eva-think_思考助理.md",
         "references/think/01_eva-reframe_表象问题归位.md",
@@ -370,7 +373,7 @@ def check_peer_skills(base: Path) -> tuple[list[str], list[str], dict]:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Check Eva Shared 2.1.4 structure and dependencies.")
+    parser = argparse.ArgumentParser(description="Check Eva Shared 2.1.5 structure and dependencies.")
     parser.add_argument("--base", default=".", help="Base folder containing schemas/ and scripts/.")
     parser.add_argument("--link", action="append", help="Optional Link config path to note in report.")
     add_common_arguments(parser)
@@ -417,7 +420,7 @@ def main() -> None:
         result(
             ok,
             "doctor",
-            "Eva Shared 2.1.4结构正常" if ok else "Eva Shared 2.1.4结构异常",
+            "Eva Shared 2.1.5结构正常" if ok else "Eva Shared 2.1.5结构异常",
             errors,
             warnings,
             data,

@@ -1,5 +1,5 @@
 {
-  "version": "2.1.4",
+  "version": "2.1.5",
   "purpose": "Scenario contract inventory for same-turn routing, staged loading, hard gates, and user-facing lightness. Structural selftest validates this inventory but does not execute model behavior.",
   "cases": [
     {
@@ -299,11 +299,71 @@
       "expected_terminal": "reframe-surface-metric-to-content-or-evidence-question"
     },
     {
-      "id": "compatibility-audience-alias",
+      "id": "explicit-audience-entry",
       "input": "/eva-audience-finder 这个话题真正会戳中谁？",
-      "expected_route": "eva-think-to-shared-audience",
-      "forbid": ["generic-think-only", "write-full-script"],
+      "expected_route": "eva-audience-finder-to-shared-audience",
+      "forbid": ["generic-think-only", "duplicate-audience-method", "write-full-script"],
+      "must_include": ["specific-audience", "cognitive-gap", "user-question"],
       "expected_terminal": "audience-position-gap-and-user-question"
+    },
+    {
+      "id": "explicit-audience-natural-language",
+      "input": "帮我看看‘不想上班’这个话题背后是什么人群，真正戳中了谁？",
+      "expected_route": "eva-audience-finder-to-shared-audience",
+      "forbid": ["eva-think-default", "require-feature-name", "write-full-script"],
+      "must_include": ["specific-audience", "cognitive-gap", "user-question"],
+      "expected_terminal": "audience-analysis-with-one-content-entry"
+    },
+    {
+      "id": "ambiguous-topic-default-think",
+      "input": "我想到一个选题，想跟你聊聊。",
+      "expected_route": "eva-think",
+      "forbid": ["eva-audience-finder-top-level", "force-audience-questionnaire", "start-writing"],
+      "expected_terminal": "direct-discussion-or-one-think-question"
+    },
+    {
+      "id": "audience-analysis-only-stops",
+      "input": "/eva-audience-finder 帮我看看‘情绪价值’真正替谁说话，只分析人群，先不要写内容。",
+      "expected_route": "eva-audience-finder-to-shared-audience",
+      "forbid": ["title-search-plan", "write-title", "write-full-script", "auto-save"],
+      "expected_terminal": "audience-analysis-stops-without-creation"
+    },
+    {
+      "id": "think-internal-audience-return",
+      "input": "/eva-think 我们已经聊出‘收藏很多 AI 教程却学不完’，我想判断它有没有内容价值，但还不知道替谁说话。",
+      "expected_route": "eva-think-to-shared-audience-then-return",
+      "forbid": ["jump-to-top-level-audience-entry", "write-full-script", "routing-loop"],
+      "expected_terminal": "audience-result-back-in-think"
+    },
+    {
+      "id": "create-audience-xhs-return",
+      "input": "帮我把‘收藏很多 AI 教程却学不完’做成一条小红书口播，我还没想清楚具体讲给谁。",
+      "expected_route": "eva-create-to-shared-audience-back-to-title-search",
+      "forbid": ["jump-to-eva-think", "routing-loop", "write-full-script-before-title-validation"],
+      "must_include": ["return-to-title-search", "tailored-search-terms"],
+      "expected_terminal": "specific-keywords-and-request-for-three-to-five-real-titles"
+    },
+    {
+      "id": "create-audience-douyin-return",
+      "input": "把‘收藏很多 AI 教程却学不完’写成抖音无封面标题口播，我还没想清楚讲给谁。",
+      "expected_route": "eva-create-to-shared-audience-back-to-first-line",
+      "forbid": ["jump-to-eva-think", "routing-loop", "force-title-search"],
+      "must_include": ["return-to-create", "first-line-content-entry"],
+      "expected_terminal": "first-line-then-script-route"
+    },
+    {
+      "id": "audience-clear-no-repeat",
+      "input": "做成小红书口播：讲给收藏了很多 AI 教程却迟迟没开始的自由职业者；她们误以为自己缺时间，其实是目标过大；她们会问‘AI 到底该先学什么’。",
+      "expected_route": "eva-create-title-search",
+      "forbid": ["repeat-audience-finder", "audience-questionnaire", "write-full-script-before-title-validation"],
+      "expected_terminal": "tailored-title-search-plan"
+    },
+    {
+      "id": "audience-to-article-return",
+      "input": "/eva-audience-finder 先看‘AI 时代培训的战争结束了’替谁说话，然后把我的判断写成一篇公众号文章。",
+      "expected_route": "eva-audience-finder-to-shared-audience-then-eva-create-article",
+      "forbid": ["short-video-title-gate", "short-video-first-line-gate", "routing-loop"],
+      "expected_terminal": "article-reader-task-and-complete-article-when-information-is-sufficient"
     },
     {
       "id": "compatibility-benchmark-alias",

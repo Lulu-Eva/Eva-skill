@@ -104,7 +104,7 @@ Eva 的阶段性判断是什么
 | 私人感受说不清 | 找一个具体瞬间或真实冲突 |
 | 两个判断冲突 | 找出不能同时成立的前提 |
 | 表象问题 | 按需读取 `01_eva-reframe_表象问题归位.md` |
-| 有话题但不知道讲给谁 | 读取 shared Audience Finder |
+| 已形成话题，正在判断内容价值或准备创作，但具体人群、认知缺口、用户问题任一不清 | 读取 shared Audience Finder，完成后返回 Think |
 | 反复分析但不行动 | 收束到一个低风险验证动作 |
 
 规则：
@@ -141,8 +141,8 @@ Eva 的阶段性判断是什么
 进入短视频前：
 
 1. 想法不清，留在 Think 归位。
-2. 话题明确但人群、真实缺口或用户疑问不清，读取 shared Audience Finder。
-3. 人群和用户疑问清楚后，转 `eva-create` 的标题、开头或脚本入口。
+2. 话题明确后，按 shared Audience Finder 的三项闸门检查：具体人群必须包含处境或身份冲突，认知缺口必须落到相信、误解或说不出的感受，用户问题必须能形成一句真实会搜索、追问或希望被回答的话。任一项不成立，读取 shared Audience Finder。
+3. Audience Finder 完成后控制权回到 Think；三项清楚后，再转 `eva-create` 的标题、开头或脚本入口。
 4. 不在 Think 内部替代标题验证、第一句话交接或正文路线图。
 5. 只有用户明确要求保存，才进入 Memory 和 Asset 校验。
 
@@ -160,7 +160,7 @@ Eva 的阶段性判断是什么
 
 - 有经历、情绪或观察：提炼 3-5 个内容火花，每个只写来源和下一步。
 - 没有任何材料：只问最近哪个具体瞬间让用户产生过情绪。
-- 已有明确话题但人群不清：转 Audience Finder。
+- 已有明确话题，且用户开始判断内容价值、讲给谁或准备创作，但三项闸门未通过：读取 shared Audience Finder，完成后回到 Think。
 - 用户明确要做短视频或写成文章：选出最强一个火花后转 Eva Create，不在 Think 里直接成稿。
 
 ## 专项诊断转接
@@ -169,7 +169,7 @@ Think 负责识别入口，不缩写以下模块的判断标准：
 
 | 用户信号 | 读取真源 |
 |---|---|
-| `/eva-audience-finder`、这个话题戳中了谁、这个选题讲给谁 | shared Audience Finder |
+| 已经在 Think 对话中，用户开始明确追问这个话题戳中了谁、讲给谁 | shared Audience Finder；完成后回到 Think，不跳一级门牌 |
 | `/eva-benchmark-copy`、对标拆解、拆这篇爆款内容 | shared Benchmark；只拆结构，不直接写稿 |
 | `/eva-ai-check`、AI 味、有没有人味、表达真实性审查 | shared AI Check；默认只诊断，明确授权才局部改写 |
 | `/eva-reframe`、限流、垂直、为什么不涨粉、小眼睛低 | Reframe |

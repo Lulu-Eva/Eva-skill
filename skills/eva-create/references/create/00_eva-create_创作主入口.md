@@ -23,7 +23,7 @@ Eva Create 只做一层内容形式分流：短视频进入 shortvideo，非虚�
 
 | 信号 | 读取 |
 |---|---|
-| 话题、热词、现象、标题，但不知道讲给谁 | `../eva-shared/references/audience/00_eva-audience-finder_话题人群识别器.md` |
+| 话题、热词、现象、标题，但具体人群、认知缺口、用户问题任一不清 | 直接读取 `../eva-shared/references/audience/00_eva-audience-finder_话题人群识别器.md`，完成后返回 Create |
 | 短视频对标文案、爆款笔记、口播稿拆解 | `../eva-shared/references/benchmark/00_eva-benchmark-copy_对标文案拆解.md` |
 | 品牌 Brief、商单需求、合作口径、产品卖点、商单原稿、同产品样本 | `../eva-shared/references/commerce/00_eva-commerce_商单主入口.md` |
 | 视频稿 AI 味、太机械、表达真实性审查 | `../eva-shared/references/quality/00_eva-ai-check_表达真实性审查.md` |
@@ -43,7 +43,7 @@ Eva Create 只做一层内容形式分流：短视频进入 shortvideo，非虚�
 
 ## 硬规则
 
-- 短视频没有人群和用户疑问，不直接写完整稿；Article 按自己的读者任务与材料充分度判断。
+- 短视频进入完整稿前，具体人群、认知缺口和用户问题必须全部通过 shared Audience Finder 的三项闸门；任一项不清就直接读取 shared 真源，完成后返回 Create。Article 按自己的读者任务与材料充分度判断。
 - 标题验证是短视频标题链路的硬闸门，不是 Article 成稿前的硬闸门。
 - 依赖封面或标题点击的短视频平台，第一次要求完整稿且标题无验证线索时先交付定制标题搜索方案。明确做抖音、视频号等没有封面点击的完整口播时，不强制平台标题搜索；先形成能被正文兑现的第一句话，再进入路线和成稿。
 - 短视频商单先拆 Brief，再进入标题或第一句话链路。

@@ -1,4 +1,4 @@
 interface:
   display_name: "Eva"
-  short_description: "Eva 主入口，按意图进入思考、创作、学习、复盘、视角补充或 Link"
-  default_prompt: "用 $eva 判断这次该进入 Think、Create、Learn、Brief、Link、Review 还是 Lens。"
+  short_description: "Eva 主入口，按意图进入思考、人群识别、创作、学习、复盘或 Link"
+  default_prompt: "用 $eva 判断这次该进入 Think、Audience、Create、Learn、Brief、Link、Review 还是 Lens。"
