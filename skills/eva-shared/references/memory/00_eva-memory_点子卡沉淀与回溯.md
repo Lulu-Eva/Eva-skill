@@ -270,8 +270,8 @@ voice-card 的用途不是让用户变成某种固定腔调，而是防止写稿
 
 在主链路指定的两个主动回捞点，也可以扫描 `eva-memory/`：
 
-- `references/create/shortvideo/title/02_eva-title-candidate-check_爆款标题候选判断.md`：回捞 `idea-card`、经历卡和 `persona-card`，判断标题承诺能否兑现。
-- `references/create/shortvideo/script/01_eva-script-logic_正文逻辑链推理.md`：回捞 `persona-card`、`voice-card`、`idea-card` 和经历卡，确认表达资格、用户文风和正文素材。
+- `../eva-create/references/create/shortvideo/title/02_eva-title-candidate-check_爆款标题候选判断.md`：回捞 `idea-card`、经历卡和 `persona-card`，判断标题承诺能否兑现。
+- `../eva-create/references/create/shortvideo/script/01_eva-script-logic_正文逻辑链推理.md`：回捞 `persona-card`、`voice-card`、`idea-card` 和经历卡，确认表达资格、用户文风和正文素材。
 
 匹配优先级：
 

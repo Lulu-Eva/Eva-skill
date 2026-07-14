@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Prompt-level lint checks for Eva 2.1 source-of-truth boundaries."""
+"""Prompt-level lint checks for Eva 2.2 source-of-truth boundaries."""
 
 from __future__ import annotations
 
@@ -206,11 +206,15 @@ def rel(path: Path, base: Path) -> str:
 
 
 def md_files(base: Path) -> list[Path]:
-    candidates = list(base.rglob("*.md"))
-    for peer in ("eva", "eva-think", "eva-create", "eva-learn", "eva-brief", "eva-link"):
-        peer_root = base.parent / peer
-        if peer_root.exists():
-            candidates.extend(peer_root.rglob("*.md"))
+    # Scan every installed/source Eva sibling dynamically.  A hard-coded peer
+    # list silently skipped new top-level entries (for example Preflight), which
+    # made source-of-truth duplication checks weaker each time Eva grew.
+    skills_root = base.parent
+    candidates: list[Path] = []
+    if skills_root.exists():
+        for skill_root in skills_root.iterdir():
+            if skill_root.is_dir():
+                candidates.extend(skill_root.rglob("*.md"))
     return sorted({path.resolve() for path in candidates})
 
 

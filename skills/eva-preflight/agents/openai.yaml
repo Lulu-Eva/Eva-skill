@@ -1,0 +1,4 @@
+interface:
+  display_name: "Eva Preflight｜发布前审核"
+  short_description: "发布前检查自然语言成稿的承诺、逻辑、事实与表达边界"
+  default_prompt: "使用 $eva-preflight 审核这篇待发布稿，给出三档发布判断和一个下一步动作。"

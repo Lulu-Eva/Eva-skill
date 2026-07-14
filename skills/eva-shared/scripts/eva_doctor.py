@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Check Eva Shared 2.1.5 local structure and dependencies."""
+"""Check Eva Shared 2.2.0 local structure and dependencies."""
 
 from __future__ import annotations
 
@@ -58,6 +58,7 @@ REQUIRED_PEER_SKILLS = {
         "../eva-shared/references/benchmark/00_eva-benchmark-copy_对标文案拆解.md",
         "../eva-shared/references/quality/00_eva-ai-check_表达真实性审查.md",
         "../eva-shared/references/shared/06_external-material-safety_外部材料安全边界.md",
+        "../eva-shared/references/lens/00_eva-lens-discipline-divergence_学科发散.md",
     ],
     "eva-create": [
         "references/create/00_eva-create_创作主入口.md",
@@ -122,7 +123,16 @@ REQUIRED_PEER_SKILLS = {
         "references/lens/01_quick_快速补光.md",
         "references/lens/02_deep_深度审视.md",
         "references/lens/03_evidence_证据与出口边界.md",
+        "../eva-shared/references/lens/00_eva-lens-discipline-divergence_学科发散.md",
         "../eva-shared/references/shared/06_external-material-safety_外部材料安全边界.md",
+    ],
+    "eva-preflight": [
+        "references/preflight/00_eva-preflight_发布前审核主控.md",
+        "references/preflight/01_eva-preflight-shortvideo_短视频审核.md",
+        "references/preflight/02_eva-preflight-article_文章审核.md",
+        "references/preflight/03_eva-preflight-social_图文与一般社媒内容审核.md",
+        "references/preflight/04_eva-preflight-expression-assets_表达资产增强.md",
+        "references/preflight/05_eva-preflight-truth-source-call_真源只读调用.md",
     ],
 }
 
@@ -345,8 +355,12 @@ def check_peer_skills(base: Path) -> tuple[list[str], list[str], dict]:
     if schema_path.exists():
         version = str(read_json(schema_path).get("version", ""))
         data["eva_shared_asset_types_version"] = version
-        if not version.startswith("2.1."):
-            errors.append(f"schemas/asset-types.json version must be 2.1.x, got {version or '<missing>'}")
+        expected_version = VERSION.rsplit("-", 1)[-1]
+        if version != expected_version:
+            errors.append(
+                "schemas/asset-types.json version must match eva_common "
+                f"{expected_version}, got {version or '<missing>'}"
+            )
 
     peer_status: dict[str, dict] = {}
     for skill_name, referenced_paths in REQUIRED_PEER_SKILLS.items():
@@ -368,12 +382,18 @@ def check_peer_skills(base: Path) -> tuple[list[str], list[str], dict]:
             target = (skill_root / relative).resolve()
             if not target.exists():
                 errors.append(f"../{skill_name}/SKILL.md referenced missing source: {relative}")
+        if skill_name in ("eva-think", "eva-lens"):
+            discipline_reference = "../eva-shared/references/lens/00_eva-lens-discipline-divergence_学科发散.md"
+            if discipline_reference not in skill_text:
+                errors.append(
+                    f"../{skill_name}/SKILL.md must reference the shared Lens discipline-divergence truth source"
+                )
     data["peer_skills"] = peer_status
     return errors, warnings, data
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Check Eva Shared 2.1.5 structure and dependencies.")
+    parser = argparse.ArgumentParser(description="Check Eva Shared structure and dependencies.")
     parser.add_argument("--base", default=".", help="Base folder containing schemas/ and scripts/.")
     parser.add_argument("--link", action="append", help="Optional Link config path to note in report.")
     add_common_arguments(parser)
@@ -420,7 +440,9 @@ def main() -> None:
         result(
             ok,
             "doctor",
-            "Eva Shared 2.1.5结构正常" if ok else "Eva Shared 2.1.5结构异常",
+            f"Eva Shared {VERSION.rsplit('-', 1)[-1]}结构正常"
+            if ok
+            else f"Eva Shared {VERSION.rsplit('-', 1)[-1]}结构异常",
             errors,
             warnings,
             data,

@@ -23,7 +23,7 @@
 
 ## 必经规则
 
-商单、标题/主问题冲突、长素材未选入口、复杂故事、材料双薄、深度审视或完整发布审查，进入 `references/create/shortvideo/script/05_eva-script-writing_正文撰写.md` 前必须经过本模块。普通、非商单、单一主问题且素材足够的正文可以改走 `03_eva-script-runtime_普通正文简版路线.md`。
+商单、标题/主问题冲突、长素材未选入口、复杂故事、材料双薄、系统论证或复杂改稿，进入 `references/create/shortvideo/script/05_eva-script-writing_正文撰写.md` 前必须经过本模块。普通、非商单、单一主问题且素材足够的正文可以改走 `03_eva-script-runtime_普通正文简版路线.md`。基本成形、尚未发布的稿件要求综合发布前审核时交给 `eva-preflight`，不由路线图输出发布准备度三档结论。
 
 长素材消化和商单约束检查只能提供输入材料与约束，不能替代本模块。
 

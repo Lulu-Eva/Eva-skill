@@ -1,6 +1,6 @@
 ---
 name: eva-new-user
-description: Eva New User 2.1.5 独立新手教程。用于用户明确说 /eva-new-user、Eva New User、我是新用户、开启新手教程、教我怎么用 Eva，或在裸 /eva 欢迎语后选择新手教程时使用。开始前动态扫描当前环境已安装的 Eva 子 Skill，再围绕用户当前目标完成“演示、跟做、独立发起”的最小闭环；允许用户随时说“跳过”、指定提前学习的功能，或退出教程直接处理真实任务。
+description: Eva New User 2.2.0 独立新手教程。用于用户明确说 /eva-new-user、Eva New User、我是新用户、开启新手教程、教我怎么用 Eva，或在裸 /eva 欢迎语后选择新手教程时使用。开始前动态扫描当前环境已安装的 Eva 子 Skill，再围绕用户当前目标完成“演示、跟做、独立发起”的最小闭环；允许用户随时说“跳过”、指定提前学习的功能，或退出教程直接处理真实任务。
 ---
 
 # Eva New User
@@ -48,6 +48,8 @@ description: Eva New User 2.1.5 独立新手教程。用于用户明确说 /eva-
 - 有话题但不知道讲给谁：话题人群识别器。
 - 想梳理自己的经历和表达资格：人设采集。
 - 想做短视频或写非虚构自媒体文章：Eva Create。
+- 想从学科机制打开一个话题：Eva Lens。
+- 稿子已经写完，想在发布前总检：Eva Preflight。
 - 想系统学一个主题或读一份资料：Eva Learn。
 
 其他已安装功能只在用户需求命中或主动询问时介绍。
@@ -108,7 +110,8 @@ description: Eva New User 2.1.5 独立新手教程。用于用户明确说 /eva-
 品牌商单 Brief -> eva-brief
 本地工作流接入 -> eva-link
 已发布内容复盘 -> eva-review
-多元视角与深度审视 -> eva-lens
+学科发散、多元视角与深度审视 -> eva-lens
+未发布成稿的发布前总检 -> eva-preflight
 ```
 
 目标 Skill 当前未安装时，明确说当前环境没有发现该功能，不假装执行；可以继续教已安装能力。

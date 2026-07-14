@@ -1,4 +1,4 @@
 interface:
-  display_name: "Eva Lens"
-  short_description: "面向创作者的多元视角快速补光、单视角点射与系统深度审视入口"
-  default_prompt: "用 $eva-lens 从多元视角检查这个判断，指出最大盲区。"
+  display_name: "Eva Lens｜多元视角与学科发散"
+  short_description: "话题未成形时用学科打开，观点成形后用多视角做压力测试"
+  default_prompt: "用 $eva-lens 看这个话题或观点：还没成形就从最匹配的学科发散，已经成形就用多元视角找最大盲区。"
