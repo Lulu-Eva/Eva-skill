@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Check Eva Shared 2.2.0 local structure and dependencies."""
+"""Check Eva Shared 2.2.1 local structure and dependencies."""
 
 from __future__ import annotations
 
@@ -334,6 +334,18 @@ def check_peer_skills(base: Path) -> tuple[list[str], list[str], dict]:
         return errors, warnings, data
 
     skills_root = base.parent
+    package_root = skills_root.parent
+    skillhub_bundle = skills_root.name == "modules" and (package_root / "SKILL.md").exists()
+    data["skillhub_bundle"] = skillhub_bundle
+    if skillhub_bundle:
+        package_readme = package_root / "README.md"
+        package_version = package_root / "VERSION"
+        data["skillhub_root_readme"] = str(package_readme) if package_readme.exists() else None
+        data["skillhub_root_version"] = str(package_version) if package_version.exists() else None
+        if not package_readme.exists():
+            errors.append("missing SkillHub package root README.md")
+        if not package_version.exists():
+            errors.append("missing SkillHub package root VERSION")
     schema_path = base / "schemas" / "asset-types.json"
     shared_skill_md = base / "SKILL.md"
     data["eva_shared_has_skill_md"] = shared_skill_md.exists()

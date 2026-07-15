@@ -26,5 +26,5 @@ __pycache__/
 # Local scratch files
 *.tmp
 
-# Local SkillHub release workspace
+# Local SkillHub release workspace; upload bundles are generated from tracked source
 /SkillHub/

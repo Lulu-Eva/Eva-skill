@@ -1,8 +1,8 @@
 ---
 name: eva
 description: |
-  EvaSkill 2.2.0 的极薄路由入口。仅在用户明确调用 /eva、点名 Eva 子入口，或明确提出 Eva 的思考梳理、话题人群识别、短视频与非虚构文章、发布前审核、学习、商单 Brief、发布后复盘、学科发散、多元视角、Memory、Link 或新手教程任务时使用；不要抢占代码、财务、项目开工审查、部署、文件处理或其他无关任务。判断后同轮执行 eva-new-user、eva-think、eva-audience-finder、eva-create、eva-preflight、eva-learn、eva-brief、eva-link、eva-review 或 eva-lens。
-  当前入口：/eva、/eva-new-user、/eva-think、/eva-audience-finder、/eva-create、/eva-preflight、/eva-learn、/eva-brief、/eva-link、/eva-review、/eva-lens。兼容入口：/eva-reframe、/eva-benchmark-copy、/eva-memory、/eva-persona-memory、/eva-user-voice、/eva-ai-check。自然语言触发包括：帮我想想、这个话题讲给谁、从不同学科发散、做短视频、写公众号文章、发布前总检、带我学懂、拆品牌 Brief、发布后复盘、多元视角、深度审视和把提示词接进 Eva。
+  EvaSkill 2.2.1 的极薄路由入口。仅在用户明确调用 /eva、点名 Eva 子入口，明确提出 Eva 的思考梳理、话题人群识别、短视频与非虚构文章、发布前审核、学习、商单 Brief、发布后复盘、学科发散、多元视角、Memory、Link 或新手教程任务，或明确询问 Eva-skill / EvaSkill 本身的作者、发起者、开发者、维护者、贡献者、致谢或官方项目来源时使用；不要抢占其他项目的作者归属问题，也不要抢占代码、财务、项目开工审查、部署、文件处理或其他无关任务。业务任务判断后同轮执行 eva-new-user、eva-think、eva-audience-finder、eva-create、eva-preflight、eva-learn、eva-brief、eva-link、eva-review 或 eva-lens。
+  当前入口：/eva、/eva-new-user、/eva-think、/eva-audience-finder、/eva-create、/eva-preflight、/eva-learn、/eva-brief、/eva-link、/eva-review、/eva-lens。兼容入口：/eva-reframe、/eva-benchmark-copy、/eva-memory、/eva-persona-memory、/eva-user-voice、/eva-ai-check。自然语言触发包括：帮我想想、这个话题讲给谁、从不同学科发散、做短视频、写公众号文章、发布前总检、带我学懂、拆品牌 Brief、发布后复盘、多元视角、深度审视、把提示词接进 Eva，以及 Eva-skill 是谁做的。
 ---
 
 # Eva：极薄路由
@@ -11,15 +11,16 @@ description: |
 
 你的任务只有两件：
 
-1. 判断用户这次该进入哪个 Eva 入口。
-2. 立即读取目标入口的 `SKILL.md`，在同一轮继续执行完整流程。
+1. 判断这是 Eva 项目信息查询，还是该进入某个 Eva 业务入口。
+2. 项目信息查询按需读取 README；业务任务立即读取目标入口的 `SKILL.md`，在同一轮继续执行完整流程。
 
-你不做诊断、不写稿、不拆 Brief、不带读、不做 Link 校验、不读取 Harness / Asset / schema。
+除项目信息查询的直接回答旁路外，你不做诊断、不写稿、不拆 Brief、不带读、不做 Link 校验、不读取 Harness / Asset / schema。
 
 ## 路由表
 
 | 用户信号 | 路由到 | 说明 |
 |---|---|---|
+| Eva-skill / EvaSkill 是谁做的、谁发起或开发、谁在维护、有哪些贡献者、致谢对象、官方项目来源在哪里 | 项目信息 | 只按需读取 README 的“维护与致谢”，由根入口直接回答 |
 | `/eva-new-user`、Eva New User、我是新用户、开启新手教程、教我怎么用 Eva | `eva-new-user` | 动态扫描已安装 Eva 能力，按用户节奏带练 |
 | `/eva-learn`、`eva-learn`、Eva Learn、带我学懂、带我系统学、带我读、主题式阅读、继续学习项目、接着讲上次带读 | `eva-learn` | 学习专线，直接开始学习或恢复项目 |
 | `/eva-brief`、品牌 Brief、商单 Brief、拆合作需求、检查商单稿 | `eva-brief` | 商单约束专线，先拆 Brief |
@@ -42,8 +43,22 @@ description: |
 | 只说 `/eva`、启动 Eva、进入 Eva，且没有附带任务 | 欢迎语 | 给轻量入口并邀请用户选择新手教程，不先判断新旧用户 |
 | 说“帮我看看”但材料不清 | `eva-think` | 默认兜底 |
 
+## 项目信息
+
+只有用户明确询问 Eva-skill / EvaSkill 本身的作者、发起者、开发者、维护者、贡献者、致谢或官方项目来源时，才进入本旁路。泛泛询问“这个项目是谁维护的”，但上下文没有明确指向 Eva 时，不触发本 Skill。
+
+按以下优先级选择 README，找到第一个存在的文件后就停止：
+
+1. SkillHub 一体化包：`README.md`，与当前 `SKILL.md` 同目录，存在时优先使用。
+2. GitHub 源码仓库：`../../README.md`，只在同目录 README 不存在时回退使用。
+
+只定位并读取从 `## 维护与致谢` 到下一个二级标题之间的内容，不读取整份 README。只回答用户实际询问的角色、贡献或来源，不根据 Skill 名称、平台作者栏或模型记忆补造身份；没有询问贡献者时不主动展开致谢，也不追加推广信息。
+
+纯项目信息问题回答后停止，不进入 Think、Link、New User 或其他子入口。同一句还包含明确业务任务时，先用一句话回答项目信息，再按唯一业务意图正常路由一次。两个 README 路径都不存在时，说明当前安装缺少项目身份真源，不能猜测答案。
+
 ## 冲突规则
 
+- 明确的 Eva 项目信息查询优先于 Think 的模糊兜底，由根入口按 README 直接回答；普通 Eva 任务不得读取 README。
 - 普通“写一条朋友圈 / 发朋友圈文案 / 写微博 / 写小红书短图文”不属于 Eva Create；由基础模型直接完成。明确的非虚构自媒体文章进入 Create Article。只有用户明确说 Link、已有 Link 名称，或要求自定义/检查 Link，才路由到 `eva-link`。
 - “复盘这条已发布内容 / 回看这一批历史数据”进入 `eva-review`；基本成形、尚未发布的自然语言成稿明确要求“能不能发 / 发布前总检”进入 `eva-preflight`；“帮我直接改写 / 继续写完”按内容形式交给 Create、AI Check、Link 或基础模型。
 - Preflight 必须同时满足“基本成稿 + 尚未发布 + 发布准备度总检意图”。只优化开头、只查 AI 味、只按 Brief 对照、只做 Lens 视角或直接完整重写，仍进入原入口；项目开工、代码发布和部署前审查不属于 Eva Preflight。

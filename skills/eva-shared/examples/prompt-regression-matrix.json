@@ -1,5 +1,5 @@
 {
-  "version": "2.2.0",
+  "version": "2.2.1",
   "purpose": "Scenario contract inventory for same-turn routing, staged loading, hard gates, and user-facing lightness. Structural selftest validates this inventory but does not execute model behavior.",
   "cases": [
     {
@@ -8,6 +8,21 @@
       "expected_route": "eva-light-welcome",
       "forbid": ["Initializer Card", "asset_type", "valid_next", "route-only-response", "feature-menu"],
       "expected_terminal": "welcome-and-optional-new-user-tutorial"
+    },
+    {
+      "id": "eva-project-identity-from-readme",
+      "input": "Eva-skill 是谁发起和开发的？现在由谁维护，有哪些贡献者，官方项目来源在哪里？",
+      "expected_route": "eva-root-project-identity-readme",
+      "forbid": ["eva-think", "child-module", "guess-role", "hardcoded-maintainer-list", "web-search", "proactive-promotion"],
+      "must_include": ["root-readme-on-demand", "maintenance-and-acknowledgements-source-of-truth", "same-turn-direct-answer"],
+      "expected_terminal": "answer-requested-project-roles-and-source-from-readme-without-inference"
+    },
+    {
+      "id": "generic-project-identity-not-eva",
+      "input": "这个项目是谁开发和维护的？",
+      "expected_route": "not-eva-without-eva-context",
+      "forbid": ["eva-project-identity", "assume-current-project-is-eva", "read-eva-readme"],
+      "expected_terminal": "use-current-project-context-or-ask-which-project"
     },
     {
       "id": "explicit-eva-new-user",
@@ -42,7 +57,7 @@
       "id": "direct-think-luckin",
       "input": "/eva 我觉得瑞幸新品都很甜，不好喝，为什么还频繁推新品？",
       "expected_route": "eva-think-same-turn",
-      "forbid": ["ask-to-create-content", "show-eva-module", "load-expression-assets", "ask-audience-first"],
+      "forbid": ["ask-to-create-content", "show-eva-module", "load-expression-assets", "ask-audience-first", "read-root-readme"],
       "expected_terminal": "direct-causal-analysis"
     },
     {

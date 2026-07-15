@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Eva 2.2.0 structural checks and prompt scenario-contract validation."""
+"""Eva 2.2.1 structural checks and prompt scenario-contract validation."""
 
 from __future__ import annotations
 
@@ -464,6 +464,29 @@ REQUIRED_22_CASE_CONTRACTS = {
 
 REQUIRED_SCENARIO_CASES.update(REQUIRED_22_CASE_CONTRACTS)
 
+REQUIRED_221_CASE_CONTRACTS = {
+    "eva-project-identity-from-readme": {
+        "expected_route": "eva-root-project-identity-readme",
+        "expected_terminal": "answer-requested-project-roles-and-source-from-readme-without-inference",
+        "forbid": {"eva-think", "child-module", "guess-role", "hardcoded-maintainer-list", "web-search", "proactive-promotion"},
+        "must_include": {"root-readme-on-demand", "maintenance-and-acknowledgements-source-of-truth", "same-turn-direct-answer"},
+    },
+    "generic-project-identity-not-eva": {
+        "expected_route": "not-eva-without-eva-context",
+        "expected_terminal": "use-current-project-context-or-ask-which-project",
+        "forbid": {"eva-project-identity", "assume-current-project-is-eva", "read-eva-readme"},
+        "must_include": set(),
+    },
+    "direct-think-luckin": {
+        "expected_route": "eva-think-same-turn",
+        "expected_terminal": "direct-causal-analysis",
+        "forbid": {"read-root-readme"},
+        "must_include": set(),
+    },
+}
+
+REQUIRED_SCENARIO_CASES.update(REQUIRED_221_CASE_CONTRACTS)
+
 REQUIRED_ROUTER_MARKERS = {
     "eva-new-user": "Router must expose the adaptive new-user tutorial",
     "eva-think": "Router must expose eva-think as the default light entry",
@@ -499,6 +522,17 @@ REQUIRED_ROUTER_MARKERS = {
     "AI Check + 改稿": "Router must resolve combined AI-check and rewrite intent",
     "Review + 改下一篇": "Router must keep Review separate from content production",
     "Review + 补盲区": "Router must hand Review conclusions to Lens without redoing attribution",
+    "明确询问 Eva-skill / EvaSkill 本身": "Router must scope project identity triggers to Eva itself",
+    "作者、发起者、开发者、维护者、贡献者": "Router must expose Eva project attribution intent",
+    "../../README.md": "Source router must know the repository README path",
+    "SkillHub 一体化包：`README.md`": "SkillHub router must know the bundled README path",
+    "存在时优先使用": "Router must prefer the README beside the active Skill entry",
+    "只在同目录 README 不存在时回退使用": "Source router must use the repository README only as fallback",
+    "## 维护与致谢": "Router must delegate project attribution to the README maintenance section",
+    "不读取整份 README": "Router must keep project attribution progressively loaded",
+    "纯项目信息问题回答后停止": "Router must answer attribution without entering a child module",
+    "普通 Eva 任务不得读取 README": "Router must not load README during ordinary work",
+    "不要抢占其他项目的作者归属问题": "Router must not hijack generic project-attribution questions",
 }
 
 REQUIRED_ARCHITECTURE_PATHS = (
@@ -902,6 +936,23 @@ def main() -> None:
                         + ", ".join(missing_markers)
                     )
 
+        for case_id, contract in REQUIRED_221_CASE_CONTRACTS.items():
+            case = case_by_id.get(case_id) or {}
+            for scalar_field in ("expected_route", "expected_terminal"):
+                if case.get(scalar_field) != contract[scalar_field]:
+                    errors.append(
+                        f"prompt scenario case {case_id!r} {scalar_field} must be "
+                        f"{contract[scalar_field]!r}"
+                    )
+            for list_field in ("forbid", "must_include"):
+                actual = set(case.get(list_field) or [])
+                missing_markers = sorted(contract[list_field] - actual)
+                if missing_markers:
+                    errors.append(
+                        f"prompt scenario case {case_id!r} missing {list_field} marker(s): "
+                        + ", ".join(missing_markers)
+                    )
+
     shared_skill_path = base / "SKILL.md"
     if not shared_skill_path.exists():
         errors.append("eva-shared must have SKILL.md so GitHub skill installers copy the shared package")
@@ -945,35 +996,57 @@ def main() -> None:
     repo_root = base.parent.parent
     version_path = repo_root / "VERSION"
     source_checkout = (repo_root / ".git").exists() or (repo_root / ".claude-plugin" / "marketplace.json").exists()
-    layout = "source-checkout" if source_checkout else "installed-skill-bundle"
-    if version_path.exists():
+    skillhub_bundle = base.parent.name == "modules" and (repo_root / "SKILL.md").exists()
+    if source_checkout:
+        layout = "source-checkout"
+    elif skillhub_bundle:
+        layout = "skillhub-bundle"
+    else:
+        layout = "installed-skill-bundle"
+    if (source_checkout or skillhub_bundle) and version_path.exists():
         actual_version = version_path.read_text(encoding="utf-8").strip()
         if actual_version != expected_version:
             errors.append(f"root VERSION must be {expected_version}, got {actual_version or '<empty>'}")
-    elif source_checkout:
+    elif source_checkout or skillhub_bundle:
         errors.append(f"missing root VERSION: {version_path}")
 
     readme_path = repo_root / "README.md"
-    if readme_path.exists():
+    if (source_checkout or skillhub_bundle) and readme_path.exists():
         readme_text = readme_path.read_text(encoding="utf-8")
         for marker in (
             f"# Eva Skill v{expected_version}",
+            f"当前版本：`{expected_version}`。",
             "## 按你想完成的事使用 Eva",
             "## 一个短视频从想法到成稿",
             "## 一篇文章从判断到成稿",
             "## 常见问题",
+            f"## {expected_version} 新增",
             "## 2.2.0 新增",
             "## 2.1.5 新增",
             "## 2.1.4 新增",
             "## 2.1.2 新增",
             "## 维护与致谢",
-            "Eva-skill 由璐璐 Eva 持续维护",
+            "Eva-skill 由璐璐 Eva 发起开发并持续维护",
+            "官方开源仓库：https://github.com/Lulu-Eva/Eva-skill",
+            "需求与产品灵感贡献者",
             "凯瑟琳学姐",
             "梦野学姐",
         ):
             if marker not in readme_text:
                 errors.append(f"README missing {expected_version} release/user-guide marker: {marker}")
-    elif source_checkout:
+        maintenance_tail = readme_text.split("## 维护与致谢", 1)
+        if len(maintenance_tail) != 2:
+            errors.append("README missing maintenance-and-acknowledgements source-of-truth section")
+        else:
+            maintenance_section = maintenance_tail[1].split("\n## ", 1)[0]
+            for marker in (
+                "璐璐 Eva 发起开发并持续维护",
+                "https://github.com/Lulu-Eva/Eva-skill",
+                "需求与产品灵感贡献者",
+            ):
+                if marker not in maintenance_section:
+                    errors.append(f"README maintenance section missing project-attribution marker: {marker}")
+    elif source_checkout or skillhub_bundle:
         errors.append(f"missing root README: {readme_path}")
 
     marketplace_path = repo_root / ".claude-plugin" / "marketplace.json"
@@ -981,6 +1054,8 @@ def main() -> None:
         marketplace = read_json(marketplace_path)
         if str((marketplace.get("metadata") or {}).get("version", "")) != expected_version:
             errors.append("marketplace metadata version must match root VERSION")
+        if f"v{expected_version}" not in str((marketplace.get("metadata") or {}).get("description", "")):
+            errors.append("marketplace metadata description version must match root VERSION")
         plugins = marketplace.get("plugins") or []
         eva_plugin = next((item for item in plugins if isinstance(item, dict) and item.get("name") == "eva"), None)
         if not eva_plugin:
@@ -988,6 +1063,8 @@ def main() -> None:
         else:
             if str(eva_plugin.get("version", "")) != expected_version:
                 errors.append("marketplace eva plugin version must match root VERSION")
+            if f"v{expected_version}" not in str(eva_plugin.get("description", "")):
+                errors.append("marketplace eva plugin description version must match root VERSION")
             if "./skills/eva-preflight" not in set(eva_plugin.get("skills") or []):
                 errors.append("marketplace eva plugin must expose ./skills/eva-preflight")
     elif source_checkout:
@@ -1267,6 +1344,21 @@ def main() -> None:
             if marker not in router_text
         ]
         errors.extend(missing_markers)
+        frontmatter_parts = router_text.split("---", 2)
+        router_frontmatter = frontmatter_parts[1] if len(frontmatter_parts) == 3 else ""
+        for marker in (
+            "明确询问 Eva-skill / EvaSkill 本身",
+            "作者",
+            "发起者",
+            "开发者",
+            "维护者",
+            "贡献者",
+            "官方项目来源",
+        ):
+            if marker not in router_frontmatter:
+                errors.append(f"eva router frontmatter missing project-attribution trigger: {marker}")
+        if "Eva-skill 由璐璐 Eva 发起开发并持续维护" in router_text:
+            errors.append("eva router must not duplicate the README project-attribution truth source")
 
     audience_entry_path = (base / "../eva-audience-finder/SKILL.md").resolve()
     audience_openai_path = (base / "../eva-audience-finder/agents/openai.yaml").resolve()
