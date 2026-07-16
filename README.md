@@ -264,6 +264,8 @@ Eva-skill 由璐璐 Eva 发起开发并持续维护。项目会从真实的内�
 
 官方开源仓库：https://github.com/Lulu-Eva/Eva-skill
 
+感谢 dontbesilent 开源 dbskill，将个人商业方法论提炼并沉淀为可调用的 Skills，为中文 Skill 开源生态作出重要贡献。Eva-skill 的多入口路由与模块分工设计亦受其启发，并在创作者思考与内容生产场景中继续发展。
+
 感谢凯瑟琳学姐和梦野学姐作为需求与产品灵感贡献者，为 Eva-skill 生态提供真实创作场景：凯瑟琳学姐在使用 Eva-skill 创作内容时提出了“学科发散”的需求，推动 Eva Lens 增加观点形成前的跨学科发散模式；梦野学姐提出了“发布前审核”的需求，推动 Eva Preflight 的设计。这两项能力都来自真实创作过程中发现的问题，也是 Eva-skill 持续生长的一部分。
 
 ## 核心边界

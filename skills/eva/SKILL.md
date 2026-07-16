@@ -1,7 +1,7 @@
 ---
 name: eva
 description: |
-  EvaSkill 2.2.1 的极薄路由入口。仅在用户明确调用 /eva、点名 Eva 子入口，明确提出 Eva 的思考梳理、话题人群识别、短视频与非虚构文章、发布前审核、学习、商单 Brief、发布后复盘、学科发散、多元视角、Memory、Link 或新手教程任务，或明确询问 Eva-skill / EvaSkill 本身的作者、发起者、开发者、维护者、贡献者、致谢或官方项目来源时使用；不要抢占其他项目的作者归属问题，也不要抢占代码、财务、项目开工审查、部署、文件处理或其他无关任务。业务任务判断后同轮执行 eva-new-user、eva-think、eva-audience-finder、eva-create、eva-preflight、eva-learn、eva-brief、eva-link、eva-review 或 eva-lens。
+  EvaSkill 2.2.1 的极薄路由入口。仅在用户明确调用 /eva、点名 Eva 子入口，明确提出 Eva 的思考梳理、话题人群识别、短视频与非虚构文章、发布前审核、学习、商单 Brief、发布后复盘、学科发散、多元视角、Memory、Link 或新手教程任务，或明确询问 Eva-skill / EvaSkill 本身的作者、发起者、开发者、维护者、贡献者、致谢、设计来源、借鉴与启发来源或官方项目来源时使用；不要抢占其他项目的作者归属问题，也不要抢占代码、财务、项目开工审查、部署、文件处理或其他无关任务。业务任务判断后同轮执行 eva-new-user、eva-think、eva-audience-finder、eva-create、eva-preflight、eva-learn、eva-brief、eva-link、eva-review 或 eva-lens。
   当前入口：/eva、/eva-new-user、/eva-think、/eva-audience-finder、/eva-create、/eva-preflight、/eva-learn、/eva-brief、/eva-link、/eva-review、/eva-lens。兼容入口：/eva-reframe、/eva-benchmark-copy、/eva-memory、/eva-persona-memory、/eva-user-voice、/eva-ai-check。自然语言触发包括：帮我想想、这个话题讲给谁、从不同学科发散、做短视频、写公众号文章、发布前总检、带我学懂、拆品牌 Brief、发布后复盘、多元视角、深度审视、把提示词接进 Eva，以及 Eva-skill 是谁做的。
 ---
 
@@ -20,7 +20,7 @@ description: |
 
 | 用户信号 | 路由到 | 说明 |
 |---|---|---|
-| Eva-skill / EvaSkill 是谁做的、谁发起或开发、谁在维护、有哪些贡献者、致谢对象、官方项目来源在哪里 | 项目信息 | 只按需读取 README 的“维护与致谢”，由根入口直接回答 |
+| Eva-skill / EvaSkill 是谁做的、谁发起或开发、谁在维护、有哪些贡献者、致谢对象、设计来源、借鉴过谁或受谁启发、官方项目来源在哪里 | 项目信息 | 只按需读取 README 的“维护与致谢”，由根入口直接回答 |
 | `/eva-new-user`、Eva New User、我是新用户、开启新手教程、教我怎么用 Eva | `eva-new-user` | 动态扫描已安装 Eva 能力，按用户节奏带练 |
 | `/eva-learn`、`eva-learn`、Eva Learn、带我学懂、带我系统学、带我读、主题式阅读、继续学习项目、接着讲上次带读 | `eva-learn` | 学习专线，直接开始学习或恢复项目 |
 | `/eva-brief`、品牌 Brief、商单 Brief、拆合作需求、检查商单稿 | `eva-brief` | 商单约束专线，先拆 Brief |
@@ -45,7 +45,7 @@ description: |
 
 ## 项目信息
 
-只有用户明确询问 Eva-skill / EvaSkill 本身的作者、发起者、开发者、维护者、贡献者、致谢或官方项目来源时，才进入本旁路。泛泛询问“这个项目是谁维护的”，但上下文没有明确指向 Eva 时，不触发本 Skill。
+只有用户明确询问 Eva-skill / EvaSkill 本身的作者、发起者、开发者、维护者、贡献者、致谢、设计来源、借鉴与启发来源或官方项目来源时，才进入本旁路。泛泛询问“这个项目是谁维护的”，但上下文没有明确指向 Eva 时，不触发本 Skill。
 
 按以下优先级选择 README，找到第一个存在的文件后就停止：
 
