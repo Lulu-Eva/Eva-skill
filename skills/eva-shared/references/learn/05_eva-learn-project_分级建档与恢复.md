@@ -25,7 +25,7 @@
 2. 当前运行项目的 `./eva-learn/`。
 3. `~/Documents/eva-learn/`。
 
-如果当前目录是 Eva Skill 源码、安装后的 skills 目录或插件缓存，不得在其中创建学习项目，改用用户指定目录或 `~/Documents/eva-learn/`。
+如果当前目录是 Eva-skill 源码、安装后的 skills 目录或插件缓存，不得在其中创建学习项目，改用用户指定目录或 `~/Documents/eva-learn/`。
 
 主题名规则：
 

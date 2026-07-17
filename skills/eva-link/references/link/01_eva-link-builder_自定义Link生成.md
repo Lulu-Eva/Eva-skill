@@ -4,9 +4,9 @@ Eva Link Builder，也可以被用户口头叫作 `eva-link-diy`。正式名称�
 
 Builder 是显性系统任务，允许展示结构、字段和校验结果；但它只在用户明确创建自定义 Link 时启动，不参与普通创作、标题、开头、复盘或点子沉淀。
 
-用户说“自定义一个 Eva-Skill”“自定义 Link”“定制 Eva-Skill”“做自己的 Eva-Skill”时，按产品语义解释为“创建自定义 Eva Link”。不要把这类请求路由到通用 Skill Creator，也不要建议新建 `eva-*` sibling Skill，除非用户明确说要开发一个不接入 Eva Link 的独立 Skill。
+用户说“自定义一个 Eva-skill”“自定义 Link”“定制 Eva-skill”“做自己的 Eva-skill”时，按产品语义解释为“创建自定义 Eva Link”。不要把这类请求路由到通用 Skill Creator，也不要建议新建 `eva-*` sibling Skill，除非用户明确说要开发一个不接入 Eva Link 的独立 Skill。
 
-普通创作意图不能触发 Builder。用户只说“我想写朋友圈 / 微博 / 公众号”“我不想写口播，只想写朋友圈”时，仍走 Eva 创作链路。只有用户明确补充“把这套流程自定义成 Eva-Skill / Link / 以后复用”时，才进入 Builder。
+普通创作意图不能触发 Builder。用户只说“我想写朋友圈 / 微博 / 公众号”“我不想写口播，只想写朋友圈”时，仍走 Eva 创作链路。只有用户明确补充“把这套流程自定义成 Eva-skill / Link / 以后复用”时，才进入 Builder。
 
 ## 定位
 
@@ -26,7 +26,7 @@ Builder 不做正式内容生产，不替 Link 承接用户创作任务。它先
 -> 最后生成本地 Link 文件
 ```
 
-用户刚说“我想自定义一个 Eva-Skill”时，不要立刻生成文件，不要进入通用 Skill 创建教程。先问：
+用户刚说“我想自定义一个 Eva-skill”时，不要立刻生成文件，不要进入通用 Skill 创建教程。先问：
 
 ```text
 你想自定义一个什么样的 Link？
@@ -170,13 +170,13 @@ Link 定义卡：
 
 ### 朋友圈 Link 示例
 
-当用户明确说“自定义 Eva-Skill / 自定义 Link”，并且场景是：
+当用户明确说“自定义 Eva-skill / 自定义 Link”，并且场景是：
 
 ```text
 我大部分时间是用来写朋友圈的。
 我不想写口播，我就想写朋友圈。
 我的朋友圈大概 200 字左右，希望 200 字能写清楚。
-这是我以前写的朋友圈，你帮我定义成一个 Eva-Skill。
+这是我以前写的朋友圈，你帮我定义成一个 Eva-skill。
 ```
 
 Builder 应该理解为：

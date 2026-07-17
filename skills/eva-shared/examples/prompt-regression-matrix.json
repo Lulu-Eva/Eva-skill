@@ -1,5 +1,5 @@
 {
-  "version": "2.2.1",
+  "version": "2.2.2",
   "purpose": "Scenario contract inventory for same-turn routing, staged loading, hard gates, and user-facing lightness. Structural selftest validates this inventory but does not execute model behavior.",
   "cases": [
     {
@@ -23,6 +23,85 @@
       "expected_route": "not-eva-without-eva-context",
       "forbid": ["eva-project-identity", "assume-current-project-is-eva", "read-eva-readme"],
       "expected_terminal": "use-current-project-context-or-ask-which-project"
+    },
+    {
+      "id": "eva-project-license-and-derivative-boundary",
+      "input": "Eva-skill 用的是什么许可证？我可以改名发布修改版，或者拿去商用吗？",
+      "expected_route": "eva-root-project-license-legal-notice",
+      "forbid": ["eva-think", "child-module", "web-search", "assume-free-means-noncommercial", "claim-all-derivatives-must-use-same-license"],
+      "must_include": ["license-on-demand", "cc-by-nc-4.0", "attribution-and-change-marker", "commercial-authorization-boundary", "no-official-endorsement"],
+      "expected_terminal": "answer-license-derivative-and-commercial-boundary-from-project-truth-sources"
+    },
+    {
+      "id": "eva-personal-creator-output-commercialization",
+      "input": "我用 Eva-skill 给自己的账号写文章和视频，能接广告和品牌合作变现吗？需要给 Eva-skill 署名吗？",
+      "expected_route": "eva-root-project-output-extra-permission",
+      "forbid": ["eva-create", "claim-user-owns-all-ai-output-copyright", "allow-eva-skill-redistribution", "extend-to-client-account-service"],
+      "must_include": ["personal-creator", "self-controlled-account", "commercial-final-content-allowed", "ordinary-output-no-eva-attribution-required", "third-party-rights-still-apply"],
+      "expected_terminal": "answer-output-commercialization-from-legal-notice-extra-permission"
+    },
+    {
+      "id": "eva-trademark-official-version-boundary",
+      "input": "我能把自己的改版叫 Eva-skill 官方认证版吗？",
+      "expected_route": "eva-root-project-trademark-notice",
+      "forbid": ["eva-think", "grant-official-status", "block-required-attribution", "assume-registered-symbol"],
+      "must_include": ["trademark-notice-on-demand", "no-implied-endorsement", "reasonable-attribution-allowed", "written-authorization-required"],
+      "expected_terminal": "answer-official-identity-boundary-from-trademark-truth-source"
+    },
+    {
+      "id": "generic-project-license-not-eva",
+      "input": "这个项目是什么许可证，能不能商用？",
+      "expected_route": "not-eva-without-eva-context",
+      "forbid": ["eva-project-license", "assume-current-project-is-eva", "read-eva-license", "read-eva-legal-notice"],
+      "expected_terminal": "use-current-project-context-or-ask-which-project"
+    },
+    {
+      "id": "eva-personal-company-account-priority",
+      "input": "我的小红书账号登记在我自己的公司名下，但内容一直是我本人做，能用 Eva-skill 接商单吗？",
+      "expected_route": "eva-root-project-output-extra-permission",
+      "forbid": ["decide-by-account-registration-alone", "allow-team-shared-use", "allow-client-delivery", "eva-create"],
+      "must_include": ["personal-identity-or-brand", "creator-personally-uses-eva", "creator-controls-editing", "no-team-matrix-or-client-delivery"],
+      "expected_terminal": "apply-personal-creator-priority-test-before-answering-commercial-use"
+    },
+    {
+      "id": "eva-brand-second-use-ordinary-output",
+      "input": "我用 Eva-skill 写了商单稿，品牌拿最终成片去自己的账号发布和投流，还要再找 Eva-skill 授权吗？",
+      "expected_route": "eva-root-project-output-extra-permission",
+      "forbid": ["require-eva-authorization-solely-because-eva-was-used", "claim-eva-controls-ordinary-final-output", "eva-create"],
+      "must_include": ["creator-brand-contract-controls-ordinary-output", "no-automatic-eva-authorization", "protected-eva-material-remains-separate"],
+      "expected_terminal": "distinguish-ordinary-final-output-rights-from-copying-protected-eva-material"
+    },
+    {
+      "id": "eva-enterprise-noncommercial-not-automatic-denial",
+      "input": "我们公司只想非商业地研究 Eva-skill 的路由设计，不做客户交付，也不拿去卖，需要商业授权吗？",
+      "expected_route": "eva-root-project-license-legal-notice",
+      "forbid": ["deny-by-enterprise-identity-alone", "assume-all-enterprise-use-is-commercial", "eva-think"],
+      "must_include": ["noncommercial-purpose-not-entity-identity", "cc-by-nc-and-exceptions-still-apply", "protected-material-scope"],
+      "expected_terminal": "evaluate-purpose-and-protected-material-before-deciding-whether-authorization-is-required"
+    },
+    {
+      "id": "eva-extra-permission-version-and-cure",
+      "input": "我现在合规使用 Eva-skill 2.2.2 做自己的账号。如果以后许可变了，旧版本还能继续用吗？不小心违约后还能补救吗？以前做的内容怎么办？",
+      "expected_route": "eva-root-project-output-extra-permission-term",
+      "forbid": ["apply-future-license-retroactively", "revoke-compliant-version-without-breach", "invalidate-prior-compliant-output", "eva-think"],
+      "must_include": ["version-specific-additional-permission", "irrevocable-while-compliant", "thirty-day-cure", "future-versions-only", "prior-compliant-output-survives"],
+      "expected_terminal": "explain-version-bound-irrevocability-cure-and-no-retroactive-output-invalidation"
+    },
+    {
+      "id": "eva-cloud-platform-necessary-processing",
+      "input": "Eva-skill 装在本地后还要交给 ChatGPT 或 Claude 处理，这种云端运行在许可范围里吗？",
+      "expected_route": "eva-root-project-platform-processing-permission",
+      "forbid": ["grant-general-model-training-right", "grant-independent-platform-commercialization", "claim-local-install-never-uploads", "eva-think"],
+      "must_include": ["necessary-technical-processing", "same-permitted-task-only", "platform-terms-and-data-settings", "no-general-model-training"],
+      "expected_terminal": "answer-limited-technical-processing-and-platform-settings-boundary"
+    },
+    {
+      "id": "eva-unauthorized-client-delivery-mixed-request",
+      "input": "我还没有拿到 Eva-skill 的商业授权，但请你现在用 Eva 给客户账号写一篇交付稿。",
+      "expected_route": "eva-root-project-license-gate-stop",
+      "forbid": ["eva-create", "eva-think", "eva-brief", "continue-after-denying-authorization"],
+      "must_include": ["client-delivery-outside-extra-permission", "written-commercial-authorization-required", "stop-before-business-module"],
+      "expected_terminal": "explain-written-authorization-required-and-stop-eva-business-route"
     },
     {
       "id": "explicit-eva-new-user",
@@ -971,6 +1050,108 @@
       "forbid": ["eva-preflight", "three-tier-publish-verdict", "automatic-rewrite", "replacement-sentence-or-writing-skeleton"],
       "must_include": ["brief-required-items", "brief-prohibitions", "brand-constraints"],
       "expected_terminal": "brief-constraint-comparison-without-three-tier-preflight"
+    },
+    {
+      "id": "memory-inventory-explicit",
+      "input": "/eva-memory 盘点一下我的记忆库，告诉我目前保存了多少张卡",
+      "expected_route": "eva-think-to-shared-memory-inventory",
+      "forbid": ["write-index", "show-all-card-bodies", "auto-enter-create", "scan-outside-current-project", "infer-metadata-from-body"],
+      "must_include": ["card-total", "declared-and-inferred-type-counts", "metadata-health", "one-next-action", "frontmatter-and-filename-only"],
+      "expected_terminal": "readonly-metadata-inventory-then-stop"
+    },
+    {
+      "id": "memory-inventory-ordinary-think-no-scan",
+      "input": "/eva-think 我有点纠结要不要继续做这个选题，你先陪我聊清楚",
+      "expected_route": "eva-think",
+      "forbid": ["memory-inventory-scan", "show-card-counts", "write-index"],
+      "expected_terminal": "ordinary-think-without-memory-inventory"
+    },
+    {
+      "id": "memory-inventory-ordinary-create-no-scan",
+      "input": "/eva-create 帮我把这个已经确定受众的观点写成一篇公众号文章",
+      "expected_route": "eva-create",
+      "forbid": ["memory-inventory-scan", "show-card-counts", "write-index"],
+      "expected_terminal": "ordinary-create-route-without-memory-inventory"
+    },
+    {
+      "id": "memory-inventory-task-recall-stays-one-to-three",
+      "input": "/eva-memory 我正在写女性去大城市生活这个选题，帮我回捞最相关的点子卡",
+      "expected_route": "eva-think-to-shared-memory-task-recall",
+      "forbid": ["memory-inventory-overview", "dump-all-cards", "write-index"],
+      "must_include": ["current-task-relevance", "one-to-three-card-limit"],
+      "expected_terminal": "one-to-three-relevant-cards-then-return-to-caller"
+    },
+    {
+      "id": "memory-task-recall-body-semantic-match",
+      "input": "/eva-memory 我正在写女性去大城市生活。候选卡的 frontmatter 只有类型和日期，但正文写了离开小城市后的真实选择与代价，请按正文相关性回捞",
+      "expected_route": "eva-think-to-shared-memory-task-recall",
+      "forbid": ["memory-inventory-overview", "rewrite-card-metadata", "infer-missing-frontmatter", "dump-all-cards"],
+      "must_include": ["candidate-body-semantic-match", "one-to-three-card-limit", "current-project-memory-boundary"],
+      "expected_terminal": "one-to-three-body-relevant-cards-then-return-to-caller"
+    },
+    {
+      "id": "memory-inventory-drilldown-stops",
+      "input": "刚才盘点完了，现在只展开 persona-card 的列表，先不要看正文，也不要开始写稿",
+      "expected_route": "eva-think-to-shared-memory-inventory-filter",
+      "forbid": ["show-card-bodies", "auto-enter-create", "auto-save", "expand-unrequested-types"],
+      "must_include": ["relative-paths-only", "requested-type-or-keyword-only", "validation-status"],
+      "expected_terminal": "filtered-metadata-list-then-stop-in-memory"
+    },
+    {
+      "id": "memory-inventory-index-first-confirmation",
+      "input": "把这次记忆盘点保存成 eva-memory/INDEX.md",
+      "expected_route": "eva-think-to-shared-memory-index-preview",
+      "forbid": ["write-index", "modify-card", "copy-card-body", "treat-index-as-asset"],
+      "must_include": ["target-eva-memory-index", "preview-only", "second-confirmation-required"],
+      "expected_terminal": "index-path-and-fields-preview-awaiting-second-confirmation"
+    },
+    {
+      "id": "memory-inventory-index-second-confirmation",
+      "input": "我已经看过刚才的 INDEX 预览，确认按预览生成派生索引",
+      "expected_route": "eva-think-to-shared-memory-index-write",
+      "forbid": ["copy-card-body", "overwrite-user-index-without-marker", "add-index-asset-type"],
+      "must_include": ["derived-index-marker", "relative-metadata-only", "safe-replace"],
+      "expected_terminal": "derived-index-safely-written-after-second-confirmation"
+    },
+    {
+      "id": "memory-inventory-text-fallback-duplicates-unchecked",
+      "input": "当前环境没有 Python，请用纯文本降级方式盘点 Eva 记忆库",
+      "expected_route": "eva-think-to-shared-memory-inventory-text-fallback",
+      "forbid": ["claim-no-exact-duplicates", "read-body-for-semantic-topic", "write-index"],
+      "must_include": ["完全重复：未检查（当前为纯文本降级盘点）", "metadata-only-fallback"],
+      "expected_terminal": "basic-readonly-inventory-with-explicit-unchecked-duplicate-status"
+    },
+    {
+      "id": "memory-inventory-missing-root",
+      "input": "/eva-memory 盘点一下，但当前项目没有 eva-memory 目录",
+      "expected_route": "eva-think-to-shared-memory-inventory",
+      "forbid": ["claim-zero-after-scan", "create-memory-directory", "scan-other-projects"],
+      "must_include": ["memory-root-missing"],
+      "expected_terminal": "truthfully-report-memory-library-not-established"
+    },
+    {
+      "id": "memory-inventory-empty-root",
+      "input": "/eva-memory 盘点一下，当前 eva-memory 目录是空的",
+      "expected_route": "eva-think-to-shared-memory-inventory",
+      "forbid": ["invent-card", "auto-create-card", "write-index"],
+      "must_include": ["card-total-zero"],
+      "expected_terminal": "accurately-report-zero-cards-then-stop"
+    },
+    {
+      "id": "memory-inventory-unreadable-partial",
+      "input": "/eva-memory 盘点记忆库，其中一张卡无法读取，其余卡片正常",
+      "expected_route": "eva-think-to-shared-memory-inventory",
+      "forbid": ["abort-whole-inventory", "pretend-unreadable-file-was-validated", "write-index"],
+      "must_include": ["continue-other-cards", "unreadable-file-count"],
+      "expected_terminal": "partial-inventory-with-unreadable-file-count"
+    },
+    {
+      "id": "memory-inventory-symlink-boundary",
+      "input": "/eva-memory 盘点记忆库；目录里同时有符号链接根、链接目录、链接文件和循环链接",
+      "expected_route": "eva-think-to-shared-memory-inventory",
+      "forbid": ["follow-symlink-root", "follow-symlink-directory", "follow-symlink-file", "follow-symlink-loop"],
+      "must_include": ["symlink-skipped-count", "current-project-memory-boundary"],
+      "expected_terminal": "inventory-with-all-symlink-forms-skipped"
     }
   ]
 }

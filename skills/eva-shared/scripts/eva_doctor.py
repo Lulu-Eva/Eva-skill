@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Check Eva Shared 2.2.1 local structure and dependencies."""
+"""Check Eva Shared 2.2.2 local structure and dependencies."""
 
 from __future__ import annotations
 
@@ -40,12 +40,16 @@ REQUIRED_SCRIPTS = [
     "eva_doctor.py",
     "eva_prompt_lint.py",
     "eva_selftest.py",
+    "eva_memory_inventory.py",
 ]
 
 OPTIONAL_SCRIPTS = []
 
 REQUIRED_PEER_SKILLS = {
-    "eva": [],
+    "eva": [
+        "references/project/00_project-info_项目身份与许可.md",
+        "references/project/01_project-license-routing_项目许可问答路由.md",
+    ],
     "eva-new-user": [],
     "eva-audience-finder": [
         "../eva-shared/references/audience/00_eva-audience-finder_话题人群识别器.md",
@@ -336,6 +340,7 @@ def check_peer_skills(base: Path) -> tuple[list[str], list[str], dict]:
     skills_root = base.parent
     package_root = skills_root.parent
     skillhub_bundle = skills_root.name == "modules" and (package_root / "SKILL.md").exists()
+    source_checkout = (package_root / ".git").exists() or (package_root / ".claude-plugin" / "marketplace.json").exists()
     data["skillhub_bundle"] = skillhub_bundle
     if skillhub_bundle:
         package_readme = package_root / "README.md"
@@ -346,6 +351,15 @@ def check_peer_skills(base: Path) -> tuple[list[str], list[str], dict]:
             errors.append("missing SkillHub package root README.md")
         if not package_version.exists():
             errors.append("missing SkillHub package root VERSION")
+    if source_checkout or skillhub_bundle:
+        required_legal_files = ("LICENSE", "LEGAL_NOTICE.md", "TRADEMARKS.md", "THIRD_PARTY_NOTICES.md")
+        missing_legal_files = [name for name in required_legal_files if not (package_root / name).exists()]
+        data["root_legal_files"] = {
+            name: str(package_root / name) if (package_root / name).exists() else None
+            for name in required_legal_files
+        }
+        if missing_legal_files:
+            errors.append("missing package root legal file(s): " + ", ".join(missing_legal_files))
     schema_path = base / "schemas" / "asset-types.json"
     shared_skill_md = base / "SKILL.md"
     data["eva_shared_has_skill_md"] = shared_skill_md.exists()

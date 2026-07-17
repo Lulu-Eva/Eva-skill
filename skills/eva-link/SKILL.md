@@ -1,7 +1,7 @@
 ---
 name: eva-link
 description: |
-  Eva Link 独立本地工作流接入口。处理已有 Link 调用、把提示词/SOP/私有方法论接进 Eva、自定义 Link、检查 Link。触发：/eva-link、/eva-link-builder、/eva-link-diy、/eva-link-doctor、自定义 Eva-Skill、做自己的 Link、把提示词接进 Eva、检查本地 Link、用我的某个 Link。
+  Eva Link 独立本地工作流接入口。处理已有 Link 调用、把提示词/SOP/私有方法论接进 Eva、自定义 Link、检查 Link。触发：/eva-link、/eva-link-builder、/eva-link-diy、/eva-link-doctor、自定义 Eva-skill、做自己的 Link、把提示词接进 Eva、检查本地 Link、用我的某个 Link。
 ---
 
 # Eva Link

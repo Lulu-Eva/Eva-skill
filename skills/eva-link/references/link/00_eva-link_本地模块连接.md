@@ -2,7 +2,7 @@
 
 Eva Link 不是“多一个功能”，而是本地模块接入 Eva 资产流的协议。
 
-用户口头说“自定义 Eva-Skill / 自定义 Link / 定制 Eva-Skill / 做自己的 Eva-Skill”时，默认指自定义 Eva Link。Link 是用户工作流接入层，不是新建 sibling Skill。普通“写朋友圈 / 微博 / 公众号”不触发 Link；只有显式点名 Link、项目级默认 Link 命中，或用户当场确认，才进入 Link。
+用户口头说“自定义 Eva-skill / 自定义 Link / 定制 Eva-skill / 做自己的 Eva-skill”时，默认指自定义 Eva Link。Link 是用户工作流接入层，不是新建 sibling Skill。普通“写朋友圈 / 微博 / 公众号”不触发 Link；只有显式点名 Link、项目级默认 Link 命中，或用户当场确认，才进入 Link。
 
 它解决的问题：
 
@@ -18,7 +18,7 @@ Link 属于 `../eva-shared/references/shared/04_light-interaction_轻交互协�
 
 ## Link 不能做什么
 
-- 不修改 Eva-Skill 本体。
+- 不修改 Eva-skill 本体。
 - 不覆盖 `/eva-think`、`/eva-learn`、`/eva-create` 等核心入口。
 - 不自动抢占模糊需求。
 - 不绕过资产卡协议。
@@ -213,7 +213,7 @@ Link 输出必须能被 Eva Asset 承接。字段真源读取 `../eva-shared/ref
 
 | 用户意图 | 读取 |
 |---|---|
-| 创建自定义 Link、把提示词/SOP/私有方法论接进 Eva、用户说 `eva-link-diy` 或“自定义 Eva-Skill / 定制 Eva-Skill / 做自己的 Eva-Skill” | `references/link/01_eva-link-builder_自定义Link生成.md` |
+| 创建自定义 Link、把提示词/SOP/私有方法论接进 Eva、用户说 `eva-link-diy` 或“自定义 Eva-skill / 定制 Eva-skill / 做自己的 Eva-skill” | `references/link/01_eva-link-builder_自定义Link生成.md` |
 | 检查已有 Link、升级后能不能用、Link 为什么不能交接 | `references/link/02_eva-link-doctor_Link健康检查.md` |
 
 Link 不出现在默认创作启动提示里；只有用户明确触发或确认后进入。

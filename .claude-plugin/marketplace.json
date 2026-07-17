@@ -4,18 +4,18 @@
     "name": "Lulu-Eva"
   },
   "metadata": {
-    "description": "Eva-skill v2.2.1 创作者工作台。新增按需项目身份查询，普通创作与路由保持轻量。",
-    "version": "2.2.1"
+    "description": "Eva-skill v2.2.2 创作者工作台。新增 Memory 记忆盘点，保存与任务回捞体验保持不变。",
+    "version": "2.2.2"
   },
   "plugins": [
     {
       "name": "eva",
-      "description": "Eva-skill v2.2.1 创作者工作台。包含 New User、Think、Audience Finder、Create、Preflight、Learn、Brief、Link、Review、Lens 和 shared 真源包。",
+      "description": "Eva-skill v2.2.2 创作者工作台。包含 New User、Think、Audience Finder、Create、Preflight、Learn、Brief、Link、Review、Lens 和 shared 真源包，并支持 Memory 记忆盘点。",
       "source": "./",
       "strict": false,
-      "version": "2.2.1",
+      "version": "2.2.2",
       "category": "content-creation",
-      "keywords": ["creator", "new-user", "tutorial", "short-video", "xiaohongshu", "script", "script-structure", "content-writing", "title", "body-title", "audience", "audience-finder", "thinking", "discipline-divergence", "preflight", "content-audit", "reframe", "benchmark-copy", "commercial-brief", "brand-brief", "sponsored-content", "memory", "persona", "persona-memory", "user-voice", "voice-card", "ai-check", "learn", "learning", "reading", "research", "study", "review", "content-review", "multi-perspective", "lens", "thought-seed-card", "voice", "chinese"],
+      "keywords": ["creator", "new-user", "tutorial", "short-video", "xiaohongshu", "script", "script-structure", "content-writing", "title", "body-title", "audience", "audience-finder", "thinking", "discipline-divergence", "preflight", "content-audit", "reframe", "benchmark-copy", "commercial-brief", "brand-brief", "sponsored-content", "memory", "memory-inventory", "persona", "persona-memory", "user-voice", "voice-card", "ai-check", "learn", "learning", "reading", "research", "study", "review", "content-review", "multi-perspective", "lens", "thought-seed-card", "voice", "chinese"],
       "skills": ["./skills/eva", "./skills/eva-new-user", "./skills/eva-shared", "./skills/eva-think", "./skills/eva-audience-finder", "./skills/eva-create", "./skills/eva-preflight", "./skills/eva-learn", "./skills/eva-brief", "./skills/eva-link", "./skills/eva-review", "./skills/eva-lens"]
     }
   ]

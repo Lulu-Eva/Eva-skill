@@ -28,3 +28,6 @@ __pycache__/
 
 # Local SkillHub release workspace; upload bundles are generated from tracked source
 /SkillHub/
+
+# Local RedSkill release workspace; upload bundles are generated from tracked source
+/RedSkill/

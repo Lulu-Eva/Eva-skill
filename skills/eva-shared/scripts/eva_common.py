@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Common helpers for Eva Shared 2.2.1 scripts."""
+"""Common helpers for Eva Shared 2.2.2 scripts."""
 
 from __future__ import annotations
 
@@ -44,7 +44,12 @@ VALID_LOW_CONFIDENCE_REASONS = {
     "unverified-causality",
 }
 
-VERSION = "eva-shared-2.2.1"
+VERSION = "eva-shared-2.2.2"
+
+FRONTMATTER_MAX_BYTES = 64 * 1024
+FRONTMATTER_MAX_KEY_CHARS = 128
+FRONTMATTER_MAX_SCALAR_CHARS = 4096
+FRONTMATTER_MAX_COLLECTION_ITEMS = 256
 
 
 def default_base_from_script(script_path: str) -> Path:
@@ -266,6 +271,232 @@ def parse_markdown_fields(path: Path) -> dict[str, str]:
         if key:
             fields[key] = value
     return fields
+
+
+def read_frontmatter_metadata(
+    path: Path,
+    max_bytes: int = FRONTMATTER_MAX_BYTES,
+) -> dict[str, Any]:
+    """Read bounded YAML-like frontmatter without loading the Markdown body.
+
+    This intentionally supports only the metadata shapes used by Eva cards:
+    top-level scalars, block lists and one-level nested maps. The return value
+    always contains ``status``, ``metadata``, ``errors`` and ``bytes_read``.
+    Existing ``parse_frontmatter`` remains unchanged for compatibility.
+    """
+    response: dict[str, Any] = {
+        "status": "missing",
+        "metadata": {},
+        "errors": [],
+        "bytes_read": 0,
+    }
+    if max_bytes <= 0:
+        response["status"] = "invalid-limit"
+        response["errors"] = ["frontmatter byte limit must be positive"]
+        return response
+
+    try:
+        with path.open("rb") as handle:
+            first = handle.readline(max_bytes + 1)
+            response["bytes_read"] = len(first)
+            first_without_bom = first[3:] if first.startswith(b"\xef\xbb\xbf") else first
+            if first_without_bom.strip() != b"---":
+                return response
+            if len(first) > max_bytes:
+                response["status"] = "too-large"
+                response["errors"] = [f"frontmatter exceeds {max_bytes} bytes"]
+                return response
+            try:
+                opening = first_without_bom.decode("utf-8").strip()
+            except UnicodeDecodeError:
+                response["status"] = "decode-error"
+                response["errors"] = ["frontmatter opening line is not valid UTF-8"]
+                return response
+            if opening != "---":
+                return response
+
+            raw_lines: list[bytes] = []
+            while True:
+                remaining = max_bytes - int(response["bytes_read"])
+                if remaining <= 0:
+                    response["status"] = "too-large"
+                    response["errors"] = [f"frontmatter exceeds {max_bytes} bytes"]
+                    return response
+                raw_line = handle.readline(remaining + 1)
+                response["bytes_read"] = int(response["bytes_read"]) + len(raw_line)
+                if not raw_line:
+                    response["status"] = "unclosed"
+                    response["errors"] = ["frontmatter has no closing ---"]
+                    return response
+                if int(response["bytes_read"]) > max_bytes:
+                    response["status"] = "too-large"
+                    response["errors"] = [f"frontmatter exceeds {max_bytes} bytes"]
+                    return response
+                try:
+                    decoded_line = raw_line.decode("utf-8")
+                except UnicodeDecodeError:
+                    response["status"] = "decode-error"
+                    response["errors"] = ["frontmatter is not valid UTF-8"]
+                    return response
+                if decoded_line.strip() == "---":
+                    break
+                raw_lines.append(raw_line)
+    except (OSError, PermissionError) as exc:
+        response["status"] = "unreadable"
+        response["errors"] = [f"cannot read frontmatter: {exc.__class__.__name__}"]
+        return response
+
+    try:
+        lines = b"".join(raw_lines).decode("utf-8").splitlines()
+    except UnicodeDecodeError:
+        response["status"] = "decode-error"
+        response["errors"] = ["frontmatter is not valid UTF-8"]
+        return response
+
+    metadata, parse_errors = _parse_safe_frontmatter_lines(lines)
+    response["metadata"] = metadata
+    response["errors"] = parse_errors
+    response["status"] = "malformed" if parse_errors else "ok"
+    return response
+
+
+def _parse_safe_frontmatter_lines(lines: list[str]) -> tuple[dict[str, Any], list[str]]:
+    metadata: dict[str, Any] = {}
+    errors: list[str] = []
+    index = 0
+
+    while index < len(lines):
+        raw_line = lines[index]
+        stripped = raw_line.strip()
+        if not stripped or stripped.startswith("#"):
+            index += 1
+            continue
+        if raw_line.startswith((" ", "\t")) or ":" not in raw_line:
+            errors.append(f"line {index + 2}: expected a top-level key")
+            index += 1
+            continue
+
+        raw_key, raw_value = raw_line.split(":", 1)
+        key = raw_key.strip()
+        if not key or len(key) > FRONTMATTER_MAX_KEY_CHARS:
+            errors.append(f"line {index + 2}: invalid or oversized key")
+            index += 1
+            continue
+        if key in metadata:
+            errors.append(f"line {index + 2}: duplicate key '{key}'")
+
+        value = raw_value.strip()
+        if value and value not in {"|", ">"}:
+            parsed, value_error = _parse_safe_metadata_scalar(value)
+            metadata[key] = parsed
+            if value_error:
+                errors.append(f"line {index + 2}: {value_error}")
+            index += 1
+            continue
+
+        block_start = index + 1
+        block: list[tuple[int, str]] = []
+        index += 1
+        while index < len(lines):
+            candidate = lines[index]
+            if candidate.strip() and not candidate.startswith((" ", "\t")):
+                break
+            block.append((index + 2, candidate))
+            index += 1
+
+        if value in {"|", ">"}:
+            block_text = [item.strip() for _, item in block]
+            joined = ("\n" if value == "|" else " ").join(block_text).strip()
+            if len(joined) > FRONTMATTER_MAX_SCALAR_CHARS:
+                joined = joined[:FRONTMATTER_MAX_SCALAR_CHARS]
+                errors.append(f"line {block_start + 1}: block scalar was truncated")
+            metadata[key] = joined
+            continue
+
+        meaningful = [(line_no, item.strip()) for line_no, item in block if item.strip() and not item.strip().startswith("#")]
+        if not meaningful:
+            metadata[key] = None
+            continue
+
+        is_list = [item.startswith("-") for _, item in meaningful]
+        is_map = [(not item.startswith("-")) and ":" in item for _, item in meaningful]
+        if all(is_list):
+            values: list[Any] = []
+            for line_no, item in meaningful[:FRONTMATTER_MAX_COLLECTION_ITEMS]:
+                raw_item = item[1:].strip()
+                parsed, value_error = _parse_safe_metadata_scalar(raw_item)
+                values.append(parsed)
+                if value_error:
+                    errors.append(f"line {line_no}: {value_error}")
+            if len(meaningful) > FRONTMATTER_MAX_COLLECTION_ITEMS:
+                errors.append(f"line {block_start + 1}: list exceeded item limit and was truncated")
+            metadata[key] = values
+        elif all(is_map):
+            nested: dict[str, Any] = {}
+            for line_no, item in meaningful[:FRONTMATTER_MAX_COLLECTION_ITEMS]:
+                nested_key_raw, nested_value_raw = item.split(":", 1)
+                nested_key = nested_key_raw.strip()
+                if not nested_key or len(nested_key) > FRONTMATTER_MAX_KEY_CHARS:
+                    errors.append(f"line {line_no}: invalid or oversized nested key")
+                    continue
+                if nested_key in nested:
+                    errors.append(f"line {line_no}: duplicate nested key '{nested_key}'")
+                parsed, value_error = _parse_safe_metadata_scalar(nested_value_raw.strip())
+                nested[nested_key] = parsed
+                if value_error:
+                    errors.append(f"line {line_no}: {value_error}")
+            if len(meaningful) > FRONTMATTER_MAX_COLLECTION_ITEMS:
+                errors.append(f"line {block_start + 1}: map exceeded item limit and was truncated")
+            metadata[key] = nested
+        else:
+            metadata[key] = None
+            errors.append(f"line {block_start + 1}: mixed or unsupported block for '{key}'")
+
+    return metadata, errors
+
+
+def _parse_safe_metadata_scalar(value: str) -> tuple[Any, str | None]:
+    cleaned = value.strip()
+    if not cleaned:
+        return "", None
+    if len(cleaned) > FRONTMATTER_MAX_SCALAR_CHARS:
+        return cleaned[:FRONTMATTER_MAX_SCALAR_CHARS], "scalar was truncated"
+    if cleaned in {"true", "True", "TRUE"}:
+        return True, None
+    if cleaned in {"false", "False", "FALSE"}:
+        return False, None
+    if cleaned in {"null", "Null", "NULL", "~"}:
+        return None, None
+    if cleaned.startswith("[") and cleaned.endswith("]"):
+        inner = cleaned[1:-1].strip()
+        if not inner:
+            return [], None
+        try:
+            parsed = json.loads(cleaned)
+            if isinstance(parsed, list):
+                if len(parsed) > FRONTMATTER_MAX_COLLECTION_ITEMS:
+                    return parsed[:FRONTMATTER_MAX_COLLECTION_ITEMS], "inline list was truncated"
+                return parsed, None
+        except json.JSONDecodeError:
+            items = [item.strip().strip("\"'") for item in inner.split(",")]
+            if len(items) > FRONTMATTER_MAX_COLLECTION_ITEMS:
+                return items[:FRONTMATTER_MAX_COLLECTION_ITEMS], "inline list was truncated"
+            return items, None
+    if (cleaned.startswith('"') and cleaned.endswith('"')) or (
+        cleaned.startswith("'") and cleaned.endswith("'")
+    ):
+        return cleaned[1:-1], None
+    if re.fullmatch(r"[-+]?\d+", cleaned):
+        try:
+            return int(cleaned), None
+        except ValueError:
+            pass
+    if re.fullmatch(r"[-+]?(?:\d+\.\d*|\d*\.\d+)", cleaned):
+        try:
+            return float(cleaned), None
+        except ValueError:
+            pass
+    return cleaned, None
 
 
 def parse_frontmatter(path: Path) -> tuple[dict[str, Any], str]:

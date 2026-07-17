@@ -1,17 +1,22 @@
 #!/usr/bin/env python3
-"""Eva 2.2.1 structural checks and prompt scenario-contract validation."""
+"""Eva 2.2.2 structural checks and prompt scenario-contract validation."""
 
 from __future__ import annotations
 
 import argparse
+from datetime import date
 import json
+import os
 from pathlib import Path
 import shutil
 import subprocess
 import sys
 import tempfile
+from unittest.mock import patch
 
+import eva_memory_inventory as memory_inventory
 from eva_link_check import link_sha256, validate_expected_asset as validate_link_expected_asset
+from eva_memory_inventory import run_inventory
 from eva_common import (
     CORE_ENTRIES,
     VERSION,
@@ -487,6 +492,131 @@ REQUIRED_221_CASE_CONTRACTS = {
 
 REQUIRED_SCENARIO_CASES.update(REQUIRED_221_CASE_CONTRACTS)
 
+REQUIRED_222_CASE_CONTRACTS = {
+    "eva-project-license-and-derivative-boundary": {
+        "expected_route": "eva-root-project-license-legal-notice",
+        "expected_terminal": "answer-license-derivative-and-commercial-boundary-from-project-truth-sources",
+        "forbid": {"eva-think", "child-module", "web-search", "assume-free-means-noncommercial", "claim-all-derivatives-must-use-same-license"},
+        "must_include": {"license-on-demand", "cc-by-nc-4.0", "attribution-and-change-marker", "commercial-authorization-boundary", "no-official-endorsement"},
+    },
+    "eva-personal-creator-output-commercialization": {
+        "expected_route": "eva-root-project-output-extra-permission",
+        "expected_terminal": "answer-output-commercialization-from-legal-notice-extra-permission",
+        "forbid": {"eva-create", "claim-user-owns-all-ai-output-copyright", "allow-eva-skill-redistribution", "extend-to-client-account-service"},
+        "must_include": {"personal-creator", "self-controlled-account", "commercial-final-content-allowed", "ordinary-output-no-eva-attribution-required", "third-party-rights-still-apply"},
+    },
+    "eva-trademark-official-version-boundary": {
+        "expected_route": "eva-root-project-trademark-notice",
+        "expected_terminal": "answer-official-identity-boundary-from-trademark-truth-source",
+        "forbid": {"eva-think", "grant-official-status", "block-required-attribution", "assume-registered-symbol"},
+        "must_include": {"trademark-notice-on-demand", "no-implied-endorsement", "reasonable-attribution-allowed", "written-authorization-required"},
+    },
+    "generic-project-license-not-eva": {
+        "expected_route": "not-eva-without-eva-context",
+        "expected_terminal": "use-current-project-context-or-ask-which-project",
+        "forbid": {"eva-project-license", "assume-current-project-is-eva", "read-eva-license", "read-eva-legal-notice"},
+        "must_include": set(),
+    },
+    "eva-personal-company-account-priority": {
+        "expected_route": "eva-root-project-output-extra-permission",
+        "expected_terminal": "apply-personal-creator-priority-test-before-answering-commercial-use",
+        "forbid": {"decide-by-account-registration-alone", "allow-team-shared-use", "allow-client-delivery", "eva-create"},
+        "must_include": {"personal-identity-or-brand", "creator-personally-uses-eva", "creator-controls-editing", "no-team-matrix-or-client-delivery"},
+    },
+    "eva-cloud-platform-necessary-processing": {
+        "expected_route": "eva-root-project-platform-processing-permission",
+        "expected_terminal": "answer-limited-technical-processing-and-platform-settings-boundary",
+        "forbid": {"grant-general-model-training-right", "grant-independent-platform-commercialization", "claim-local-install-never-uploads", "eva-think"},
+        "must_include": {"necessary-technical-processing", "same-permitted-task-only", "platform-terms-and-data-settings", "no-general-model-training"},
+    },
+    "eva-unauthorized-client-delivery-mixed-request": {
+        "expected_route": "eva-root-project-license-gate-stop",
+        "expected_terminal": "explain-written-authorization-required-and-stop-eva-business-route",
+        "forbid": {"eva-create", "eva-think", "eva-brief", "continue-after-denying-authorization"},
+        "must_include": {"client-delivery-outside-extra-permission", "written-commercial-authorization-required", "stop-before-business-module"},
+    },
+    "memory-inventory-explicit": {
+        "expected_route": "eva-think-to-shared-memory-inventory",
+        "expected_terminal": "readonly-metadata-inventory-then-stop",
+        "forbid": {"write-index", "show-all-card-bodies", "auto-enter-create", "scan-outside-current-project", "infer-metadata-from-body"},
+        "must_include": {"card-total", "declared-and-inferred-type-counts", "metadata-health", "one-next-action", "frontmatter-and-filename-only"},
+    },
+    "memory-inventory-ordinary-think-no-scan": {
+        "expected_route": "eva-think",
+        "expected_terminal": "ordinary-think-without-memory-inventory",
+        "forbid": {"memory-inventory-scan", "show-card-counts", "write-index"},
+        "must_include": set(),
+    },
+    "memory-inventory-ordinary-create-no-scan": {
+        "expected_route": "eva-create",
+        "expected_terminal": "ordinary-create-route-without-memory-inventory",
+        "forbid": {"memory-inventory-scan", "show-card-counts", "write-index"},
+        "must_include": set(),
+    },
+    "memory-inventory-task-recall-stays-one-to-three": {
+        "expected_route": "eva-think-to-shared-memory-task-recall",
+        "expected_terminal": "one-to-three-relevant-cards-then-return-to-caller",
+        "forbid": {"memory-inventory-overview", "dump-all-cards", "write-index"},
+        "must_include": {"current-task-relevance", "one-to-three-card-limit"},
+    },
+    "memory-task-recall-body-semantic-match": {
+        "expected_route": "eva-think-to-shared-memory-task-recall",
+        "expected_terminal": "one-to-three-body-relevant-cards-then-return-to-caller",
+        "forbid": {"memory-inventory-overview", "rewrite-card-metadata", "infer-missing-frontmatter", "dump-all-cards"},
+        "must_include": {"candidate-body-semantic-match", "one-to-three-card-limit", "current-project-memory-boundary"},
+    },
+    "memory-inventory-drilldown-stops": {
+        "expected_route": "eva-think-to-shared-memory-inventory-filter",
+        "expected_terminal": "filtered-metadata-list-then-stop-in-memory",
+        "forbid": {"show-card-bodies", "auto-enter-create", "auto-save", "expand-unrequested-types"},
+        "must_include": {"relative-paths-only", "requested-type-or-keyword-only", "validation-status"},
+    },
+    "memory-inventory-index-first-confirmation": {
+        "expected_route": "eva-think-to-shared-memory-index-preview",
+        "expected_terminal": "index-path-and-fields-preview-awaiting-second-confirmation",
+        "forbid": {"write-index", "modify-card", "copy-card-body", "treat-index-as-asset"},
+        "must_include": {"target-eva-memory-index", "preview-only", "second-confirmation-required"},
+    },
+    "memory-inventory-index-second-confirmation": {
+        "expected_route": "eva-think-to-shared-memory-index-write",
+        "expected_terminal": "derived-index-safely-written-after-second-confirmation",
+        "forbid": {"copy-card-body", "overwrite-user-index-without-marker", "add-index-asset-type"},
+        "must_include": {"derived-index-marker", "relative-metadata-only", "safe-replace"},
+    },
+    "memory-inventory-text-fallback-duplicates-unchecked": {
+        "expected_route": "eva-think-to-shared-memory-inventory-text-fallback",
+        "expected_terminal": "basic-readonly-inventory-with-explicit-unchecked-duplicate-status",
+        "forbid": {"claim-no-exact-duplicates", "read-body-for-semantic-topic", "write-index"},
+        "must_include": {"完全重复：未检查（当前为纯文本降级盘点）", "metadata-only-fallback"},
+    },
+    "memory-inventory-missing-root": {
+        "expected_route": "eva-think-to-shared-memory-inventory",
+        "expected_terminal": "truthfully-report-memory-library-not-established",
+        "forbid": {"claim-zero-after-scan", "create-memory-directory", "scan-other-projects"},
+        "must_include": {"memory-root-missing"},
+    },
+    "memory-inventory-empty-root": {
+        "expected_route": "eva-think-to-shared-memory-inventory",
+        "expected_terminal": "accurately-report-zero-cards-then-stop",
+        "forbid": {"invent-card", "auto-create-card", "write-index"},
+        "must_include": {"card-total-zero"},
+    },
+    "memory-inventory-unreadable-partial": {
+        "expected_route": "eva-think-to-shared-memory-inventory",
+        "expected_terminal": "partial-inventory-with-unreadable-file-count",
+        "forbid": {"abort-whole-inventory", "pretend-unreadable-file-was-validated", "write-index"},
+        "must_include": {"continue-other-cards", "unreadable-file-count"},
+    },
+    "memory-inventory-symlink-boundary": {
+        "expected_route": "eva-think-to-shared-memory-inventory",
+        "expected_terminal": "inventory-with-all-symlink-forms-skipped",
+        "forbid": {"follow-symlink-root", "follow-symlink-directory", "follow-symlink-file", "follow-symlink-loop"},
+        "must_include": {"symlink-skipped-count", "current-project-memory-boundary"},
+    },
+}
+
+REQUIRED_SCENARIO_CASES.update(REQUIRED_222_CASE_CONTRACTS)
+
 REQUIRED_ROUTER_MARKERS = {
     "eva-new-user": "Router must expose the adaptive new-user tutorial",
     "eva-think": "Router must expose eva-think as the default light entry",
@@ -522,21 +652,60 @@ REQUIRED_ROUTER_MARKERS = {
     "AI Check + 改稿": "Router must resolve combined AI-check and rewrite intent",
     "Review + 改下一篇": "Router must keep Review separate from content production",
     "Review + 补盲区": "Router must hand Review conclusions to Lens without redoing attribution",
-    "明确询问 Eva-skill / EvaSkill 本身": "Router must scope project identity triggers to Eva itself",
+    "明确询问 Eva-skill 本身": "Router must scope project identity triggers to Eva itself",
     "作者、发起者、开发者、维护者、贡献者": "Router must expose Eva project attribution intent",
+    "许可证、商用范围、修改发布、生成内容变现、隐私、法律风险、责任边界、商标或官方身份": "Router must expose explicit Eva license and legal-boundary intents",
     "../../README.md": "Source router must know the repository README path",
     "SkillHub 一体化包：`README.md`": "SkillHub router must know the bundled README path",
     "存在时优先使用": "Router must prefer the README beside the active Skill entry",
-    "只在同目录 README 不存在时回退使用": "Source router must use the repository README only as fallback",
+    "确认 `../../.claude-plugin/marketplace.json` 存在后": "Source router must verify the repository layout before reading root project files",
+    "references/project/00_project-info_项目身份与许可.md": "Individually installed eva entry must keep a compact project-information fallback",
+    "references/project/01_project-license-routing_项目许可问答路由.md": "Router must load detailed Eva license routing only for explicit legal questions",
     "## 维护与致谢": "Router must delegate project attribution to the README maintenance section",
     "不读取整份 README": "Router must keep project attribution progressively loaded",
-    "纯项目信息问题回答后停止": "Router must answer attribution without entering a child module",
+    "纯身份问题回答后停止": "Router must answer attribution without entering a child module",
+    "纯问答后停止": "Router must answer license questions without entering a child module",
     "普通 Eva 任务不得读取 README": "Router must not load README during ordinary work",
-    "不要抢占其他项目的作者归属问题": "Router must not hijack generic project-attribution questions",
+    "不要抢占其他项目的作者、许可证或法律问题": "Router must not hijack generic project-attribution or licensing questions",
+    "普通 Eva 任务不得读取 README、法律问答 reference、LICENSE、LEGAL_NOTICE 或 TRADEMARKS": "Router must keep legal truth sources out of ordinary work",
+    "不得仅凭类别直接判定违法": "Router must distinguish excluded extra permissions from uses that actually require authorization",
+}
+
+REQUIRED_LICENSE_ROUTING_MARKERS = {
+    "只有用户明确询问 Eva-skill 本身": "License routing reference must be explicit-intent only",
+    "普通 Think、Create、Brief、Learn、Review、Lens、Preflight": "Ordinary Eva work must not load legal routing",
+    "SkillHub / 一体化包": "License routing must support bundled SkillHub layout",
+    "../../.claude-plugin/marketplace.json": "License routing must verify source-checkout layout",
+    "逐个 Skill 安装": "License routing must support individually installed skills",
+    "references/project/00_project-info_项目身份与许可.md": "Individual installation must resolve its fallback from the Eva Skill root",
+    "../../LICENSE": "License routing must know the repository license path",
+    "../../LEGAL_NOTICE.md": "License routing must know the repository legal-notice path",
+    "../../TRADEMARKS.md": "License routing must know the repository trademark-notice path",
+    "THIRD_PARTY_NOTICES.md": "License routing must expose the third-party truth source on demand",
+    "只读取足以回答用户实际问题": "License routing must enforce minimal truth-source reads",
+    "免费不等于非商业": "License routing must not misstate the noncommercial boundary",
+    "不在个人创作者额外许可内": "License routing must not equate exclusion from the extra permission with automatic illegality",
+    "不得承诺用户拥有全部 AI 输出版权": "License routing must not overclaim user ownership of model outputs",
+    "品牌二次使用原则上由品牌与创作者之间的合同确定": "License routing must not overclaim control over ordinary creator outputs",
+    "真源明确允许": "License routing must continue only when the use is allowed",
+    "已有适用于该用途的书面商业授权": "License routing must support user-stated written authorization",
+    "实际使用涉及受保护材料": "License routing must distinguish excluded extra permissions from uses that actually require authorization",
+    "用途不清": "License routing must ask one boundary question when permission is unclear",
+    "先确认该用途需要授权且用户没有授权": "License routing must never deny and then execute the same request",
+}
+
+FORBIDDEN_ROUTER_LEGAL_DETAILS = {
+    "../../LICENSE": "Eva root router must not duplicate source-layout license paths",
+    "../../LEGAL_NOTICE.md": "Eva root router must not duplicate source-layout legal-notice paths",
+    "../../TRADEMARKS.md": "Eva root router must not duplicate source-layout trademark paths",
+    "免费不等于非商业": "Eva root router must not duplicate detailed noncommercial guidance",
+    "不得承诺用户拥有全部 AI 输出版权": "Eva root router must not duplicate detailed AI-output guidance",
 }
 
 REQUIRED_ARCHITECTURE_PATHS = (
     "../eva/SKILL.md",
+    "../eva/references/project/00_project-info_项目身份与许可.md",
+    "../eva/references/project/01_project-license-routing_项目许可问答路由.md",
     "../eva-new-user/SKILL.md",
     "../eva-think/SKILL.md",
     "../eva-think/references/think/00_eva-think_思考助理.md",
@@ -634,6 +803,449 @@ def validate_asset(asset: dict, schema: dict, base) -> list[str]:
     return errors
 
 
+def _inventory_data(payload: object) -> dict:
+    if not isinstance(payload, dict):
+        return {}
+    nested = payload.get("data")
+    return nested if isinstance(nested, dict) else payload
+
+
+def run_memory_inventory_selftests(errors: list[str]) -> None:
+    """Exercise the read-only scanner against deterministic filesystem fixtures."""
+
+    def check(condition: bool, message: str) -> None:
+        if not condition:
+            errors.append("memory inventory runtime: " + message)
+
+    def write_card(path: Path, text: str) -> Path:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(text, encoding="utf-8")
+        return path
+
+    with tempfile.TemporaryDirectory(prefix="eva-memory-inventory-selftest-") as temp_dir:
+        project_root = Path(temp_dir) / "creator-project"
+        project_root.mkdir()
+
+        parser_fixture = write_card(
+            Path(temp_dir) / "frontmatter-bom.md",
+            "\ufeff---\n"
+            "type: idea-card\n"
+            "keywords:\n"
+            "  - 创作\n"
+            "privacy:\n"
+            "  public: false\n"
+            "---\n"
+            + ("BODY_MUST_NOT_BE_READ\n" * 5000),
+        )
+        parser_result = memory_inventory.read_frontmatter_metadata(parser_fixture)
+        check(parser_result.get("status") == "ok", "bounded frontmatter reader must support UTF-8 BOM")
+        check((parser_result.get("metadata") or {}).get("keywords") == ["创作"], "frontmatter block list parsing failed")
+        check(
+            (parser_result.get("metadata") or {}).get("privacy") == {"public": False},
+            "frontmatter one-level nested map parsing failed",
+        )
+        check(
+            int(parser_result.get("bytes_read") or 0) < parser_fixture.stat().st_size,
+            "frontmatter reader must stop before the Markdown body",
+        )
+        oversized_fixture = write_card(
+            Path(temp_dir) / "frontmatter-oversized.md",
+            "---\nsummary: " + ("x" * (70 * 1024)) + "\n---\nbody\n",
+        )
+        oversized_result = memory_inventory.read_frontmatter_metadata(oversized_fixture)
+        check(oversized_result.get("status") == "too-large", "oversized frontmatter must be bounded and rejected")
+
+        missing_payload = run_inventory(project_root, recent_days=30, today=date(2026, 7, 17))
+        missing_data = _inventory_data(missing_payload)
+        check(missing_data.get("root_status") == "missing", "missing eva-memory must report root_status=missing")
+        check(missing_data.get("total_cards") == 0, "missing eva-memory must report zero cards")
+        check(not (project_root / "eva-memory").exists(), "read-only scan must not create a missing eva-memory directory")
+
+        memory_root = project_root / "eva-memory"
+        memory_root.mkdir()
+        empty_payload = run_inventory(project_root, recent_days=30, today=date(2026, 7, 17))
+        empty_data = _inventory_data(empty_payload)
+        check(empty_data.get("root_status") == "empty", "empty eva-memory must report root_status=empty")
+        check(empty_data.get("total_cards") == 0, "empty eva-memory must report exactly zero cards")
+        check(not (memory_root / "INDEX.md").exists(), "read-only scan must not generate INDEX.md")
+
+        real_cards = [
+            write_card(
+                memory_root / "idea-cards" / "idea-main.md",
+                """---
+type: idea-card
+created: 2026-07-16
+keywords:
+  - 创作
+  - AI
+summary: 一个点子
+---
+# 点子正文
+BODY_SECRET_IDEA
+""",
+            ),
+            write_card(
+                memory_root / "persona" / "persona-main.md",
+                """---
+type: persona-card
+created: 2026-07-01
+keywords: [创作, 人设]
+---
+# 人设正文
+BODY_SECRET_PERSONA
+""",
+            ),
+            write_card(
+                memory_root / "voice" / "voice-main.md",
+                """---
+type: voice-card
+created: 2026-06-01
+keywords:
+  - 节奏
+---
+# 文风正文
+BODY_SECRET_VOICE
+""",
+            ),
+            write_card(
+                memory_root / "persona" / "inferred.md",
+                """---
+created: 2026-06-10
+keywords:
+  - 目录推断
+---
+# 缺少正式 type 的历史人设卡
+BODY_SECRET_INFERRED
+""",
+            ),
+            write_card(
+                memory_root / "legacy" / "broken.md",
+                """---
+type: idea-card
+created: not-a-date
+keywords:
+  - 损坏
+# 缺少 frontmatter 结束线
+BODY_SECRET_BROKEN
+""",
+            ),
+            write_card(
+                memory_root / "idea-cards" / "same.md",
+                """---
+type: idea-card
+created: 2026-07-10
+keywords: [同名]
+---
+first same-name body
+""",
+            ),
+            write_card(
+                memory_root / "persona" / "same.md",
+                """---
+type: persona-card
+created: 2026-07-11
+keywords: [同名]
+---
+second same-name body
+""",
+            ),
+        ]
+        exact_text = """---
+type: idea-card
+created: 2026-07-12
+keywords:
+  - 完全重复
+---
+BODY_SECRET_EXACT_DUPLICATE
+"""
+        real_cards.extend(
+            [
+                write_card(memory_root / "idea-cards" / "exact-a.md", exact_text),
+                write_card(memory_root / "archive" / "exact-b.md", exact_text),
+            ]
+        )
+
+        write_card(memory_root / "INDEX.md", "<!-- eva-memory-derived-index:v1 -->\nignored index\n")
+        write_card(memory_root / ".hidden.md", "hidden\n")
+        write_card(memory_root / "draft.md.tmp", "temporary\n")
+        fifo_count = 0
+        if hasattr(os, "mkfifo"):
+            try:
+                os.mkfifo(memory_root / "special-pipe.md")
+                fifo_count = 1
+            except OSError as exc:
+                errors.append(f"memory inventory runtime: could not create FIFO fixture: {exc}")
+        outside_file = write_card(
+            Path(temp_dir) / "outside-card.md",
+            """---
+type: idea-card
+created: 2026-07-17
+keywords: [outside]
+---
+MUST_NOT_BE_SCANNED
+""",
+        )
+        outside_directory = Path(temp_dir) / "outside-memory"
+        write_card(
+            outside_directory / "outside-directory-card.md",
+            """---
+type: idea-card
+created: 2026-07-17
+keywords: [outside-directory]
+---
+MUST_NOT_BE_SCANNED_EITHER
+""",
+        )
+        symlink_count = 0
+        try:
+            (memory_root / "linked-file.md").symlink_to(outside_file)
+            symlink_count += 1
+            (memory_root / "linked-directory").symlink_to(outside_directory, target_is_directory=True)
+            symlink_count += 1
+            (memory_root / "loop").symlink_to(memory_root, target_is_directory=True)
+            symlink_count += 1
+        except OSError as exc:
+            errors.append(f"memory inventory runtime: could not create symlink fixtures: {exc}")
+
+        before_bytes = {path.relative_to(memory_root).as_posix(): path.read_bytes() for path in real_cards}
+        mixed_payload = run_inventory(
+            project_root,
+            recent_days=30,
+            today=date(2026, 7, 17),
+        )
+        mixed_data = _inventory_data(mixed_payload)
+        after_bytes = {path.relative_to(memory_root).as_posix(): path.read_bytes() for path in real_cards}
+
+        check(mixed_data.get("total_cards") == 9, "mixed fixture must count only nine real Markdown cards")
+        type_counts = mixed_data.get("type_counts") or {}
+        check(type_counts.get("idea-card") == 4, "mixed fixture idea-card count must be four")
+        check(type_counts.get("persona-card") == 3, "mixed fixture persona-card count must include one directory-inferred card")
+        check(type_counts.get("voice-card") == 1, "mixed fixture voice-card count must be one")
+        check(type_counts.get("unrecognized") == 1, "unclosed legacy card must remain unrecognized")
+        check((mixed_data.get("declared_type_counts") or {}).get("persona-card") == 2, "declared persona count must stay separate from inferred cards")
+        check((mixed_data.get("inferred_type_counts") or {}).get("persona-card") == 1, "missing type under persona/ must be marked as one inferred card")
+        check(mixed_data.get("pending_validation_count") == 2, "every card with any index issue must be counted once as pending validation")
+        check(isinstance(mixed_data.get("next_action"), str), "inventory must return exactly one next_action")
+        check("next_actions" not in mixed_data, "inventory must not return a multi-action menu")
+        check((mixed_data.get("created") or {}).get("earliest") == "2026-06-01", "created range must use valid frontmatter dates")
+        check((mixed_data.get("created") or {}).get("latest") == "2026-07-16", "created range latest date is incorrect")
+        check((mixed_data.get("created") or {}).get("recent_count") == 6, "recent 30-day count must ignore old and invalid dates")
+        keywords = {item.get("keyword"): item.get("count") for item in mixed_data.get("top_keywords") or []}
+        check(keywords.get("创作") == 2, "block and inline keyword lists must both be parsed")
+        health = mixed_data.get("health") or {}
+        check((health.get("unclosed_frontmatter") or 0) >= 1, "unclosed frontmatter must be reported without aborting")
+        check((health.get("skipped_symlinks") or 0) >= symlink_count, "file, directory, and loop symlinks must all be skipped")
+        check((health.get("skipped_outside_root") or 0) >= min(symlink_count, 2), "outside symlink targets must be counted")
+        check((health.get("skipped_non_regular") or 0) >= fifo_count, "non-regular Markdown paths must be skipped without reading")
+        check((health.get("excluded_index") or 0) == 1, "generated INDEX.md must be excluded")
+        check((health.get("skipped_hidden") or 0) >= 1, "hidden files must be excluded")
+        check((health.get("skipped_temp") or 0) >= 1, "temporary files must be excluded")
+        duplicates = mixed_data.get("duplicates") or {}
+        check((duplicates.get("same_name_group_count") or 0) >= 1, "same-name cards must be reported as suspected duplicates")
+        check((duplicates.get("exact_content_group_count") or 0) >= 1, "byte-identical cards must be reported by SHA-256")
+        cards = mixed_data.get("cards") or []
+        check(mixed_data.get("cards_included") is False, "default inventory must not include card metadata rows")
+        check(cards == [], "default inventory must not expose the full card list")
+        check(before_bytes == after_bytes, "inventory scan must not modify any card")
+        check((memory_root / "INDEX.md").read_text(encoding="utf-8") == "<!-- eva-memory-derived-index:v1 -->\nignored index\n", "inventory scan must not rewrite INDEX.md")
+        markdown_inventory = memory_inventory.render_markdown(mixed_payload)
+        check("## 正式声明类型" in markdown_inventory, "Markdown output must separate declared types")
+        check("## 目录推断、待校验" in markdown_inventory, "Markdown output must expose inferred types as pending validation")
+        check("非普通文件跳过" in markdown_inventory, "Markdown output must report skipped non-regular files")
+        check("BODY_SECRET" not in markdown_inventory, "Markdown inventory must not expose card bodies")
+
+        limited_payload = run_inventory(
+            project_root,
+            recent_days=30,
+            today=date(2026, 7, 17),
+            scan_limit=2,
+        )
+        limited_data = _inventory_data(limited_payload)
+        check(limited_data.get("scanned_cards") == 2, "scan_limit must cap the number of scanned cards")
+        check(limited_data.get("total_cards") is None, "a capped scan must not label the scanned count as the total")
+        check(limited_data.get("total_cards_complete") is False, "a capped scan must mark the total as incomplete")
+        check(limited_data.get("duplicate_check_complete") is False, "a capped scan must mark duplicate checks as incomplete")
+        check(limited_data.get("scan_limit_reached") is True, "scan_limit must be reported when reached")
+        check(limited_data.get("root_status") == "partial", "a capped scan must be labeled partial")
+        limited_markdown = memory_inventory.render_markdown(limited_payload)
+        check("已扫描卡片数（非全量）：2" in limited_markdown, "partial Markdown must not call a capped count the total")
+        check("部分检查中发现" in limited_markdown and "未完整检查" in limited_markdown, "partial Markdown must qualify duplicate results")
+
+        cli_completed = subprocess.run(
+            [
+                sys.executable,
+                str(Path(memory_inventory.__file__)),
+                "--project-root",
+                str(project_root),
+                "--format",
+                "markdown",
+                "--as-of",
+                "2026-07-17",
+            ],
+            capture_output=True,
+            text=True,
+            timeout=10,
+            check=False,
+        )
+        check(cli_completed.returncode == 0, "real CLI Markdown inventory must complete successfully")
+        check("BODY_SECRET" not in cli_completed.stdout, "real CLI output must not expose card bodies")
+        cli_unfiltered = subprocess.run(
+            [
+                sys.executable,
+                str(Path(memory_inventory.__file__)),
+                "--project-root",
+                str(project_root),
+                "--include-cards",
+            ],
+            capture_output=True,
+            text=True,
+            timeout=10,
+            check=False,
+        )
+        check(cli_unfiltered.returncode != 0, "real CLI must reject unfiltered metadata drill-down")
+        cli_blank_filter = subprocess.run(
+            [
+                sys.executable,
+                str(Path(memory_inventory.__file__)),
+                "--project-root",
+                str(project_root),
+                "--include-cards",
+                "--filter-type",
+                "   ",
+            ],
+            capture_output=True,
+            text=True,
+            timeout=10,
+            check=False,
+        )
+        check(cli_blank_filter.returncode != 0, "real CLI must reject whitespace-only metadata filters")
+        blank_filter_payload = run_inventory(
+            project_root,
+            today=date(2026, 7, 17),
+            include_cards=True,
+            filter_keyword="   ",
+        )
+        check(blank_filter_payload.get("ok") is False, "programmatic inventory must reject whitespace-only filters")
+        check((_inventory_data(blank_filter_payload).get("cards") or []) == [], "invalid filters must never expose all card metadata")
+
+        filtered_payload = run_inventory(
+            project_root,
+            recent_days=30,
+            today=date(2026, 7, 17),
+            include_cards=True,
+            filter_type="persona-card",
+        )
+        filtered_cards = _inventory_data(filtered_payload).get("cards") or []
+        check(len(filtered_cards) == 3, "type drill-down must return declared and inferred persona-card metadata")
+        check(all(card.get("type") == "persona-card" for card in filtered_cards), "type drill-down leaked another type")
+        check(all("body" not in card and "content" not in card for card in filtered_cards), "card rows must never contain body/content fields")
+        check(all("summary" not in card for card in filtered_cards), "metadata drill-down must not expose a field outside the Memory contract")
+        check("BODY_SECRET" not in json.dumps(filtered_cards, ensure_ascii=False), "inventory must not expose card bodies")
+        filtered_markdown = memory_inventory.render_markdown(filtered_payload)
+        check("## 筛选结果" in filtered_markdown, "filtered Markdown must render the requested metadata list")
+        check("persona/persona-main.md" in filtered_markdown, "filtered Markdown must include matching relative paths")
+        check("idea-cards/idea-main.md" not in filtered_markdown, "filtered Markdown must not include nonmatching paths")
+        check("BODY_SECRET" not in filtered_markdown, "filtered Markdown must not expose card bodies")
+
+        cli_filtered = subprocess.run(
+            [
+                sys.executable,
+                str(Path(memory_inventory.__file__)),
+                "--project-root",
+                str(project_root),
+                "--format",
+                "markdown",
+                "--include-cards",
+                "--filter-type",
+                "persona-card",
+                "--as-of",
+                "2026-07-17",
+            ],
+            capture_output=True,
+            text=True,
+            timeout=10,
+            check=False,
+        )
+        check(cli_filtered.returncode == 0, "real CLI filtered Markdown drill-down must succeed")
+        check("## 筛选结果" in cli_filtered.stdout, "real CLI filtered Markdown must show requested rows")
+        check("idea-cards/idea-main.md" not in cli_filtered.stdout, "real CLI filtered Markdown leaked a nonmatching card")
+        check("BODY_SECRET" not in cli_filtered.stdout, "real CLI filtered Markdown must not expose card bodies")
+
+        real_project = Path(temp_dir) / "real-project"
+        real_project.mkdir()
+        project_symlink = Path(temp_dir) / "project-link"
+        try:
+            project_symlink.symlink_to(real_project, target_is_directory=True)
+        except OSError as exc:
+            errors.append(f"memory inventory runtime: could not create project-root symlink fixture: {exc}")
+        else:
+            project_link_data = _inventory_data(run_inventory(project_symlink, today=date(2026, 7, 17)))
+            check(project_link_data.get("root_status") == "blocked-project-symlink", "project-root symlink must be rejected")
+
+        linked_memory_project = Path(temp_dir) / "linked-memory-project"
+        linked_memory_project.mkdir()
+        linked_memory = linked_memory_project / "eva-memory"
+        try:
+            linked_memory.symlink_to(outside_directory, target_is_directory=True)
+        except OSError as exc:
+            errors.append(f"memory inventory runtime: could not create memory-root symlink fixture: {exc}")
+        else:
+            linked_memory_data = _inventory_data(run_inventory(linked_memory_project, today=date(2026, 7, 17)))
+            check(linked_memory_data.get("root_status") == "blocked-memory-symlink", "eva-memory root symlink must be rejected")
+            check((linked_memory_data.get("health") or {}).get("skipped_symlinks") == 1, "blocked memory-root symlink must be counted")
+
+        unreadable_project = Path(temp_dir) / "unreadable-project"
+        unreadable_memory = unreadable_project / "eva-memory" / "idea-cards"
+        good_card = write_card(
+            unreadable_memory / "good.md",
+            """---
+type: idea-card
+created: 2026-07-17
+keywords: [good]
+---
+good body
+""",
+        )
+        unreadable_card = write_card(
+            unreadable_memory / "locked.md",
+            """---
+type: idea-card
+created: 2026-07-17
+keywords: [locked]
+---
+locked body
+""",
+        )
+        original_metadata_reader = memory_inventory.read_frontmatter_metadata
+        original_hasher = memory_inventory.sha256_file
+
+        def unreadable_metadata(path: Path) -> dict:
+            if path == unreadable_card:
+                return {"status": "unreadable", "metadata": {}, "errors": ["permission denied"]}
+            return original_metadata_reader(path)
+
+        def unreadable_hash(path: Path) -> str:
+            if path == unreadable_card:
+                raise PermissionError("permission denied")
+            return original_hasher(path)
+
+        with (
+            patch.object(memory_inventory, "read_frontmatter_metadata", side_effect=unreadable_metadata),
+            patch.object(memory_inventory, "sha256_file", side_effect=unreadable_hash),
+        ):
+            unreadable_payload = run_inventory(unreadable_project, today=date(2026, 7, 17))
+        unreadable_data = _inventory_data(unreadable_payload)
+        check(unreadable_data.get("total_cards") == 2, "unreadable card must not abort or hide readable siblings")
+        check(unreadable_data.get("total_cards_complete") is True, "an unreadable counted file must not invalidate the filename total")
+        check(unreadable_data.get("duplicate_check_complete") is False, "an unreadable file must invalidate complete duplicate checking")
+        check(unreadable_data.get("root_status") == "partial", "unreadable card must yield a partial inventory")
+        check((unreadable_data.get("health") or {}).get("unreadable_files") == 1, "unreadable card must be counted once")
+        check((unreadable_data.get("declared_type_counts") or {}).get("idea-card") == 1, "readable card must still be classified")
+        check(good_card.read_text(encoding="utf-8").endswith("good body\n"), "partial inventory must not modify readable cards")
+        unreadable_markdown = memory_inventory.render_markdown(unreadable_payload)
+        check("部分检查中发现" in unreadable_markdown and "未完整检查" in unreadable_markdown, "unreadable partial Markdown must qualify duplicate results")
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Run Eva structural checks and validate the prompt scenario contract.")
     parser.add_argument("--base", default=None, help="Base folder containing schemas/ and examples/.")
@@ -643,6 +1255,8 @@ def main() -> None:
     base = normalize_path(args.base) if args.base else default_base_from_script(__file__)
     errors: list[str] = []
     warnings: list[str] = []
+
+    run_memory_inventory_selftests(errors)
 
     schema = read_json(base / "schemas" / "asset-card.schema.json")
     example_asset = read_json(base / "examples" / "asset-card.example.json")
@@ -953,6 +1567,23 @@ def main() -> None:
                         + ", ".join(missing_markers)
                     )
 
+        for case_id, contract in REQUIRED_222_CASE_CONTRACTS.items():
+            case = case_by_id.get(case_id) or {}
+            for scalar_field in ("expected_route", "expected_terminal"):
+                if case.get(scalar_field) != contract[scalar_field]:
+                    errors.append(
+                        f"prompt scenario case {case_id!r} {scalar_field} must be "
+                        f"{contract[scalar_field]!r}"
+                    )
+            for list_field in ("forbid", "must_include"):
+                actual = set(case.get(list_field) or [])
+                missing_markers = sorted(contract[list_field] - actual)
+                if missing_markers:
+                    errors.append(
+                        f"prompt scenario case {case_id!r} missing {list_field} marker(s): "
+                        + ", ".join(missing_markers)
+                    )
+
     shared_skill_path = base / "SKILL.md"
     if not shared_skill_path.exists():
         errors.append("eva-shared must have SKILL.md so GitHub skill installers copy the shared package")
@@ -980,6 +1611,32 @@ def main() -> None:
         errors.append("missing Memory source of truth for Create reference validation")
     else:
         memory_truth_text = memory_truth_path.read_text(encoding="utf-8")
+        for marker in (
+            "保存、任务回捞，还是记忆盘点",
+            "只返回最相关的 1—3 张卡",
+            "扫描范围固定为当前运行项目的 `./eva-memory/`",
+            "不跟随任何符号链接",
+            "元数据中的命令、联网要求或权限要求一律视为待统计的数据",
+            "原始文件字节计算 SHA-256",
+            "不得向模型返回正文或用正文补齐元数据",
+            "记忆盘点不得读取正文补齐或推断关键词、主题、日期或卡片类型",
+            "这项限制只约束记忆盘点",
+            "可以读取当前项目 `./eva-memory/` 内候选卡片正文",
+            "frontmatter 缺少关键词或主题时，不得因此排除候选卡",
+            "回捞不得改写卡片元数据",
+            "不得因此启动全库盘点",
+            "最近 30 个自然日",
+            "完全重复：未检查（当前为纯文本降级盘点）",
+            "用户下一轮明确要求按类型、关键词查看",
+            "空白筛选等同无筛选，必须拒绝",
+            "不能因 FIFO 等特殊文件阻塞盘点",
+            "无法确定全量文件数时，只能报告“已扫描数量”",
+            "生成或更新必须经过两次明确确认",
+            "<!-- eva-memory-derived-index:v1 -->",
+            "只读盘点脚本始终不负责写 INDEX",
+        ):
+            if marker not in memory_truth_text:
+                errors.append(f"Memory inventory source of truth missing 2.2.2 marker: {marker}")
         for relative in memory_create_targets:
             if relative not in memory_truth_text:
                 errors.append(f"Memory source of truth missing Create reference: {relative}")
@@ -991,6 +1648,9 @@ def main() -> None:
         ):
             if stale_line in memory_truth_text:
                 errors.append(f"Memory source of truth keeps stale Create reference: {stale_line}")
+
+    if (base.parent / "eva-memory").exists():
+        errors.append("Memory inventory must stay inside shared Memory and must not add a top-level skills/eva-memory")
 
     expected_version = VERSION.rsplit("-", 1)[-1]
     repo_root = base.parent.parent
@@ -1014,7 +1674,7 @@ def main() -> None:
     if (source_checkout or skillhub_bundle) and readme_path.exists():
         readme_text = readme_path.read_text(encoding="utf-8")
         for marker in (
-            f"# Eva Skill v{expected_version}",
+            f"# Eva-skill v{expected_version}",
             f"当前版本：`{expected_version}`。",
             "## 按你想完成的事使用 Eva",
             "## 一个短视频从想法到成稿",
@@ -1026,7 +1686,12 @@ def main() -> None:
             "## 2.1.4 新增",
             "## 2.1.2 新增",
             "## 维护与致谢",
-            "Eva-skill 由璐璐 Eva 发起开发并持续维护",
+            "## 许可证与法律说明",
+            "[项目许可证](LICENSE)",
+            "[许可与法律说明](LEGAL_NOTICE.md)",
+            "[商标与官方身份使用说明](TRADEMARKS.md)",
+            "[第三方材料与许可排除说明](THIRD_PARTY_NOTICES.md)",
+            "Eva-skill 由璐璐Eva 发起开发并持续维护",
             "官方开源仓库：https://github.com/Lulu-Eva/Eva-skill",
             "需求与产品灵感贡献者",
             "凯瑟琳学姐",
@@ -1040,7 +1705,7 @@ def main() -> None:
         else:
             maintenance_section = maintenance_tail[1].split("\n## ", 1)[0]
             for marker in (
-                "璐璐 Eva 发起开发并持续维护",
+                "璐璐Eva 发起开发并持续维护",
                 "https://github.com/Lulu-Eva/Eva-skill",
                 "需求与产品灵感贡献者",
             ):
@@ -1048,6 +1713,62 @@ def main() -> None:
                     errors.append(f"README maintenance section missing project-attribution marker: {marker}")
     elif source_checkout or skillhub_bundle:
         errors.append(f"missing root README: {readme_path}")
+
+    if source_checkout or skillhub_bundle:
+        legal_truth_sources = {
+            "LICENSE": (
+                "CC BY-NC 4.0",
+                "https://creativecommons.org/licenses/by-nc/4.0/",
+                "Eva-skill by 璐璐Eva",
+                "LEGAL_NOTICE.md",
+                "TRADEMARKS.md",
+                "THIRD_PARTY_NOTICES.md",
+            ),
+            "LEGAL_NOTICE.md": (
+                "# Eva-skill 许可与法律说明",
+                "## 2. 用户最终内容商业化额外许可",
+                "个人创作者",
+                "自有账号",
+                "模型与平台的必要技术处理",
+                "适用版本、持续效力与补救",
+                "30 日内完全纠正",
+                "未来许可变化只适用于",
+                "守约期间已经合规产生的普通最终内容",
+                "未收到明确书面授权，不视为",
+                "普通最终内容无须仅因使用 Eva-skill 而署名 Eva-skill",
+                "不会仅因创作过程中使用了 Eva-skill 而当然需要 Eva-skill 另行授权",
+                "依法无需权利人授权的使用不受影响",
+                "本地安装与数据边界",
+                "任何条款均不排除或限制适用法律不允许排除或限制的责任",
+            ),
+            "TRADEMARKS.md": (
+                "# Eva-skill 商标与官方身份使用说明",
+                "CC BY-NC 4.0 不授予任何商标权或官方身份使用权",
+                "璐璐Eva",
+                "https://github.com/Lulu-Eva/Eva-skill/issues",
+                "合理使用",
+                "非官方修改版",
+                "不使用 `®`",
+                "不对未接受本政策的第三方创设超出适用法律的新义务",
+            ),
+            "THIRD_PARTY_NOTICES.md": (
+                "# Eva-skill 第三方材料与许可排除说明",
+                "dontbesilent 开源 dbskill",
+                "需求与产品灵感贡献者",
+                "未包含需要随发行分发的图片、字体、音视频或 PDF 素材",
+                "外部贡献只有",
+                "不对 CC BY-NC 4.0 已授予的权利增加额外限制",
+            ),
+        }
+        for filename, markers in legal_truth_sources.items():
+            path = repo_root / filename
+            if not path.exists():
+                errors.append(f"missing root legal truth source: {path}")
+                continue
+            text = path.read_text(encoding="utf-8")
+            for marker in markers:
+                if marker not in text:
+                    errors.append(f"{filename} missing legal-boundary marker: {marker}")
 
     marketplace_path = repo_root / ".claude-plugin" / "marketplace.json"
     if marketplace_path.exists():
@@ -1339,26 +2060,81 @@ def main() -> None:
     router_path = (base / "../eva/SKILL.md").resolve()
     if router_path.exists():
         router_text = router_path.read_text(encoding="utf-8")
+        if len(router_text.splitlines()) > 140:
+            errors.append(
+                f"eva router must stay at or below 140 lines, got {len(router_text.splitlines())}"
+            )
+        if len(router_text) > 8500:
+            errors.append(f"eva router must stay at or below 8500 characters, got {len(router_text)}")
         missing_markers = [
             description for marker, description in REQUIRED_ROUTER_MARKERS.items()
             if marker not in router_text
         ]
         errors.extend(missing_markers)
+        for marker, description in FORBIDDEN_ROUTER_LEGAL_DETAILS.items():
+            if marker in router_text:
+                errors.append(description)
         frontmatter_parts = router_text.split("---", 2)
         router_frontmatter = frontmatter_parts[1] if len(frontmatter_parts) == 3 else ""
         for marker in (
-            "明确询问 Eva-skill / EvaSkill 本身",
+            "明确询问 Eva-skill 本身",
             "作者",
             "发起者",
             "开发者",
             "维护者",
             "贡献者",
             "官方项目来源",
+            "许可证",
+            "商用范围",
+            "修改发布",
+            "生成内容变现",
+            "隐私",
+            "法律风险",
+            "责任边界",
+            "商标",
+            "官方身份",
         ):
             if marker not in router_frontmatter:
-                errors.append(f"eva router frontmatter missing project-attribution trigger: {marker}")
-        if "Eva-skill 由璐璐 Eva 发起开发并持续维护" in router_text:
+                errors.append(f"eva router frontmatter missing project-information trigger: {marker}")
+        if "Eva-skill 由璐璐Eva 发起开发并持续维护" in router_text:
             errors.append("eva router must not duplicate the README project-attribution truth source")
+
+    project_info_path = (base / "../eva/references/project/00_project-info_项目身份与许可.md").resolve()
+    if project_info_path.exists():
+        project_info_text = project_info_path.read_text(encoding="utf-8")
+        for marker in (
+            "Eva-skill 由璐璐Eva 发起开发并持续维护",
+            "https://github.com/Lulu-Eva/Eva-skill",
+            "CC BY-NC 4.0",
+            "个人创作者最终内容商业化额外许可",
+            "普通最终内容",
+            "为第三方账号",
+            "本地安装不等于数据绝不上传",
+            "不保证输出具有著作权",
+        ):
+            if marker not in project_info_text:
+                errors.append(f"eva installed project-information fallback missing marker: {marker}")
+
+    license_routing_path = (
+        base / "../eva/references/project/01_project-license-routing_项目许可问答路由.md"
+    ).resolve()
+    if not license_routing_path.exists():
+        errors.append("missing Eva project license-routing reference")
+    else:
+        license_routing_text = license_routing_path.read_text(encoding="utf-8")
+        for marker, description in REQUIRED_LICENSE_ROUTING_MARKERS.items():
+            if marker not in license_routing_text:
+                errors.append(description)
+        eva_skill_root = (base / "../eva").resolve()
+        fallback_path = eva_skill_root / "references/project/00_project-info_项目身份与许可.md"
+        if not fallback_path.exists():
+            errors.append(f"Eva individual-install legal fallback does not resolve: {fallback_path}")
+        source_marker = (eva_skill_root / "../../.claude-plugin/marketplace.json").resolve()
+        if source_marker.exists():
+            for filename in ("LICENSE", "LEGAL_NOTICE.md", "TRADEMARKS.md", "THIRD_PARTY_NOTICES.md"):
+                source_truth = (eva_skill_root / "../.." / filename).resolve()
+                if not source_truth.exists():
+                    errors.append(f"Eva source-layout legal truth does not resolve: {source_truth}")
 
     audience_entry_path = (base / "../eva-audience-finder/SKILL.md").resolve()
     audience_openai_path = (base / "../eva-audience-finder/agents/openai.yaml").resolve()
