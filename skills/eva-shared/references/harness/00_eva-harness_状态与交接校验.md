@@ -1,6 +1,6 @@
 # Eva Harness：状态与交接校验
 
-Harness 是 Eva-skill 2.2.2 的异常恢复与正式状态校验协议，不是用户功能入口，也不是所有入口默认加载的全局调度器。
+Harness 是 Eva-skill 2.2.3 的异常恢复与正式状态校验协议，不是用户功能入口，也不是所有入口默认加载的全局调度器。
 
 只有 Learn 恢复/写入/状态失败、Link/脚本/schema/Asset 校验失败、正式 Asset 交接失败，或用户明确要求查看状态时，入口才读取 Harness。前台是否展示状态，按 `../eva-shared/references/shared/04_light-interaction_轻交互协议.md` 判断。
 
@@ -17,11 +17,12 @@ Harness 是 Eva-skill 2.2.2 的异常恢复与正式状态校验协议，不是�
 
 ## Runner 原则
 
-模块不决定下一步。
+业务模块不自行发起新的跨模块任务。
 
 ```text
 Module 输出：我完成了什么、我需要什么、我建议交给谁。
-Harness 判断：是否允许交接、是否补字段、是否需要用户确认、是否启动 Link。
+动态选路：常规下一步只读取 `../eva-shared/references/shared/07_next-step-navigation_动态选路与下一步推荐.md`。
+Harness 判断：正式交接是否允许、是否补字段、是否需要用户确认、是否启动 Link。
 ```
 
 禁止：
@@ -43,7 +44,7 @@ Module / Link 返回交接请求
 
 ## Initializer
 
-2.2.2 不因任务复杂就默认生成任务初始化卡。只有用户要求查看结构化任务状态，或异常恢复确实需要重建任务上下文时才生成。
+2.2.3 不因任务复杂就默认生成任务初始化卡。只有用户要求查看结构化任务状态，或异常恢复确实需要重建任务上下文时才生成。
 
 触发条件只读取 `../eva-shared/references/shared/04_light-interaction_轻交互协议.md` 的 Harness 读取与外显条件。本文件只说明命中条件后如何生成和校验初始化卡，不维护第二套条件清单。
 
@@ -120,7 +121,7 @@ Eva 可以低风险自动交接，但必须同时满足：
 下游路径有多个合理选择
 ```
 
-Harness 不做第一入口路由；第一入口以 `../eva/SKILL.md` 为准。当前入口和 handoff/Asset 真源先做常规交接判断，只有正式交接失败或需要结构化状态恢复时才追加读取 Harness。
+Harness 不做第一入口路由，也不代替常规下一步推荐；第一入口以 `../eva/SKILL.md` 为准，动态接力以 shared 07 为准。当前入口和 handoff/Asset 真源先做常规交接判断，只有正式交接失败或需要结构化状态恢复时才追加读取 Harness。
 
 资产交接判断顺序：
 

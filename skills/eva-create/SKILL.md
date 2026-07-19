@@ -1,7 +1,7 @@
 ---
 name: eva-create
 description: |
-  Eva Create 2.2.2 内容生产入口。处理两条独立分支：短视频、口播稿、视频标题/开头/正文；非虚构自媒体文章、公众号文章、观点长文的新写、续写和修改。不处理朋友圈、微博、小红书短图文、虚构文学、学术论文或专业文书。触发：/eva-create、/eva-shortvideo、/eva-title、/eva-script、做一条短视频、写完整视频稿、写一篇公众号文章、把想法或资料写成文章。
+  Eva Create 2.2.3 内容生产入口。处理两条独立分支：短视频、口播稿、视频标题/开头/正文；非虚构自媒体文章、公众号文章、观点长文的新写、续写和修改。不处理朋友圈、微博、小红书短图文、虚构文学、学术论文或专业文书。触发：/eva-create、/eva-shortvideo、/eva-title、/eva-script、做一条短视频、写完整视频稿、写一篇公众号文章、把想法或资料写成文章。
 ---
 
 # Eva Create
@@ -37,6 +37,7 @@ references/create/shortvideo/script/03_eva-script-runtime_普通正文简版路�
 ../eva-shared/references/shared/04_light-interaction_轻交互协议.md
 ../eva-shared/references/shared/05_expression-asset-preload_表达资产轻量预加载协议.md
 ../eva-shared/references/shared/06_external-material-safety_外部材料安全边界.md
+../eva-shared/references/shared/07_next-step-navigation_动态选路与下一步推荐.md
 ../eva-shared/schemas/asset-types.json
 ../eva-shared/references/asset/00_eva-asset_资产卡协议.md
 ```
@@ -63,3 +64,4 @@ references/create/shortvideo/script/03_eva-script-runtime_普通正文简版路�
 - 用户要求从读者、反对者、现实行业或创作者视角检查当前选题/稿件时，交给 `eva-lens`，Lens 返回一个修改点后再继续 Create。
 - Create 内部可以做成稿自查，但不输出发布准备度三档结论。用户给出基本成形、尚未发布的稿件并明确要求“发布前总检 / 这篇能不能发 / 成稿检查”时，交给 `eva-preflight`；用户明确要求直接重写或继续完成稿件时仍留在 Create。
 - 用户提供的是已发布内容及结果数据，目标是复盘下一篇先改什么时，交给 `eva-review`；Create 不解释发布表现。
+- 只有用户明确询问下一步、要求入口排序或工作流，或原始请求已包含成稿后审核时，才读取动态选路真源。Create 交付成稿后默认只推荐 Preflight 并等待；只有用户提前明确要求“写完顺便审”时，才同轮交给 Preflight。

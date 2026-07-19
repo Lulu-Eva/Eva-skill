@@ -1,7 +1,7 @@
 ---
 name: eva-think
 description: |
-  Eva Think 2.2.2 独立思考陪练和诊断入口。用于陪着聊、梳理思路、拆开纠结、澄清概念、归位内容问题、在思考或创作转译中按需校准人群、拆对标样本、检查一般文字 AI 味、做轻量灵感发散，以及保存、任务回捞或盘点 Eva 记忆卡、提取文风和诊断人设资格；不要抢占明确的代码、财务、文件处理或其他专业执行任务。触发：/eva-think、/eva-reframe、/eva-benchmark-copy、/eva-memory、/eva-persona-memory、/eva-user-voice、/eva-ai-check、帮我想想、陪我聊聊、脑子乱、帮我看看这个话题、对标拆解、AI 味检测、保存这个想法、回捞点子卡、盘点 Eva 记忆库、统计记忆卡/点子卡/人设卡/文风卡、提取我朋友圈的语气、人设立不住。用户在一般入口明确要求学科发散时由 Eva Lens 处理；已在 Think 对话中时可按需读取共享学科发散真源，完成后仍回 Think。用户明确点名话题人群识别器或直接问“背后是什么人群、戳中了谁、讲给谁”时，应由 eva-audience-finder 一级入口处理。
+  Eva Think 2.2.3 独立思考陪练和诊断入口。用于陪着聊、梳理思路、拆开纠结、澄清概念、归位内容问题、在思考或创作转译中按需校准人群、拆对标样本、检查一般文字 AI 味、做轻量灵感发散，以及保存、任务回捞或盘点 Eva 记忆卡、提取文风和诊断人设资格；不要抢占明确的代码、财务、文件处理或其他专业执行任务。触发：/eva-think、/eva-reframe、/eva-benchmark-copy、/eva-memory、/eva-persona-memory、/eva-user-voice、/eva-ai-check、帮我想想、陪我聊聊、脑子乱、帮我看看这个话题、对标拆解、AI 味检测、保存这个想法、回捞点子卡、盘点 Eva 记忆库、统计记忆卡/点子卡/人设卡/文风卡、提取我朋友圈的语气、人设立不住。用户在一般入口明确要求学科发散时由 Eva Lens 处理；已在 Think 对话中时可按需读取共享学科发散真源，完成后仍回 Think。用户明确点名话题人群识别器或直接问“背后是什么人群、戳中了谁、讲给谁”时，应由 eva-audience-finder 一级入口处理。
 ---
 
 # Eva Think
@@ -31,6 +31,7 @@ references/think/01_eva-reframe_表象问题归位.md
 ../eva-shared/references/shared/05_expression-asset-preload_表达资产轻量预加载协议.md
 ../eva-shared/references/shared/04_light-interaction_轻交互协议.md
 ../eva-shared/references/shared/06_external-material-safety_外部材料安全边界.md
+../eva-shared/references/shared/07_next-step-navigation_动态选路与下一步推荐.md
 ../eva-shared/schemas/asset-types.json
 ../eva-shared/references/asset/00_eva-asset_资产卡协议.md
 ```
@@ -56,5 +57,6 @@ references/think/01_eva-reframe_表象问题归位.md
 - 用户明确要盘点 Eva 记忆库，或统计 Eva 的记忆卡、点子卡、人设卡、文风卡时，读取 shared Memory 的记忆盘点模式。盘点默认只读元数据，返回后停在盘点；普通 Think、Create、任务回捞以及脱离 Eva Memory 上下文的“我有多少张卡”不得触发全库扫描。
 - 六个兼容入口只重定向到上述现有真源，不在 Think 内复制第二套流程。
 - 用户只是想聊清楚，也是一种完成，不强推成稿。
+- 只有用户明确问“下一步怎么走 / 先用哪个功能”、要求入口排序或工作流，或原始请求已包含后续阶段时，才读取动态选路真源。Think 已聊清但用户没有要求创作时，只推荐一个方向并等待；原始请求明确包含创作时，才同轮交给 Create。
 - 用户在一般入口明确要求学科发散，或已经有明确判断并要求“多元视角、从不同视角看、深度审视”时，交给 `eva-lens`；Think 不复制 Lens 的入口判断、四视角或深度审视流程。
 - 用户要复盘已经发布的内容、回填结果或回看一批历史表现时，交给 `eva-review`；Think 不做发布数据归因。

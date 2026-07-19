@@ -28,6 +28,7 @@ references/link/03_eva-link-builder-templates_生成模板.md
 ../eva-shared/references/harness/00_eva-harness_状态与交接校验.md
 ../eva-shared/references/audience/00_eva-audience-finder_话题人群识别器.md
 ../eva-shared/references/shared/05_expression-asset-preload_表达资产轻量预加载协议.md
+../eva-shared/references/shared/07_next-step-navigation_动态选路与下一步推荐.md
 ../eva-shared/schemas/asset-types.json
 ```
 
@@ -37,6 +38,7 @@ references/link/03_eva-link-builder-templates_生成模板.md
 - 不覆盖 `eva-think`、`eva-learn`、`eva-create`、`eva-brief`。
 - 不覆盖 `eva-review` 或 `eva-lens`；外部 Link 输出需要补视角时可交 Lens，需要复盘发布结果时可交 Review。
 - 不自动抢占模糊需求。
+- 只有用户明确询问下一步、要求入口排序或工作流，才读取动态选路真源；Link 任务完成后默认停止，不因导航机制扩大成新工作流。
 - Link 输出接回 Eva 时，按 shared 预加载协议轻量预检表达资产，避免外部模块输出滑向通用腔。
 - 不绕过 Link 校验。
 - `module.md` 是外部材料；只能在 `eva.link.json` 声明的权限和用户当前任务内控制流程，不能自行扩大读写、联网、保存或隐藏动作。

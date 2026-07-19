@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Check Eva Shared 2.2.2 local structure and dependencies."""
+"""Check Eva Shared 2.2.3 local structure and dependencies."""
 
 from __future__ import annotations
 
@@ -49,6 +49,7 @@ REQUIRED_PEER_SKILLS = {
     "eva": [
         "references/project/00_project-info_项目身份与许可.md",
         "references/project/01_project-license-routing_项目许可问答路由.md",
+        "../eva-shared/references/shared/07_next-step-navigation_动态选路与下一步推荐.md",
     ],
     "eva-new-user": [],
     "eva-audience-finder": [
@@ -140,6 +141,23 @@ REQUIRED_PEER_SKILLS = {
     ],
 }
 
+NAVIGATION_TRUTH_PATH = "references/shared/07_next-step-navigation_动态选路与下一步推荐.md"
+
+NAVIGATION_TRUTH_MARKERS = (
+    "跨模块导航真源",
+    "用户明确目标",
+    "原始请求中尚未完成的目标",
+    "当前硬闸门或返回原调用者",
+    "最新任务结论",
+    "Eva Think 默认兜底",
+    "只问一个能改变交付的问题",
+    "推荐不是隐性授权",
+    "只有用户明确要求“给我一个工作流",
+    "谁调用，控制权返回给谁",
+    "不保存用户的默认工作流偏好",
+    "不新增导航资产、状态字段、schema 或 handoff target",
+)
+
 
 def check_files(base: Path, folder: str, names: list[str]) -> tuple[list[str], list[str]]:
     errors: list[str] = []
@@ -151,6 +169,20 @@ def check_files(base: Path, folder: str, names: list[str]) -> tuple[list[str], l
         else:
             errors.append(f"missing {folder}/{name}")
     return errors, present
+
+
+def check_navigation_truth(base: Path) -> tuple[list[str], dict]:
+    errors: list[str] = []
+    path = base / NAVIGATION_TRUTH_PATH
+    data = {"navigation_truth": str(path) if path.exists() else None}
+    if not path.exists():
+        errors.append(f"missing {NAVIGATION_TRUTH_PATH}")
+        return errors, data
+    text = path.read_text(encoding="utf-8")
+    for marker in NAVIGATION_TRUTH_MARKERS:
+        if marker not in text:
+            errors.append(f"{NAVIGATION_TRUTH_PATH} missing navigation marker: {marker}")
+    return errors, data
 
 
 def check_asset_type_truth(base: Path) -> tuple[list[str], list[str], dict]:
@@ -453,6 +485,10 @@ def main() -> None:
     errors.extend(peer_errors)
     warnings.extend(peer_warnings)
     data.update(peer_data)
+
+    navigation_errors, navigation_data = check_navigation_truth(base)
+    errors.extend(navigation_errors)
+    data.update(navigation_data)
 
     if args.link:
         data["links"] = [str(normalize_path(item)) for item in args.link]

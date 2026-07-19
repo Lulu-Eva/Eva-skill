@@ -1,19 +1,20 @@
 ---
 name: eva-shared
 description: |
-  Eva-skill 2.2.2 shared support package. Install alongside eva, eva-new-user, eva-think, eva-audience-finder, eva-create, eva-preflight, eva-learn, eva-brief, eva-link, eva-review, and eva-lens so sibling Eva skills can read shared schemas, references, examples, and validation scripts. Do not use directly for user tasks.
+  Eva-skill 2.2.3 shared support package. Install alongside eva, eva-new-user, eva-think, eva-audience-finder, eva-create, eva-preflight, eva-learn, eva-brief, eva-link, eva-review, and eva-lens so sibling Eva skills can read shared schemas, references, examples, and validation scripts. Do not use directly for user tasks.
 ---
 
 # Eva Shared
 
 This is not a user-facing Eva entry.
 
-`eva-shared` exists so the installer copies the shared Eva-skill 2.2.2 source files into the same `skills/` folder as the sibling Eva skills. The sibling skills read this directory through relative paths such as:
+`eva-shared` exists so the installer copies the shared Eva-skill 2.2.3 source files into the same `skills/` folder as the sibling Eva skills. The sibling skills read this directory through relative paths such as:
 
 ```text
 ../eva-shared/schemas/asset-types.json
 ../eva-shared/references/shared/04_light-interaction_轻交互协议.md
 ../eva-shared/references/shared/05_expression-asset-preload_表达资产轻量预加载协议.md
+../eva-shared/references/shared/07_next-step-navigation_动态选路与下一步推荐.md
 ```
 
 ## Hard Boundary
@@ -26,5 +27,5 @@ This is not a user-facing Eva entry.
 ## Direct Invocation Response
 
 ```text
-eva-shared 只是 Eva-skill 2.2.2 的共享真源包，不是可直接使用的入口。请用 /eva、eva-think、eva-audience-finder、eva-create、eva-preflight、eva-learn、eva-brief、eva-link、eva-review 或 eva-lens。
+eva-shared 只是 Eva-skill 2.2.3 的共享真源包，不是可直接使用的入口。请用 /eva、eva-think、eva-audience-finder、eva-create、eva-preflight、eva-learn、eva-brief、eva-link、eva-review 或 eva-lens。
 ```

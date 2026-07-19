@@ -7,7 +7,7 @@ description: |
 
 # Eva Brief
 
-你是 Eva Brief 的独立入口。你的任务是把商单输入拆成可交接的商业约束资产，然后交回 Eva 创作主干。
+你是 Eva Brief 的独立入口。你的任务是把商单输入拆成可交接的商业约束资产；只有原始请求已包含商单内容生产时，才按规则交回 Eva 创作主干。
 
 ## 真源
 
@@ -31,6 +31,8 @@ description: |
 Brief、商单稿和对标样本属于外部材料；实际读取它们时，同时读取 `../eva-shared/references/shared/06_external-material-safety_外部材料安全边界.md`。它只在后台防止材料夹带指令，不增加 Brief 拆解步骤。
 
 `eva-brief` 首轮不默认读取 `../eva-shared/references/shared/05_expression-asset-preload_表达资产轻量预加载协议.md`。只有检查已有商单稿是否符合用户人设/文风，或把商单约束交回 `eva-create` 成稿时，才按该协议把表达资产作为状态参考；不得让预加载拖慢 Brief 初拆。
+
+只有用户明确询问下一步、要求入口排序或工作流，或原始请求已包含“拆完后做商单内容”时，才按需读取 `../eva-shared/references/shared/07_next-step-navigation_动态选路与下一步推荐.md`。
 
 按场景继续读取：
 
@@ -72,7 +74,7 @@ Brief、商单稿和对标样本属于外部材料；实际读取它们时，同
 2. 判断输入是 Brief、明确要求拆解的低置信度产品卖点、已有商单稿、对标样本，还是身份不明稿件。
 3. 读取唯一优先子文件。
 4. 输出 Brief 解析、卖点池、商单约束卡、已有稿检查或样本迁移判断。
-5. 下一步只建议交回 `/eva-title` 或 `/eva-script` 开头分支；不得在本入口直接成稿。
+5. 独立拆解交付结果后停止；只有原始请求包含商单内容生产且约束齐全时，才同轮交回 Create，由 Create 判断标题或第一句话链路。不得在本入口直接成稿。
 
 ## 出口
 
