@@ -6,6 +6,8 @@
 
 本模块遵守 `../eva-shared/references/shared/04_light-interaction_轻交互协议.md`。未明确保存前，只输出可沉淀摘要和一个动作；点子卡、persona-card、voice-card 的完整字段只在用户确认保存、字段缺失、低置信度确认或用户要求查看时外显。
 
+只有用户在保存或盘点结果后明确询问下一步、入口排序或工作流时，才由当前调用入口按需读取 `../eva-shared/references/shared/07_next-step-navigation_动态选路与下一步推荐.md`。Memory 不自行扩展工作流；任务回捞完成后仍直接返回原调用链路。
+
 Memory 只处理三种互斥任务：
 
 | 任务 | 目的 | 默认终点 |

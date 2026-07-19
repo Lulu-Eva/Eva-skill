@@ -1,8 +1,8 @@
 ---
 name: eva
 description: |
-  Eva-skill 2.2.2 的极薄路由入口。仅在用户明确调用 /eva、点名 Eva 子入口，明确提出 Eva 的思考梳理、话题人群识别、短视频与非虚构文章、发布前审核、学习、商单 Brief、发布后复盘、学科发散、多元视角、Memory、Link 或新手教程任务，或明确询问 Eva-skill 本身的作者、发起者、开发者、维护者、贡献者、致谢、设计来源、借鉴与启发来源、官方项目来源、许可证、商用范围、修改发布、生成内容变现、隐私、法律风险、责任边界、商标或官方身份时使用；不要抢占其他项目的作者、许可证或法律问题，也不要抢占代码、财务、项目开工审查、部署、文件处理或其他无关任务。业务任务判断后同轮执行 eva-new-user、eva-think、eva-audience-finder、eva-create、eva-preflight、eva-learn、eva-brief、eva-link、eva-review 或 eva-lens。
-  当前入口：/eva、/eva-new-user、/eva-think、/eva-audience-finder、/eva-create、/eva-preflight、/eva-learn、/eva-brief、/eva-link、/eva-review、/eva-lens。兼容入口：/eva-reframe、/eva-benchmark-copy、/eva-memory、/eva-persona-memory、/eva-user-voice、/eva-ai-check。自然语言触发包括：帮我想想、这个话题讲给谁、从不同学科发散、做短视频、写公众号文章、发布前总检、带我学懂、拆品牌 Brief、发布后复盘、多元视角、深度审视、保存这个想法、回捞点子卡、盘点 Eva 记忆库、把提示词接进 Eva、Eva-skill 是谁做的、Eva-skill 能不能商用或改名发布，以及用 Eva-skill 创作的内容能不能变现。
+  Eva-skill 2.2.3 的极薄路由入口。仅在用户明确调用 /eva、点名 Eva 子入口，明确提出 Eva 的思考梳理、话题人群识别、短视频与非虚构文章、发布前审核、学习、商单 Brief、发布后复盘、学科发散、多元视角、Memory、Link、新手教程，或在 Eva 任务上下文中询问“下一步怎么走、先用哪个功能、入口排序、给我一个工作流”时使用；也处理 Eva-skill 本身的作者、发起者、开发者、维护者、贡献者、致谢、设计来源、借鉴与启发来源、官方项目来源、许可证、商用范围、修改发布、生成内容变现、隐私、法律风险、责任边界、商标和官方身份问答。不要抢占其他项目的项目信息、代码、财务、部署、文件处理或其他无关任务。业务任务判断后同轮执行 eva-new-user、eva-think、eva-audience-finder、eva-create、eva-preflight、eva-learn、eva-brief、eva-link、eva-review 或 eva-lens。
+  当前入口：/eva、/eva-new-user、/eva-think、/eva-audience-finder、/eva-create、/eva-preflight、/eva-learn、/eva-brief、/eva-link、/eva-review、/eva-lens。兼容入口：/eva-reframe、/eva-benchmark-copy、/eva-memory、/eva-persona-memory、/eva-user-voice、/eva-ai-check。自然语言触发包括：帮我想想、这个话题讲给谁、从不同学科发散、做短视频、写公众号文章、发布前总检、带我学懂、拆品牌 Brief、发布后复盘、多元视角、深度审视、人设或文风采集、保存或盘点 Eva 记忆、把提示词接进 Eva；仅在当前 Eva 任务上下文中，才包括“下一步怎么走、帮我选入口、给我一个工作流”；以及 Eva-skill 的项目身份与许可问答。
 ---
 
 # Eva：极薄路由
@@ -11,8 +11,8 @@ description: |
 
 你的任务只有两件：
 
-1. 判断这是 Eva 项目信息查询，还是该进入某个 Eva 业务入口。
-2. 项目信息查询按需读取 README 或许可问答 reference；业务任务立即读取目标入口的 `SKILL.md`，在同一轮继续执行完整流程。
+1. 判断这是 Eva 项目信息查询、动态导航请求，还是该进入某个 Eva 业务入口。
+2. 项目信息按需读取项目 reference；导航按需读取 shared 07；业务任务立即读取目标入口的 `SKILL.md`，同轮继续执行。
 
 除项目信息查询的直接回答旁路外，你不做诊断、不写稿、不拆 Brief、不带读、不做 Link 校验、不读取 Harness / Asset / schema。
 
@@ -23,6 +23,7 @@ description: |
 | Eva-skill 是谁做的、谁发起或开发、谁在维护、有哪些贡献者、致谢对象、设计来源、借鉴过谁或受谁启发、官方项目来源在哪里 | 项目信息 | 只按需读取 README 的“维护与致谢”，由根入口直接回答 |
 | Eva-skill 的许可证、商用、修改或改名发布、企业使用 | 项目许可 | 读取 `references/project/01_project-license-routing_项目许可问答路由.md`，不进入业务模块 |
 | 输出变现、署名、材料与案例、数据上传、免责或法律风险 | 项目法律说明 | 读取同一许可问答 reference；商标与官方身份也由它定位真源 |
+| Eva 上下文中的“下一步怎么走、先用哪个功能、入口排序、给我一个工作流” | 动态导航 | 读取 shared 07，根据当前目标和最近有效结论只决定当前一步 |
 | `/eva-new-user`、Eva New User、我是新用户、开启新手教程、教我怎么用 Eva | `eva-new-user` | 动态扫描已安装 Eva 能力，按用户节奏带练 |
 | `/eva-learn`、`eva-learn`、Eva Learn、带我学懂、带我系统学、带我读、主题式阅读、继续学习项目、接着讲上次带读 | `eva-learn` | 学习专线，直接开始学习或恢复项目 |
 | `/eva-brief`、品牌 Brief、商单 Brief、拆合作需求、检查商单稿 | `eva-brief` | 商单约束专线，先拆 Brief |
@@ -88,6 +89,9 @@ description: |
 - “朋友圈 Link / 用我的朋友圈 Link / 默认走我的朋友圈 Link”是 Link 意图，路由到 `eva-link`。
 - 用户显式触发 `eva-learn`、`eva-brief`、`eva-link` 时，不回主路由二次判断。
 - 用户明确说“带我学懂 / 带我系统学 / 带我读 / 主题式阅读 / 继续上次学习”时，路由到 `eva-learn`；不要求用户必须说出 `eva-learn` 字样。
+- 用户只说“研究 / 看看 / 处理这份资料”，但没有说明最终是学懂、提炼结论还是创作时，只问一个能改变交付的结果导向问题；不得仅因资料很长就进入 Learn，也不得先收材料再延迟判断。同句已给出最终产物时，按最终动词直接路由。
+- 用户询问下一步、入口排序或工作流时，读取 `../eva-shared/references/shared/07_next-step-navigation_动态选路与下一步推荐.md`；用户明确目标优先，不能用推荐绕过现有硬闸门。
+- 入口清楚时直接执行；轻微歧义但可以合理判断时只解释一句默认依据并同轮执行；只有不同方向会产生明显不同交付且无法判断时才问一个问题。用户明确要求“排序 123”时才最多展示三个入口。
 - 用户不知道该进哪里时，默认进 `eva-think`，让 Think 轻量接住。
 - 用户只做裸 `/eva` 启动时，不读取 Think，也不展示完整菜单；先输出欢迎语。用户选择教程后同轮读取 `eva-new-user`。
 - 路由后不要继续执行当前文件里的分析；必须读取目标入口自己的 `SKILL.md`，并在同一轮按其闸门继续。
@@ -113,16 +117,12 @@ eva-lens   -> ../eva-lens/SKILL.md
 - 不默认向用户展示内部入口名；只有切换会改变任务边界时，才用一句自然语言说明。
 - 基础模型直写不生成 Eva Asset、不声称通过 Eva 短视频闸门；用户后来要求保存或接入 Link 时，再进入对应入口。
 
-## 组合意图
+## 动态导航与组合意图
 
-- **AI Check + 改稿**：只检测留在 shared AI Check；明确只改一处或给出局部范围时使用它的局部改写模式；明确要完成、重写或发布某种内容时，按最终形式进入 Create 的短视频或 Article 分支。若只说“改成一版”等改写授权、却既未说明最终内容形式也未说明局部范围，只问一次：`你想先诊断并改最严重的一处，还是直接重写成哪种内容？`；不要自行选择局部改写或完整成稿。
-- **“不像我” + “AI 味重”**：有用户自己的样本、目标是以后照着写时进入 User Voice；没有用户样本、只检查哪里假空机械时进入 AI Check；已是短视频成稿任务时保留 Create 主链，文风与真实性后置校准。
-- **长文档按最终动词**：带我学懂、带我读、系统学进入 Learn；做成短视频或写成自媒体文章进入 Create 对应分支；拆样本结构进入 Benchmark；保存个人想法、经历或文风进入 Think 对应 Memory；最终动词不清时只问一个会改变入口的问题。
-- **商单意图**：拆 Brief、检查是否符合 Brief 进入 Brief；把商单写成短视频进入 Create，内部必须先形成 Commerce/Brief 约束；正式品牌赞助文章在本版只进 Brief 形成约束，不直接由 Article 成稿；只有产品名和卖点时不生成正式商单约束卡，不进入高置信度成稿。
-- **Review + 改下一篇**：先由 Review 输出一个待验证变量；用户明确要制作下一篇时，再按平台和内容形式交给 Create、Link 或基础模型，不在 Review 内直接写稿。
-- **Review + 补盲区**：用户要求从多元视角检查复盘结论时转 Lens；Lens 只审视当前结论，不重新做数据归因。
-- **Preflight + 改稿**：用户只要审核时停在三档判断，不自动改稿；用户明确要求“审核并改好”时，先由 Preflight 找到最高优先级问题，再按最终内容形式交 Create、AI Check、Link 或基础模型，不在 Preflight 内全文重写。
-- **商单最终总检**：只对照 Brief、必提或禁区仍进 Brief；明确要求整篇发布前综合总检时进 Preflight。即使 Brief 或商单约束缺失，也由 Preflight 判定“暂不建议发布”，并把唯一下一步交给 Brief 补齐，不绕过三档结论。
+- 用户明确询问下一步、入口排序或工作流，或原始请求已经包含两个以上阶段时，读取 shared 07；普通单一任务不额外加载。
+- 原始请求已授权下游阶段时同轮接力；当前任务已经完成、下一步会扩大范围时只推荐一个方向并等待。
+- Audience、Lens、Memory 等内部调用完成后返回原调用者，不回根入口重判；需要搜索、补材料、发布或等待数据时必须停止。
+- AI Check、文风、长文档、商单、Review、Preflight 等组合意图的详细接力只以 shared 07 为准，根入口不复制第二套导航表。
 
 ## 输出方式
 

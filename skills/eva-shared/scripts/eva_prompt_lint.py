@@ -84,6 +84,23 @@ ASSET_FIELD_MARKERS = (
     "confidence",
 )
 
+NAVIGATION_PRIORITY_MARKERS = (
+    "用户明确目标",
+    "原始请求中尚未完成的目标",
+    "当前硬闸门或返回原调用者",
+    "最新任务结论",
+    "Eva Think 默认兜底",
+)
+
+NAVIGATION_WORKFLOW_STAGE_MARKERS = (
+    "当前判断",
+    "必要前置",
+    "内容生产",
+    "发布前审核",
+    "用户现实动作",
+    "发布后复盘",
+)
+
 FRONTSTAGE_TEMPLATE_HEADINGS = (
     "## 默认启动",
     "## 输出格式",
@@ -194,6 +211,18 @@ SOURCE_OF_TRUTH_RULES = (
         ),
         "fields": ASSET_FIELD_MARKERS,
         "min_hits": 5,
+    },
+    {
+        "name": "dynamic-navigation priority",
+        "allowed": ("../eva-shared/references/shared/07_next-step-navigation_动态选路与下一步推荐.md",),
+        "fields": NAVIGATION_PRIORITY_MARKERS,
+        "min_hits": 4,
+    },
+    {
+        "name": "dynamic workflow stage taxonomy",
+        "allowed": ("../eva-shared/references/shared/07_next-step-navigation_动态选路与下一步推荐.md",),
+        "fields": NAVIGATION_WORKFLOW_STAGE_MARKERS,
+        "min_hits": 4,
     },
 )
 
@@ -307,10 +336,41 @@ def lint(base: Path) -> dict:
     skill = (base / "../eva/SKILL.md").resolve()
     if skill.exists():
         text = skill.read_text(encoding="utf-8")
+        if len(text.splitlines()) > 140:
+            errors.append(f"eva router must stay at or below 140 lines, got {len(text.splitlines())}")
+        if len(text) > 8500:
+            errors.append(f"eva router must stay at or below 8500 characters, got {len(text)}")
+        for marker in (
+            "../eva-shared/references/shared/07_next-step-navigation_动态选路与下一步推荐.md",
+            "下一步怎么走",
+            "先用哪个功能",
+            "入口排序",
+            "工作流",
+            "仅在当前 Eva 任务上下文中",
+            "用户只说“研究 / 看看 / 处理这份资料”",
+        ):
+            if marker not in text:
+                errors.append(f"eva router missing dynamic-navigation trigger/reference: {marker}")
         default = extract_section(text, "## 默认启动")
         for forbidden in ("Link", "Synchro", "Asset", "Harness", "schema", "valid_next", "DoD", "failure-record"):
             if forbidden in default:
                 errors.append(f"SKILL.md: default startup exposes backstage/system term: {forbidden}")
+
+    navigation_path = base / "references/shared/07_next-step-navigation_动态选路与下一步推荐.md"
+    if not navigation_path.exists():
+        errors.append("missing shared dynamic-navigation truth source")
+    else:
+        navigation_text = navigation_path.read_text(encoding="utf-8")
+        for marker in (
+            *NAVIGATION_PRIORITY_MARKERS,
+            "只问一个能改变交付的问题",
+            "推荐不是隐性授权",
+            "只有用户明确要求“给我一个工作流",
+            "谁调用，控制权返回给谁",
+            "不新增导航资产、状态字段、schema 或 handoff target",
+        ):
+            if marker not in navigation_text:
+                errors.append(f"dynamic-navigation truth missing marker: {marker}")
 
     for phrase, hits in default_phrase_hits.items():
         if len(hits) > 1:

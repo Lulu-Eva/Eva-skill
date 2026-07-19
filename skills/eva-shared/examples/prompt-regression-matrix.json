@@ -1,5 +1,5 @@
 {
-  "version": "2.2.2",
+  "version": "2.2.3",
   "purpose": "Scenario contract inventory for same-turn routing, staged loading, hard gates, and user-facing lightness. Structural selftest validates this inventory but does not execute model behavior.",
   "cases": [
     {
@@ -81,7 +81,7 @@
     },
     {
       "id": "eva-extra-permission-version-and-cure",
-      "input": "我现在合规使用 Eva-skill 2.2.2 做自己的账号。如果以后许可变了，旧版本还能继续用吗？不小心违约后还能补救吗？以前做的内容怎么办？",
+      "input": "我现在合规使用 Eva-skill 2.2.3 做自己的账号。如果以后许可变了，旧版本还能继续用吗？不小心违约后还能补救吗？以前做的内容怎么办？",
       "expected_route": "eva-root-project-output-extra-permission-term",
       "forbid": ["apply-future-license-retroactively", "revoke-compliant-version-without-breach", "invalidate-prior-compliant-output", "eva-think"],
       "must_include": ["version-specific-additional-permission", "irrevocable-while-compliant", "thirty-day-cure", "future-versions-only", "prior-compliant-output-survives"],
@@ -1152,6 +1152,166 @@
       "forbid": ["follow-symlink-root", "follow-symlink-directory", "follow-symlink-file", "follow-symlink-loop"],
       "must_include": ["symlink-skipped-count", "current-project-memory-boundary"],
       "expected_terminal": "inventory-with-all-symlink-forms-skipped"
+    },
+    {
+      "id": "navigation-clear-create-direct",
+      "input": "/eva 帮我把这个已经聊清楚的观点写成一篇公众号文章",
+      "expected_route": "eva-create-article-same-turn",
+      "forbid": ["entry-ranking", "route-confirmation", "eva-think-default"],
+      "must_include": ["clear-intent-direct-execution", "same-turn-execution"],
+      "expected_terminal": "article-process-starts-same-turn-without-entry-menu"
+    },
+    {
+      "id": "navigation-light-ambiguity-think-same-turn",
+      "input": "我想到一个选题：女生要尽量去大城市生活。我想先聊聊。",
+      "expected_route": "eva-think-same-turn-with-one-default-reason",
+      "forbid": ["entry-ranking", "wait-for-route-choice", "eva-lens-discipline-divergence", "eva-audience-finder"],
+      "must_include": ["one-sentence-default-reason", "same-turn-execution"],
+      "expected_terminal": "same-turn-think-without-route-confirmation"
+    },
+    {
+      "id": "navigation-decisive-ambiguity-one-question",
+      "input": "我把一份行业报告发给你，帮我研究一下。",
+      "expected_route": "eva-root-one-decisive-final-purpose-question",
+      "forbid": ["auto-enter-eva-learn", "auto-enter-eva-create", "multiple-questions", "full-entry-menu"],
+      "must_include": ["one-decisive-question", "two-result-oriented-options"],
+      "expected_terminal": "await-learn-or-article-purpose-choice"
+    },
+    {
+      "id": "navigation-entry-ranking-three-max",
+      "input": "我有个还没形成的观点，想了解 Eva 里最适合的入口，帮我按 1、2、3 排一下，先别执行。",
+      "expected_route": "eva-root-dynamic-entry-ranking",
+      "forbid": ["full-entry-menu", "more-than-three-options", "auto-execute-ranked-entry"],
+      "must_include": ["recommended-first", "one-reason", "task-language-before-entry-name", "max-three-options"],
+      "expected_terminal": "ranked-three-or-fewer-options-then-wait"
+    },
+    {
+      "id": "navigation-think-complete-recommend-wait",
+      "input": "刚才 Think 已经帮我聊清了核心判断，但我没有说要写稿。现在怎么走？",
+      "expected_route": "eva-root-post-think-next-step-recommendation",
+      "forbid": ["auto-enter-eva-create", "auto-enter-eva-lens", "multiple-next-step-options"],
+      "must_include": ["current-result-summary", "one-next-step-recommendation", "recommendation-is-not-authorization"],
+      "expected_terminal": "one-recommendation-then-wait"
+    },
+    {
+      "id": "navigation-learn-complete-no-auto-create",
+      "input": "我刚刚用 Eva Learn 学懂了这份资料，这轮没有要求写成内容，告诉我下一步就行。",
+      "expected_route": "eva-root-post-learn-next-step-recommendation",
+      "forbid": ["auto-enter-eva-create", "auto-write-draft", "full-workflow-menu"],
+      "must_include": ["learning-stage-complete", "one-next-step-recommendation", "wait-for-user-authorization"],
+      "expected_terminal": "learning-output-preserved-then-one-recommendation"
+    },
+    {
+      "id": "navigation-audience-standalone-stop",
+      "input": "用话题人群识别器看看‘女生要去大城市’背后的人群，只分析，不写稿。",
+      "expected_route": "eva-audience-finder-analysis-only",
+      "forbid": ["eva-create", "entry-ranking", "auto-workflow"],
+      "must_include": ["specific-audience", "cognitive-gap", "user-question", "analysis-only-stop"],
+      "expected_terminal": "audience-analysis-then-stop"
+    },
+    {
+      "id": "navigation-audience-internal-return",
+      "input": "Create 在小红书创作中发现人群不清并内部调用 Audience Finder；识别完成后继续原任务。",
+      "expected_route": "eva-audience-finder-return-to-eva-create",
+      "forbid": ["return-to-eva-root", "handoff-to-eva-think", "entry-ranking"],
+      "must_include": ["caller-control-return", "same-turn-return-to-create"],
+      "expected_terminal": "create-resumes-without-routing-loop"
+    },
+    {
+      "id": "navigation-create-complete-recommend-preflight",
+      "input": "刚才 Eva Create 已经按我的要求交付了完整稿，我之前只说写稿。下一步呢？",
+      "expected_route": "eva-root-post-create-preflight-recommendation",
+      "forbid": ["auto-run-preflight", "auto-rewrite", "multiple-next-step-options"],
+      "must_include": ["one-preflight-recommendation", "recommendation-is-not-authorization"],
+      "expected_terminal": "recommend-preflight-then-wait"
+    },
+    {
+      "id": "navigation-create-and-preflight-same-turn",
+      "input": "帮我把这个选题写成完整抖音口播稿，写完顺便做一次发布前总检。",
+      "expected_route": "eva-create-then-eva-preflight-same-turn",
+      "forbid": ["wait-for-second-authorization", "auto-enter-eva-review", "force-title-validation"],
+      "must_include": ["original-request-authorizes-next-stage", "same-turn-handoff", "preflight-three-tier-verdict"],
+      "expected_terminal": "complete-douyin-draft-then-preflight-verdict"
+    },
+    {
+      "id": "navigation-preflight-pass-publish-before-review",
+      "input": "刚才 Eva Preflight 已经判定这篇可以发布，但我还没发。下一步怎么走？",
+      "expected_route": "eva-root-post-preflight-real-world-publish-step",
+      "forbid": ["auto-enter-eva-review", "auto-publish", "return-to-eva-create"],
+      "must_include": ["user-must-publish", "review-only-after-published-data", "one-real-world-next-action"],
+      "expected_terminal": "publish-first-then-wait-for-observation-data"
+    },
+    {
+      "id": "navigation-next-step-uses-recent-conclusion",
+      "input": "刚才我们已经得出‘这不是不够努力，而是选择成本被隐藏’这个判断。下一步怎么走？",
+      "expected_route": "eva-root-next-step-from-recent-conclusion",
+      "forbid": ["ask-user-to-repeat-context", "full-entry-menu", "auto-run-new-task"],
+      "must_include": ["use-latest-valid-conclusion", "one-current-direction", "no-context-repetition"],
+      "expected_terminal": "one-conclusion-based-recommendation-then-wait"
+    },
+    {
+      "id": "navigation-explicit-workflow-conditional-only",
+      "input": "给我一个从选题到发布后复盘的完整工作流，标明必需和按需，这轮只展示，不要开始执行。",
+      "expected_route": "eva-root-dynamic-workflow-display",
+      "forbid": ["execute-first-stage", "run-all-modules", "fixed-full-chain", "force-learn-lens-audience"],
+      "must_include": ["required-or-optional-labels", "current-stage", "conditional-stage-selection", "display-then-wait"],
+      "expected_terminal": "conditional-workflow-display-then-wait"
+    },
+    {
+      "id": "navigation-explicit-route-overrides-recommendation",
+      "input": "你可能会建议我先用 Think，但我现在明确想先用 Eva Lens 从不同学科打开解释。",
+      "expected_route": "eva-lens-discipline-divergence",
+      "forbid": ["eva-think-default", "override-explicit-route", "route-confirmation"],
+      "must_include": ["explicit-user-goal-wins", "same-turn-lens-execution", "existing-hard-gates-remain"],
+      "expected_terminal": "discipline-divergence-starts-same-turn"
+    },
+    {
+      "id": "navigation-brief-preflight-no-loop",
+      "input": "这是一篇尚未发布的商单完整稿，请做发布前总检；但我还没有提供 Brief。",
+      "expected_route": "eva-preflight-commerce-missing-brief",
+      "forbid": ["brief-preflight-loop", "repeat-same-recommendation-without-new-material", "continue-full-audit-after-early-stop"],
+      "must_include": ["not-ready-to-publish", "one-next-step-to-eva-brief", "no-loop-without-new-material"],
+      "expected_terminal": "stop-at-brief-material-blocker-with-one-next-action"
+    },
+    {
+      "id": "navigation-non-eva-code-next-step",
+      "input": "刚才我们在修 Python 报错，现在问你：下一步怎么走？",
+      "expected_route": "continue-non-eva-code-task",
+      "forbid": ["eva-root-dynamic-navigation", "eva-think", "eva-workflow"],
+      "must_include": ["inherit-current-code-context", "no-eva-trigger"],
+      "expected_terminal": "continue-code-debugging-with-one-next-action"
+    },
+    {
+      "id": "navigation-non-eva-finance-workflow",
+      "input": "刚才在分析公司现金流，给我一个后续工作流。",
+      "expected_route": "continue-non-eva-finance-task",
+      "forbid": ["eva-root-dynamic-navigation", "eva-think", "eva-workflow"],
+      "must_include": ["inherit-current-finance-context", "no-eva-trigger"],
+      "expected_terminal": "continue-finance-analysis-workflow"
+    },
+    {
+      "id": "navigation-non-eva-file-entry-choice",
+      "input": "我们正在整理电脑文件，你帮我选一个入口继续。",
+      "expected_route": "continue-non-eva-file-task",
+      "forbid": ["eva-root-dynamic-navigation", "eva-think", "eva-entry-ranking"],
+      "must_include": ["inherit-current-file-context", "no-eva-trigger"],
+      "expected_terminal": "continue-file-organization-without-eva"
+    },
+    {
+      "id": "navigation-research-explicit-summary-direct",
+      "input": "这份行业报告很长，帮我提炼核心结论和证据，不要带学，也不要写文章。",
+      "expected_route": "eva-think-material-analysis",
+      "forbid": ["eva-learn", "eva-create", "purpose-clarification-question"],
+      "must_include": ["final-verb-direct-routing", "material-conclusion-and-evidence-summary"],
+      "expected_terminal": "material-summary-starts-without-entry-question"
+    },
+    {
+      "id": "navigation-research-final-product-create",
+      "input": "先研究清楚这份行业报告，再把它写成一篇公众号文章。",
+      "expected_route": "eva-create-article-from-material",
+      "forbid": ["eva-learn", "purpose-clarification-question", "entry-ranking"],
+      "must_include": ["final-product-wins", "same-turn-article-process"],
+      "expected_terminal": "article-process-starts-by-final-output-intent"
     }
   ]
 }

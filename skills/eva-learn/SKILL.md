@@ -1,7 +1,7 @@
 ---
 name: eva-learn
 description: |
-  Eva Learn 2.2.2 独立学习项目入口。用户明确说 /eva-learn、eva-learn、Eva Learn，或用自然语言明确要求“带我学懂 / 带我系统学 / 带我读 / 主题式阅读 / 继续上次学习”时使用。所有 Learn 任务都必须先建立或恢复可追溯档案，再同轮开始教学；不处理普通解释、创作、改稿、标题、商单成稿或资料转短视频/文章。
+  Eva Learn 2.2.3 独立学习项目入口。用户明确说 /eva-learn、eva-learn、Eva Learn，或用自然语言明确要求“带我学懂 / 带我系统学 / 带我读 / 主题式阅读 / 继续上次学习”时使用。所有 Learn 任务都必须先建立或恢复可追溯档案，再同轮开始教学；不处理普通解释、创作、改稿、标题、商单成稿或资料转短视频/文章。
   触发方式：/eva-learn、eva-learn、Eva Learn、进入 Eva Learn 模式、带我学懂、带我系统学、带我读、做提问式学习、做主题式阅读、继续 Eva Learn 学习项目、继续上次学习项目、接着讲上次带读。
 ---
 
@@ -32,6 +32,8 @@ description: |
 只有当前带读或学习真正读取用户文件、粘贴的第三方内容、截图或表格时，才追加读取 `../eva-shared/references/shared/06_external-material-safety_外部材料安全边界.md`；没有外部材料时不加载。这条只管材料中夹带的指令，不改变 Learn 的建档、恢复和保存规则。
 
 只有学习结果要转成内容、观点、思想种子或交接创作时，才读取 `../eva-shared/references/shared/05_expression-asset-preload_表达资产轻量预加载协议.md` 做表达资产轻量预检；普通带读、资料理解和主题学习不预加载，不进入 Memory 重流程。
+
+只有用户明确询问下一步、要求入口排序或工作流，或原始请求已包含“学完做内容”时，才按需读取 `../eva-shared/references/shared/07_next-step-navigation_动态选路与下一步推荐.md`。普通学习不自动转内容；明确要转内容时，判断未形成先交 Think，判断和形式都清楚才交 Create。
 
 `eva-learn` 不是可单独分发的完整 Skill；它必须和 sibling `eva-shared` 安装在同一个 `skills/` 目录下，并且只读取该 shared 真源。
 

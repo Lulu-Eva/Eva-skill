@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Eva 2.2.2 structural checks and prompt scenario-contract validation."""
+"""Eva 2.2.3 structural checks and prompt scenario-contract validation."""
 
 from __future__ import annotations
 
@@ -617,6 +617,131 @@ REQUIRED_222_CASE_CONTRACTS = {
 
 REQUIRED_SCENARIO_CASES.update(REQUIRED_222_CASE_CONTRACTS)
 
+REQUIRED_223_CASE_CONTRACTS = {
+    "navigation-clear-create-direct": {
+        "expected_route": "eva-create-article-same-turn",
+        "expected_terminal": "article-process-starts-same-turn-without-entry-menu",
+        "forbid": {"entry-ranking", "route-confirmation", "eva-think-default"},
+        "must_include": {"clear-intent-direct-execution", "same-turn-execution"},
+    },
+    "navigation-light-ambiguity-think-same-turn": {
+        "expected_route": "eva-think-same-turn-with-one-default-reason",
+        "expected_terminal": "same-turn-think-without-route-confirmation",
+        "forbid": {"entry-ranking", "wait-for-route-choice", "eva-lens-discipline-divergence", "eva-audience-finder"},
+        "must_include": {"one-sentence-default-reason", "same-turn-execution"},
+    },
+    "navigation-decisive-ambiguity-one-question": {
+        "expected_route": "eva-root-one-decisive-final-purpose-question",
+        "expected_terminal": "await-learn-or-article-purpose-choice",
+        "forbid": {"auto-enter-eva-learn", "auto-enter-eva-create", "multiple-questions", "full-entry-menu"},
+        "must_include": {"one-decisive-question", "two-result-oriented-options"},
+    },
+    "navigation-entry-ranking-three-max": {
+        "expected_route": "eva-root-dynamic-entry-ranking",
+        "expected_terminal": "ranked-three-or-fewer-options-then-wait",
+        "forbid": {"full-entry-menu", "more-than-three-options", "auto-execute-ranked-entry"},
+        "must_include": {"recommended-first", "one-reason", "task-language-before-entry-name", "max-three-options"},
+    },
+    "navigation-think-complete-recommend-wait": {
+        "expected_route": "eva-root-post-think-next-step-recommendation",
+        "expected_terminal": "one-recommendation-then-wait",
+        "forbid": {"auto-enter-eva-create", "auto-enter-eva-lens", "multiple-next-step-options"},
+        "must_include": {"current-result-summary", "one-next-step-recommendation", "recommendation-is-not-authorization"},
+    },
+    "navigation-learn-complete-no-auto-create": {
+        "expected_route": "eva-root-post-learn-next-step-recommendation",
+        "expected_terminal": "learning-output-preserved-then-one-recommendation",
+        "forbid": {"auto-enter-eva-create", "auto-write-draft", "full-workflow-menu"},
+        "must_include": {"learning-stage-complete", "one-next-step-recommendation", "wait-for-user-authorization"},
+    },
+    "navigation-audience-standalone-stop": {
+        "expected_route": "eva-audience-finder-analysis-only",
+        "expected_terminal": "audience-analysis-then-stop",
+        "forbid": {"eva-create", "entry-ranking", "auto-workflow"},
+        "must_include": {"specific-audience", "cognitive-gap", "user-question", "analysis-only-stop"},
+    },
+    "navigation-audience-internal-return": {
+        "expected_route": "eva-audience-finder-return-to-eva-create",
+        "expected_terminal": "create-resumes-without-routing-loop",
+        "forbid": {"return-to-eva-root", "handoff-to-eva-think", "entry-ranking"},
+        "must_include": {"caller-control-return", "same-turn-return-to-create"},
+    },
+    "navigation-create-complete-recommend-preflight": {
+        "expected_route": "eva-root-post-create-preflight-recommendation",
+        "expected_terminal": "recommend-preflight-then-wait",
+        "forbid": {"auto-run-preflight", "auto-rewrite", "multiple-next-step-options"},
+        "must_include": {"one-preflight-recommendation", "recommendation-is-not-authorization"},
+    },
+    "navigation-create-and-preflight-same-turn": {
+        "expected_route": "eva-create-then-eva-preflight-same-turn",
+        "expected_terminal": "complete-douyin-draft-then-preflight-verdict",
+        "forbid": {"wait-for-second-authorization", "auto-enter-eva-review", "force-title-validation"},
+        "must_include": {"original-request-authorizes-next-stage", "same-turn-handoff", "preflight-three-tier-verdict"},
+    },
+    "navigation-preflight-pass-publish-before-review": {
+        "expected_route": "eva-root-post-preflight-real-world-publish-step",
+        "expected_terminal": "publish-first-then-wait-for-observation-data",
+        "forbid": {"auto-enter-eva-review", "auto-publish", "return-to-eva-create"},
+        "must_include": {"user-must-publish", "review-only-after-published-data", "one-real-world-next-action"},
+    },
+    "navigation-next-step-uses-recent-conclusion": {
+        "expected_route": "eva-root-next-step-from-recent-conclusion",
+        "expected_terminal": "one-conclusion-based-recommendation-then-wait",
+        "forbid": {"ask-user-to-repeat-context", "full-entry-menu", "auto-run-new-task"},
+        "must_include": {"use-latest-valid-conclusion", "one-current-direction", "no-context-repetition"},
+    },
+    "navigation-explicit-workflow-conditional-only": {
+        "expected_route": "eva-root-dynamic-workflow-display",
+        "expected_terminal": "conditional-workflow-display-then-wait",
+        "forbid": {"execute-first-stage", "run-all-modules", "fixed-full-chain", "force-learn-lens-audience"},
+        "must_include": {"required-or-optional-labels", "current-stage", "conditional-stage-selection", "display-then-wait"},
+    },
+    "navigation-explicit-route-overrides-recommendation": {
+        "expected_route": "eva-lens-discipline-divergence",
+        "expected_terminal": "discipline-divergence-starts-same-turn",
+        "forbid": {"eva-think-default", "override-explicit-route", "route-confirmation"},
+        "must_include": {"explicit-user-goal-wins", "same-turn-lens-execution", "existing-hard-gates-remain"},
+    },
+    "navigation-brief-preflight-no-loop": {
+        "expected_route": "eva-preflight-commerce-missing-brief",
+        "expected_terminal": "stop-at-brief-material-blocker-with-one-next-action",
+        "forbid": {"brief-preflight-loop", "repeat-same-recommendation-without-new-material", "continue-full-audit-after-early-stop"},
+        "must_include": {"not-ready-to-publish", "one-next-step-to-eva-brief", "no-loop-without-new-material"},
+    },
+    "navigation-non-eva-code-next-step": {
+        "expected_route": "continue-non-eva-code-task",
+        "expected_terminal": "continue-code-debugging-with-one-next-action",
+        "forbid": {"eva-root-dynamic-navigation", "eva-think", "eva-workflow"},
+        "must_include": {"inherit-current-code-context", "no-eva-trigger"},
+    },
+    "navigation-non-eva-finance-workflow": {
+        "expected_route": "continue-non-eva-finance-task",
+        "expected_terminal": "continue-finance-analysis-workflow",
+        "forbid": {"eva-root-dynamic-navigation", "eva-think", "eva-workflow"},
+        "must_include": {"inherit-current-finance-context", "no-eva-trigger"},
+    },
+    "navigation-non-eva-file-entry-choice": {
+        "expected_route": "continue-non-eva-file-task",
+        "expected_terminal": "continue-file-organization-without-eva",
+        "forbid": {"eva-root-dynamic-navigation", "eva-think", "eva-entry-ranking"},
+        "must_include": {"inherit-current-file-context", "no-eva-trigger"},
+    },
+    "navigation-research-explicit-summary-direct": {
+        "expected_route": "eva-think-material-analysis",
+        "expected_terminal": "material-summary-starts-without-entry-question",
+        "forbid": {"eva-learn", "eva-create", "purpose-clarification-question"},
+        "must_include": {"final-verb-direct-routing", "material-conclusion-and-evidence-summary"},
+    },
+    "navigation-research-final-product-create": {
+        "expected_route": "eva-create-article-from-material",
+        "expected_terminal": "article-process-starts-by-final-output-intent",
+        "forbid": {"eva-learn", "purpose-clarification-question", "entry-ranking"},
+        "must_include": {"final-product-wins", "same-turn-article-process"},
+    },
+}
+
+REQUIRED_SCENARIO_CASES.update(REQUIRED_223_CASE_CONTRACTS)
+
 REQUIRED_ROUTER_MARKERS = {
     "eva-new-user": "Router must expose the adaptive new-user tutorial",
     "eva-think": "Router must expose eva-think as the default light entry",
@@ -648,13 +773,8 @@ REQUIRED_ROUTER_MARKERS = {
     "/eva-persona-memory": "Router must preserve the persona compatibility alias",
     "/eva-user-voice": "Router must preserve the user-voice compatibility alias",
     "/eva-ai-check": "Router must preserve the AI-check compatibility alias",
-    "长文档按最终动词": "Router must resolve long material by the user's final verb",
-    "AI Check + 改稿": "Router must resolve combined AI-check and rewrite intent",
-    "Review + 改下一篇": "Router must keep Review separate from content production",
-    "Review + 补盲区": "Router must hand Review conclusions to Lens without redoing attribution",
     "明确询问 Eva-skill 本身": "Router must scope project identity triggers to Eva itself",
     "作者、发起者、开发者、维护者、贡献者": "Router must expose Eva project attribution intent",
-    "许可证、商用范围、修改发布、生成内容变现、隐私、法律风险、责任边界、商标或官方身份": "Router must expose explicit Eva license and legal-boundary intents",
     "../../README.md": "Source router must know the repository README path",
     "SkillHub 一体化包：`README.md`": "SkillHub router must know the bundled README path",
     "存在时优先使用": "Router must prefer the README beside the active Skill entry",
@@ -666,9 +786,19 @@ REQUIRED_ROUTER_MARKERS = {
     "纯身份问题回答后停止": "Router must answer attribution without entering a child module",
     "纯问答后停止": "Router must answer license questions without entering a child module",
     "普通 Eva 任务不得读取 README": "Router must not load README during ordinary work",
-    "不要抢占其他项目的作者、许可证或法律问题": "Router must not hijack generic project-attribution or licensing questions",
+    "不要抢占其他项目的项目信息": "Router must not hijack generic project-attribution or licensing questions",
     "普通 Eva 任务不得读取 README、法律问答 reference、LICENSE、LEGAL_NOTICE 或 TRADEMARKS": "Router must keep legal truth sources out of ordinary work",
     "不得仅凭类别直接判定违法": "Router must distinguish excluded extra permissions from uses that actually require authorization",
+    "下一步怎么走、先用哪个功能、入口排序、给我一个工作流": "Router frontmatter must expose explicit dynamic-navigation intents",
+    "仅在当前 Eva 任务上下文中": "Router frontmatter must scope generic next-step language to Eva tasks",
+    "用户只说“研究 / 看看 / 处理这份资料”": "Router must resolve ambiguous material research before receiving the material",
+    "同句已给出最终产物时，按最终动词直接路由": "Router must use the explicit final product for material tasks",
+    "../eva-shared/references/shared/07_next-step-navigation_动态选路与下一步推荐.md": "Router must delegate dynamic navigation to the shared truth source",
+    "入口清楚时直接执行": "Router must directly execute clear tasks without a menu",
+    "轻微歧义但可以合理判断时只解释一句默认依据并同轮执行": "Router must keep low-risk ambiguity non-blocking",
+    "用户明确要求“排序 123”时才最多展示三个入口": "Router must cap explicit entry ranking at three",
+    "当前任务已经完成、下一步会扩大范围时只推荐一个方向并等待": "Router must not treat a recommendation as authorization",
+    "Audience、Lens、Memory 等内部调用完成后返回原调用者": "Router must prevent internal-call navigation loops",
 }
 
 REQUIRED_LICENSE_ROUTING_MARKERS = {
@@ -743,6 +873,7 @@ REQUIRED_ARCHITECTURE_PATHS = (
     "references/shared/04_light-interaction_轻交互协议.md",
     "references/shared/05_expression-asset-preload_表达资产轻量预加载协议.md",
     "references/shared/06_external-material-safety_外部材料安全边界.md",
+    "references/shared/07_next-step-navigation_动态选路与下一步推荐.md",
     "references/lens/00_eva-lens-discipline-divergence_学科发散.md",
     "references/harness/00_eva-harness_状态与交接校验.md",
 )
@@ -1584,6 +1715,23 @@ def main() -> None:
                         + ", ".join(missing_markers)
                     )
 
+        for case_id, contract in REQUIRED_223_CASE_CONTRACTS.items():
+            case = case_by_id.get(case_id) or {}
+            for scalar_field in ("expected_route", "expected_terminal"):
+                if case.get(scalar_field) != contract[scalar_field]:
+                    errors.append(
+                        f"prompt scenario case {case_id!r} {scalar_field} must be "
+                        f"{contract[scalar_field]!r}"
+                    )
+            for list_field in ("forbid", "must_include"):
+                actual = set(case.get(list_field) or [])
+                missing_markers = sorted(contract[list_field] - actual)
+                if missing_markers:
+                    errors.append(
+                        f"prompt scenario case {case_id!r} missing {list_field} marker(s): "
+                        + ", ".join(missing_markers)
+                    )
+
     shared_skill_path = base / "SKILL.md"
     if not shared_skill_path.exists():
         errors.append("eva-shared must have SKILL.md so GitHub skill installers copy the shared package")
@@ -1636,7 +1784,7 @@ def main() -> None:
             "只读盘点脚本始终不负责写 INDEX",
         ):
             if marker not in memory_truth_text:
-                errors.append(f"Memory inventory source of truth missing 2.2.2 marker: {marker}")
+                errors.append(f"Memory inventory source of truth missing stable marker: {marker}")
         for relative in memory_create_targets:
             if relative not in memory_truth_text:
                 errors.append(f"Memory source of truth missing Create reference: {relative}")
@@ -2077,7 +2225,7 @@ def main() -> None:
         frontmatter_parts = router_text.split("---", 2)
         router_frontmatter = frontmatter_parts[1] if len(frontmatter_parts) == 3 else ""
         for marker in (
-            "明确询问 Eva-skill 本身",
+            "Eva-skill 本身",
             "作者",
             "发起者",
             "开发者",
@@ -2448,6 +2596,10 @@ def main() -> None:
             "演示",
             "跟做",
             "独立",
+            "下一步怎么走",
+            "07_next-step-navigation_动态选路与下一步推荐.md",
+            "不展示完整功能表",
+            "只推荐一个最相关方向",
         ):
             if marker not in new_user_text:
                 errors.append(f"eva-new-user missing adaptive tutorial marker: {marker}")
@@ -2461,9 +2613,43 @@ def main() -> None:
             "不得只复述规则",
             "【未验证结构草案｜不可直接发布】",
             "不新增资产类型、状态字段或 schema",
+            "当前任务完成后，下一步会扩大范围时只推荐一个方向并等待",
+            "导航输出仍服从“一次只暴露一个决策点”",
         ):
             if marker not in light_interaction_text:
                 errors.append(f"light-interaction protocol missing stable boundary marker: {marker}")
+
+    navigation_path = (base / "references/shared/07_next-step-navigation_动态选路与下一步推荐.md").resolve()
+    if not navigation_path.exists():
+        errors.append("missing shared dynamic-navigation truth source")
+    else:
+        navigation_text = navigation_path.read_text(encoding="utf-8")
+        for marker in (
+            "跨模块导航真源",
+            "用户明确目标",
+            "原始请求中尚未完成的目标",
+            "当前硬闸门或返回原调用者",
+            "最新任务结论",
+            "Eva Think 默认兜底",
+            "路径清楚",
+            "轻微歧义但可以合理判断",
+            "结果方向无法区分",
+            "只问一个能改变交付的问题",
+            "推荐不是隐性授权",
+            "只有用户明确要求“给我一个工作流",
+            "每一步标记“必需”或“按需”",
+            "谁调用，控制权返回给谁",
+            "尚未发布的内容不得进入 Review",
+            "AI Check 只检测时停在检测",
+            "长文档按最终动词判断",
+            "Review 先形成一个待验证变量",
+            "用户要求从多元视角补复盘结论的盲区时可转 Lens",
+            "Lens 只审视当前结论，不重新做数据归因",
+            "不保存用户的默认工作流偏好",
+            "不新增导航资产、状态字段、schema 或 handoff target",
+        ):
+            if marker not in navigation_text:
+                errors.append(f"dynamic-navigation truth missing marker: {marker}")
 
     low_confidence_path = (base / "references/shared/02_low-confidence_低置信度授权协议.md").resolve()
     if low_confidence_path.exists():
@@ -2670,9 +2856,16 @@ def main() -> None:
     harness_path = (base / "references/harness/00_eva-harness_状态与交接校验.md").resolve()
     if harness_path.exists():
         harness_text = harness_path.read_text(encoding="utf-8")
-        for marker in ("认知反向审查交接", "交给 `eva-lens` 的深度审视模式", "Lens 结果不能绕过 Harness 闸门"):
+        for marker in (
+            "认知反向审查交接",
+            "交给 `eva-lens` 的深度审视模式",
+            "Lens 结果不能绕过 Harness 闸门",
+            "业务模块不自行发起新的跨模块任务",
+            "07_next-step-navigation_动态选路与下一步推荐.md",
+            "不代替常规下一步推荐",
+        ):
             if marker not in harness_text:
-                errors.append(f"Harness missing Lens handoff marker: {marker}")
+                errors.append(f"Harness missing stable handoff/navigation marker: {marker}")
         for removed_marker in ("## Eva Doubt", "反向审查卡：", "启动 Doubt"):
             if removed_marker in harness_text:
                 errors.append(f"Harness still maintains duplicate Eva Doubt protocol: {removed_marker}")
