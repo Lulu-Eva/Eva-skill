@@ -10,7 +10,7 @@ Eva Create 只做一层内容形式分流：短视频进入 shortvideo，非虚�
 
 | 用户最终要的产物 | 读取 |
 |---|---|
-| 短视频、口播稿、视频标题、前几秒开头或资料转视频 | `references/create/shortvideo/00_eva-shortvideo_主入口.md` |
+| 短视频、口播稿、视频标题、前几秒开头、开头发散或资料转视频 | `references/create/shortvideo/00_eva-shortvideo_主入口.md` |
 | 公众号文章、非虚构自媒体文章、观点长文、文章续写或修改 | `references/create/article/00_eva-article_文章主入口.md` |
 
 用户只说“把这个做成内容”，而内容形式会改变整条流程时，只问：
@@ -30,7 +30,7 @@ Eva Create 只做一层内容形式分流：短视频进入 shortvideo，非虚�
 | 做一条短视频，但还没判断标题/开头/正文入口 | `references/create/shortvideo/00_eva-shortvideo_主入口.md` |
 | 搜标题、判断标题、正文标题、标题兑现 | `references/create/shortvideo/title/00_eva-title_标题即选题.md` |
 | 标题交接卡或第一句话交接卡已成立，准备写正文 | `references/create/shortvideo/script/00_eva-script_思维流爆款内容创作.md` |
-| 只优化第一句话、前 5 秒、开头 | `references/create/shortvideo/opening/00_eva-opening_开头针对性优化.md` |
+| 诊断、优化或发散第一句话、前 5 秒、开头，或指定开头候选数量 | `references/create/shortvideo/opening/00_eva-opening_开头针对性优化.md` |
 
 不属于两个 Create 分支的处理：
 

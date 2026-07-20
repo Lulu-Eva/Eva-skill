@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Check Eva Shared 2.2.3 local structure and dependencies."""
+"""Check Eva Shared 2.2.4 local structure and dependencies."""
 
 from __future__ import annotations
 
@@ -70,6 +70,9 @@ REQUIRED_PEER_SKILLS = {
         "references/create/article/00_eva-article_文章主入口.md",
         "references/create/article/01_eva-article-argument_观点与论证路线.md",
         "references/create/article/02_eva-article-writing_文章撰写与长度调节.md",
+        "references/create/shortvideo/opening/00_eva-opening_开头针对性优化.md",
+        "references/create/shortvideo/opening/01_eva-opening-diagnosis_开头承接与兑现诊断.md",
+        "references/create/shortvideo/opening/02_eva-opening-generation_开头方案生成与推荐.md",
         "../eva-shared/references/audience/00_eva-audience-finder_话题人群识别器.md",
         "../eva-shared/references/benchmark/00_eva-benchmark-copy_对标文案拆解.md",
         "../eva-shared/references/quality/00_eva-ai-check_表达真实性审查.md",

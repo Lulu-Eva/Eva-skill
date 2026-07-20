@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Eva 2.2.3 structural checks and prompt scenario-contract validation."""
+"""Eva 2.2.4 structural checks and prompt scenario-contract validation."""
 
 from __future__ import annotations
 
@@ -45,6 +45,15 @@ def source_allowed_for_asset(source_module: object, allowed_sources: list) -> bo
     if "eva-link" in allowed_sources and source_module not in CORE_ENTRIES:
         return True
     return False
+
+
+def has_positive_reference(text: str, marker: str) -> bool:
+    """Return true when a reference is used, not merely named in a prohibition."""
+    negative_markers = ("禁止读取", "不得读取", "不读取", "禁止读", "不得读", "不读")
+    return any(
+        marker in line and not any(negative in line for negative in negative_markers)
+        for line in text.splitlines()
+    )
 
 
 REQUIRED_SCENARIO_CASES = {
@@ -742,6 +751,155 @@ REQUIRED_223_CASE_CONTRACTS = {
 
 REQUIRED_SCENARIO_CASES.update(REQUIRED_223_CASE_CONTRACTS)
 
+REQUIRED_224_CASE_CONTRACTS = {
+    "opening-default-three-from-nine": {
+        "expected_route": "eva-create-opening-default-convergence",
+        "expected_terminal": "three-opening-options-and-one-recommendation",
+        "forbid": {"show-nine-options", "write-full-script", "entry-ranking", "invent-fact", "two-displayed-options-share-one-mechanism"},
+        "must_include": {"internal-nine-candidate-pool", "show-exactly-three", "three-distinct-mechanisms", "recommend-exactly-one", "title-opening-body-continuity"},
+    },
+    "opening-inspiration-show-nine": {
+        "expected_route": "eva-create-opening-inspiration-divergence",
+        "expected_terminal": "nine-opening-inspiration-options-and-one-recommendation",
+        "forbid": {"eva-lens", "show-only-three", "entry-ranking", "invent-fact"},
+        "must_include": {"show-exactly-nine", "mechanism-diversity", "recommend-exactly-one", "title-opening-body-continuity"},
+    },
+    "opening-explicit-one": {
+        "expected_route": "eva-create-opening-explicit-count",
+        "expected_terminal": "exactly-one-opening-option",
+        "forbid": {"show-three-options", "show-nine-options", "entry-ranking", "invent-fact"},
+        "must_include": {"obey-explicit-count-one", "one-best-opening", "body-fulfillment-check"},
+    },
+    "opening-explicit-five": {
+        "expected_route": "eva-create-opening-explicit-count",
+        "expected_terminal": "exactly-five-opening-options-and-one-recommendation",
+        "forbid": {"force-title-validation", "show-only-three", "show-nine-options", "entry-ranking"},
+        "must_include": {"obey-explicit-count-five", "five-nonduplicate-options", "recommend-exactly-one"},
+    },
+    "opening-explicit-nine": {
+        "expected_route": "eva-create-opening-explicit-count",
+        "expected_terminal": "exactly-nine-opening-options-without-forced-recommendation",
+        "forbid": {"show-only-three", "recommend-one", "entry-ranking", "more-or-fewer-than-nine"},
+        "must_include": {"obey-explicit-count-nine", "nine-nonduplicate-options", "body-fulfillment-check"},
+    },
+    "opening-explicit-twelve-grouped": {
+        "expected_route": "eva-create-opening-explicit-count-and-grouping",
+        "expected_terminal": "exactly-twelve-openings-in-requested-three-by-four-groups-and-one-recommendation",
+        "forbid": {"cap-at-nine", "show-only-three", "entry-ranking", "duplicate-padding", "invent-benefit"},
+        "must_include": {"obey-explicit-count-twelve", "three-groups-of-four", "expand-candidate-pool", "recommend-from-displayed-twelve", "fact-boundary"},
+    },
+    "opening-followup-add-six-new": {
+        "expected_route": "eva-create-opening-followup-additive",
+        "expected_terminal": "six-new-openings-added-to-existing-three",
+        "forbid": {"replace-existing-three", "repeat-existing-option", "treat-six-as-final-total", "entry-ranking"},
+        "must_include": {"add-exactly-six-new", "preserve-existing-three", "cross-turn-nonduplication"},
+    },
+    "opening-followup-select-existing-one": {
+        "expected_route": "eva-create-opening-existing-pool-selection",
+        "expected_terminal": "one-existing-opening-retained-with-reason",
+        "forbid": {"regenerate-candidate-pool", "add-new-option", "entry-ranking"},
+        "must_include": {"select-from-existing-nine", "retain-exactly-one", "recommendation-by-fulfillment-and-fit"},
+    },
+    "opening-followup-selected-direction-variants": {
+        "expected_route": "eva-create-opening-selected-direction-followup",
+        "expected_terminal": "four-new-variants-within-selected-opening-direction",
+        "forbid": {"restart-default-nine-candidate-pool", "switch-to-unused-mechanisms", "replace-selected-direction", "entry-ranking"},
+        "must_include": {"preserve-selected-mechanism", "add-exactly-four-within-direction", "nonduplicate-fact-or-scene-angles"},
+    },
+    "opening-fact-boundary-no-offer": {
+        "expected_route": "eva-create-opening-fact-bounded",
+        "expected_terminal": "fact-bounded-opening-options",
+        "forbid": {"claim-got-offer", "upgrade-interview-to-employment", "invent-conversion-result", "invent-fact"},
+        "must_include": {"preserve-interview-invitation-fact", "no-claim-strengthening", "body-fulfillment-check"},
+    },
+    "opening-fact-boundary-no-invented-tutorial-benefit": {
+        "expected_route": "eva-create-opening-fact-bounded",
+        "expected_terminal": "supported-promise-only-opening-options",
+        "forbid": {"invent-two-minute-duration", "invent-no-design-needed", "invent-step-by-step-tutorial", "invent-template-delivery"},
+        "must_include": {"use-only-supported-promise", "fact-boundary", "body-fulfillment-check"},
+    },
+    "opening-body-cannot-fulfill-blocker": {
+        "expected_route": "eva-create-opening-fulfillment-blocker",
+        "expected_terminal": "one-fulfillment-question-before-opening-generation",
+        "forbid": {"generate-nine-empty-hooks", "amplify-unsupported-promise", "invent-body", "enter-full-script"},
+        "must_include": {"one-body-fulfillment-question", "promise-risk", "no-generation-before-minimum-support"},
+    },
+    "opening-divergence-not-lens": {
+        "expected_route": "eva-create-opening-inspiration-divergence",
+        "expected_terminal": "nine-opening-inspiration-options-and-one-recommendation",
+        "forbid": {"eva-lens", "discipline-divergence", "entry-ranking"},
+        "must_include": {"route-by-divergence-object", "show-exactly-nine", "recommend-exactly-one", "opening-generation"},
+    },
+    "opening-discipline-divergence-still-lens": {
+        "expected_route": "eva-lens-discipline-divergence",
+        "expected_terminal": "discipline-divergence-without-opening-generation",
+        "forbid": {"eva-create-opening", "opening-candidate-pool", "route-by-divergence-keyword-alone"},
+        "must_include": {"route-by-divergence-object", "discipline-mechanism-analysis"},
+    },
+    "opening-count-not-entry-ranking": {
+        "expected_route": "eva-create-opening-explicit-count",
+        "expected_terminal": "exactly-three-opening-options",
+        "forbid": {"eva-root-dynamic-entry-ranking", "three-eva-entry-options", "full-entry-menu"},
+        "must_include": {"content-count-not-entry-ranking", "obey-explicit-count-three"},
+    },
+    "opening-article-stays-article": {
+        "expected_route": "eva-create-article-local-opening-edit",
+        "expected_terminal": "article-opening-edit-without-shortvideo-opening-protocol",
+        "forbid": {"eva-create-shortvideo-opening", "opening-nine-candidate-pool", "short-video-title-gate"},
+        "must_include": {"final-content-form-wins", "article-local-edit-boundary"},
+    },
+    "opening-xhs-cover-title-stays-title": {
+        "expected_route": "eva-title",
+        "expected_terminal": "title-route-before-any-opening",
+        "forbid": {"eva-create-opening-generation", "opening-candidate-pool", "visual-cover-generation"},
+        "must_include": {"cover-title-is-title-route", "title-validation-boundary"},
+    },
+    "opening-preflight-readonly-no-generation": {
+        "expected_route": "eva-preflight-shortvideo-no-title-opening",
+        "expected_terminal": "preflight-verdict-with-readonly-opening-diagnosis",
+        "forbid": {"read-opening-generation-02", "generate-opening-options", "opening-candidate-pool", "jump-to-script"},
+        "must_include": {"opening-diagnosis-readonly", "three-tier-publish-verdict", "body-fulfills-opening"},
+    },
+    "opening-douyin-no-title-default-three": {
+        "expected_route": "eva-create-opening-no-title-default-convergence",
+        "expected_terminal": "three-no-title-first-line-options-and-one-recommendation",
+        "forbid": {"force-title-validation", "ask-for-cover-title", "show-nine-options", "write-full-script"},
+        "must_include": {"first-line-carries-topic-retention-payoff", "show-exactly-three", "recommend-exactly-one"},
+    },
+    "opening-shipinhao-no-title-inspiration-nine": {
+        "expected_route": "eva-create-opening-no-title-inspiration",
+        "expected_terminal": "nine-no-title-first-line-inspiration-options-and-one-recommendation",
+        "forbid": {"force-title-validation", "ask-for-cover-title", "eva-lens", "entry-ranking"},
+        "must_include": {"show-exactly-nine", "recommend-exactly-one", "first-line-carries-topic-retention-payoff", "body-fulfillment-check"},
+    },
+    "opening-platform-unclear-one-question": {
+        "expected_route": "eva-create-opening-platform-clarification",
+        "expected_terminal": "await-one-platform-answer-before-opening-generation",
+        "forbid": {"generate-opening-options-before-platform", "multiple-questions", "entry-ranking"},
+        "must_include": {"one-platform-question", "xhs-title-versus-douyin-no-title-distinction"},
+    },
+    "opening-then-full-script-authorized-handoff": {
+        "expected_route": "eva-create-opening-then-script-same-turn",
+        "expected_terminal": "opening-established-then-complete-douyin-script",
+        "forbid": {"stop-after-opening-despite-original-goal", "force-title-validation", "skip-first-line-handoff", "write-without-route"},
+        "must_include": {"three-opening-options-and-one-recommendation", "first-line-handoff", "same-turn-return-to-script", "compact-or-full-route"},
+    },
+    "opening-raw-title-and-opening-needs-one-purpose-question": {
+        "expected_route": "eva-root-one-opening-purpose-question",
+        "expected_terminal": "await-opening-or-full-script-purpose-choice",
+        "forbid": {"three-option-menu", "auto-generate-openings", "auto-write-full-script", "auto-create-cover"},
+        "must_include": {"one-decisive-question", "at-most-two-result-oriented-options"},
+    },
+    "opening-commercial-brief-before-generation": {
+        "expected_route": "eva-brief-or-commerce-constraint-before-opening",
+        "expected_terminal": "commercial-constraints-before-opening-generation",
+        "forbid": {"opening-candidate-pool", "invent-brand-claim", "skip-commercial-constraint-card"},
+        "must_include": {"brief-first", "one-missing-constraint-action"},
+    },
+}
+
+REQUIRED_SCENARIO_CASES.update(REQUIRED_224_CASE_CONTRACTS)
+
 REQUIRED_ROUTER_MARKERS = {
     "eva-new-user": "Router must expose the adaptive new-user tutorial",
     "eva-think": "Router must expose eva-think as the default light entry",
@@ -799,6 +957,11 @@ REQUIRED_ROUTER_MARKERS = {
     "用户明确要求“排序 123”时才最多展示三个入口": "Router must cap explicit entry ranking at three",
     "当前任务已经完成、下一步会扩大范围时只推荐一个方向并等待": "Router must not treat a recommendation as authorization",
     "Audience、Lens、Memory 等内部调用完成后返回原调用者": "Router must prevent internal-call navigation loops",
+    "按发散对象而不是“发散”一词路由": "Router must distinguish opening divergence from Lens discipline divergence",
+    "指定数量的开头方案": "Router must treat explicit opening counts as content quantities",
+    "内容候选数量不是入口排序": "Router must not mistake content option operations for entry navigation",
+    "公众号文章开头进入 Create Article": "Router must keep article openings out of short-video Opening",
+    "小红书封面标题进入 Title": "Router must keep cover-title work in Title",
 }
 
 REQUIRED_LICENSE_ROUTING_MARKERS = {
@@ -845,6 +1008,9 @@ REQUIRED_ARCHITECTURE_PATHS = (
     "../eva-create/references/create/article/00_eva-article_文章主入口.md",
     "../eva-create/references/create/article/01_eva-article-argument_观点与论证路线.md",
     "../eva-create/references/create/article/02_eva-article-writing_文章撰写与长度调节.md",
+    "../eva-create/references/create/shortvideo/opening/00_eva-opening_开头针对性优化.md",
+    "../eva-create/references/create/shortvideo/opening/01_eva-opening-diagnosis_开头承接与兑现诊断.md",
+    "../eva-create/references/create/shortvideo/opening/02_eva-opening-generation_开头方案生成与推荐.md",
     "../eva-create/references/create/shortvideo/script/03_eva-script-runtime_普通正文简版路线.md",
     "../eva-learn/SKILL.md",
     "../eva-brief/SKILL.md",
@@ -1716,6 +1882,23 @@ def main() -> None:
                     )
 
         for case_id, contract in REQUIRED_223_CASE_CONTRACTS.items():
+            case = case_by_id.get(case_id) or {}
+            for scalar_field in ("expected_route", "expected_terminal"):
+                if case.get(scalar_field) != contract[scalar_field]:
+                    errors.append(
+                        f"prompt scenario case {case_id!r} {scalar_field} must be "
+                        f"{contract[scalar_field]!r}"
+                    )
+            for list_field in ("forbid", "must_include"):
+                actual = set(case.get(list_field) or [])
+                missing_markers = sorted(contract[list_field] - actual)
+                if missing_markers:
+                    errors.append(
+                        f"prompt scenario case {case_id!r} missing {list_field} marker(s): "
+                        + ", ".join(missing_markers)
+                    )
+
+        for case_id, contract in REQUIRED_224_CASE_CONTRACTS.items():
             case = case_by_id.get(case_id) or {}
             for scalar_field in ("expected_route", "expected_terminal"):
                 if case.get(scalar_field) != contract[scalar_field]:
@@ -2721,7 +2904,7 @@ def main() -> None:
             "无标题第一句话",
             "不强制标题验证",
             "不是“修改一个关键问题后发布”",
-            "不得生成第一句话交接卡",
+            "不生成第一句话交接卡",
             "不得用无标题检查替代或绕过标题验证",
         ),
         "../eva-preflight/references/preflight/02_eva-preflight-article_文章审核.md": (
@@ -2766,6 +2949,69 @@ def main() -> None:
         ):
             if marker not in audience_preflight_text:
                 errors.append(f"Audience Finder missing Preflight read-only override: {marker}")
+
+    opening_controller_path = (base / "../eva-create/references/create/shortvideo/opening/00_eva-opening_开头针对性优化.md").resolve()
+    opening_diagnosis_path = (base / "../eva-create/references/create/shortvideo/opening/01_eva-opening-diagnosis_开头承接与兑现诊断.md").resolve()
+    opening_generation_path = (base / "../eva-create/references/create/shortvideo/opening/02_eva-opening-generation_开头方案生成与推荐.md").resolve()
+    opening_contracts = (
+        (
+            opening_controller_path,
+            (
+                "01_eva-opening-diagnosis_开头承接与兑现诊断.md",
+                "02_eva-opening-generation_开头方案生成与推荐.md",
+                "## Preflight 只读调用",
+                "禁止读取 `02_eva-opening-generation_开头方案生成与推荐.md`",
+            ),
+            "Opening controller",
+        ),
+        (
+            opening_diagnosis_path,
+            (
+                "唯一诊断真源",
+                "不生成新开头",
+                "标题疑问 -> 第一句打开小口",
+                "### 无标题第一句",
+                "正文兑现",
+                "可用事实边界",
+            ),
+            "Opening diagnosis truth",
+        ),
+        (
+            opening_generation_path,
+            (
+                "内部候选池",
+                "默认展示：3 个",
+                "3 个不同机制",
+                "推荐 1 个",
+                "展示 9 个",
+                "指定数量",
+                "再来 N 个",
+                "保留",
+                "不重复",
+                "事实边界",
+                "正文兑现",
+            ),
+            "Opening generation truth",
+        ),
+    )
+    for opening_path, markers, label in opening_contracts:
+        if not opening_path.exists():
+            errors.append(f"missing {label}: {opening_path}")
+            continue
+        opening_text = opening_path.read_text(encoding="utf-8")
+        for marker in markers:
+            if marker not in opening_text:
+                errors.append(f"{label} missing stable marker: {marker}")
+    if opening_generation_path.exists():
+        generation_text = opening_generation_path.read_text(encoding="utf-8")
+        if "## Preflight 只读调用" in generation_text:
+            errors.append("Opening generation truth must not expose a Preflight read-only entry")
+    for preflight_path in (base / "../eva-preflight").resolve().rglob("*.md"):
+        if has_positive_reference(
+            preflight_path.read_text(encoding="utf-8"),
+            "02_eva-opening-generation_开头方案生成与推荐.md",
+        ):
+            errors.append(f"Preflight must not read Opening generation truth: {preflight_path}")
 
     title_controller_path = (base / "../eva-create/references/create/shortvideo/title/00_eva-title_标题即选题.md").resolve()
     if title_controller_path.exists():

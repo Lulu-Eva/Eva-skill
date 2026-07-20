@@ -101,6 +101,21 @@ NAVIGATION_WORKFLOW_STAGE_MARKERS = (
     "发布后复盘",
 )
 
+OPENING_CONTROLLER_PATH = "../eva-create/references/create/shortvideo/opening/00_eva-opening_开头针对性优化.md"
+OPENING_DIAGNOSIS_PATH = "../eva-create/references/create/shortvideo/opening/01_eva-opening-diagnosis_开头承接与兑现诊断.md"
+OPENING_GENERATION_PATH = "../eva-create/references/create/shortvideo/opening/02_eva-opening-generation_开头方案生成与推荐.md"
+
+OPENING_GENERATION_POLICY_MARKERS = (
+    "内部候选池",
+    "默认展示",
+    "推荐 1 个",
+    "展示 9 个",
+    "指定数量优先",
+    "再来 N 个",
+    "保留 / 从已有候选选择",
+    "不重复",
+)
+
 FRONTSTAGE_TEMPLATE_HEADINGS = (
     "## 默认启动",
     "## 输出格式",
@@ -224,6 +239,12 @@ SOURCE_OF_TRUTH_RULES = (
         "fields": NAVIGATION_WORKFLOW_STAGE_MARKERS,
         "min_hits": 4,
     },
+    {
+        "name": "opening candidate-count and recommendation policy",
+        "allowed": (OPENING_GENERATION_PATH,),
+        "fields": OPENING_GENERATION_POLICY_MARKERS,
+        "min_hits": 4,
+    },
 )
 
 
@@ -273,6 +294,15 @@ def extract_section(text: str, heading: str) -> str:
     return text[start:end]
 
 
+def has_positive_reference(text: str, marker: str) -> bool:
+    """Return true when a reference is used, not merely named in a prohibition."""
+    negative_markers = ("禁止读取", "不得读取", "不读取", "禁止读", "不得读", "不读")
+    return any(
+        marker in line and not any(negative in line for negative in negative_markers)
+        for line in text.splitlines()
+    )
+
+
 def lint(base: Path) -> dict:
     errors: list[str] = []
     warnings: list[str] = []
@@ -314,6 +344,10 @@ def lint(base: Path) -> dict:
             for coupling in SHORTVIDEO_FORBIDDEN_ARTICLE_COUPLINGS:
                 if coupling in text:
                     errors.append(f"{path_rel}: short-video protocol couples to Article branch: {coupling}")
+        if "/eva-preflight/" in normalized_path and has_positive_reference(
+            text, "02_eva-opening-generation_开头方案生成与推荐.md"
+        ):
+            errors.append(f"{path_rel}: Preflight must not read Opening generation truth 02")
 
         for rule in SEMANTIC_DUPLICATE_PATTERNS:
             patterns = rule["patterns"]
@@ -348,6 +382,9 @@ def lint(base: Path) -> dict:
             "工作流",
             "仅在当前 Eva 任务上下文中",
             "用户只说“研究 / 看看 / 处理这份资料”",
+            "按发散对象而不是“发散”一词路由",
+            "指定数量的开头方案",
+            "内容候选数量不是入口排序",
         ):
             if marker not in text:
                 errors.append(f"eva router missing dynamic-navigation trigger/reference: {marker}")
@@ -368,9 +405,44 @@ def lint(base: Path) -> dict:
             "只有用户明确要求“给我一个工作流",
             "谁调用，控制权返回给谁",
             "不新增导航资产、状态字段、schema 或 handoff target",
+            "内容产物数量不是入口数量",
+            "局部内容创作或发散留在对应 Create 分支",
         ):
             if marker not in navigation_text:
                 errors.append(f"dynamic-navigation truth missing marker: {marker}")
+
+    opening_paths = {
+        "controller": (base / OPENING_CONTROLLER_PATH).resolve(),
+        "diagnosis": (base / OPENING_DIAGNOSIS_PATH).resolve(),
+        "generation": (base / OPENING_GENERATION_PATH).resolve(),
+    }
+    for role, opening_path in opening_paths.items():
+        if not opening_path.exists():
+            errors.append(f"missing Opening {role} truth: {opening_path}")
+    if all(path.exists() for path in opening_paths.values()):
+        controller_text = opening_paths["controller"].read_text(encoding="utf-8")
+        diagnosis_text = opening_paths["diagnosis"].read_text(encoding="utf-8")
+        generation_text = opening_paths["generation"].read_text(encoding="utf-8")
+        for required_reference in (
+            "01_eva-opening-diagnosis_开头承接与兑现诊断.md",
+            "02_eva-opening-generation_开头方案生成与推荐.md",
+        ):
+            if required_reference not in controller_text:
+                errors.append(f"Opening controller must reference {required_reference}")
+        if "唯一诊断真源" not in diagnosis_text or "不生成新开头" not in diagnosis_text:
+            errors.append("Opening diagnosis truth must state that it diagnoses without generating options")
+        generation_policy_hits = count_fields(generation_text, OPENING_GENERATION_POLICY_MARKERS)
+        if generation_policy_hits < 6:
+            errors.append(
+                "Opening generation truth must own the candidate-count policy "
+                f"(found {generation_policy_hits} of {len(OPENING_GENERATION_POLICY_MARKERS)} markers)"
+            )
+        if count_fields(diagnosis_text, OPENING_GENERATION_POLICY_MARKERS) >= 2:
+            errors.append("Opening diagnosis truth duplicates candidate-count or recommendation policy")
+        if has_positive_reference(diagnosis_text, "02_eva-opening-generation_开头方案生成与推荐.md"):
+            errors.append("Opening diagnosis truth must not call the generation truth")
+        if "## Preflight 只读调用" in generation_text:
+            errors.append("Opening generation truth must not expose a Preflight read-only entry")
 
     for phrase, hits in default_phrase_hits.items():
         if len(hits) > 1:
