@@ -1,5 +1,5 @@
 {
-  "version": "2.2.3",
+  "version": "2.2.4",
   "purpose": "Scenario contract inventory for same-turn routing, staged loading, hard gates, and user-facing lightness. Structural selftest validates this inventory but does not execute model behavior.",
   "cases": [
     {
@@ -81,7 +81,7 @@
     },
     {
       "id": "eva-extra-permission-version-and-cure",
-      "input": "我现在合规使用 Eva-skill 2.2.3 做自己的账号。如果以后许可变了，旧版本还能继续用吗？不小心违约后还能补救吗？以前做的内容怎么办？",
+      "input": "我现在合规使用 Eva-skill 2.2.4 做自己的账号。如果以后许可变了，旧版本还能继续用吗？不小心违约后还能补救吗？以前做的内容怎么办？",
       "expected_route": "eva-root-project-output-extra-permission-term",
       "forbid": ["apply-future-license-retroactively", "revoke-compliant-version-without-breach", "invalidate-prior-compliant-output", "eva-think"],
       "must_include": ["version-specific-additional-permission", "irrevocable-while-compliant", "thirty-day-cure", "future-versions-only", "prior-compliant-output-survives"],
@@ -240,7 +240,7 @@
     },
     {
       "id": "opening-only",
-      "input": "只帮我优化前三秒",
+      "input": "这是准备发抖音的无标题口播，只帮我优化前三秒，不要续写全文。正文能兑现的内容：我曾在项目延期后只记“进度慢”，复盘时找不到原因；后来改成同时记录“当时判断”和“判断依据”，下一次排期前就能看出估时漏项。正文只讲这次经历和这两个记录项。",
       "expected_route": "eva-opening",
       "forbid": ["write-full-script-by-default"],
       "expected_terminal": "opening-options-and-risk"
@@ -1312,6 +1312,198 @@
       "forbid": ["eva-learn", "purpose-clarification-question", "entry-ranking"],
       "must_include": ["final-product-wins", "same-turn-article-process"],
       "expected_terminal": "article-process-starts-by-final-output-intent"
+    },
+    {
+      "id": "opening-default-three-from-nine",
+      "input": "这是已经验证过的小红书标题和能完整兑现标题的正文，帮我把视频开头优化到可以直接继续打磨。",
+      "expected_route": "eva-create-opening-default-convergence",
+      "forbid": ["show-nine-options", "write-full-script", "entry-ranking", "invent-fact", "two-displayed-options-share-one-mechanism"],
+      "must_include": ["internal-nine-candidate-pool", "show-exactly-three", "three-distinct-mechanisms", "recommend-exactly-one", "title-opening-body-continuity"],
+      "expected_terminal": "three-opening-options-and-one-recommendation"
+    },
+    {
+      "id": "opening-inspiration-show-nine",
+      "input": "这是已经验证过的小红书标题和完整正文，帮我发散一下开头，给我找找灵感。",
+      "expected_route": "eva-create-opening-inspiration-divergence",
+      "forbid": ["eva-lens", "show-only-three", "entry-ranking", "invent-fact"],
+      "must_include": ["show-exactly-nine", "mechanism-diversity", "recommend-exactly-one", "title-opening-body-continuity"],
+      "expected_terminal": "nine-opening-inspiration-options-and-one-recommendation"
+    },
+    {
+      "id": "opening-explicit-one",
+      "input": "正文和平台信息都齐了，只给我 1 个最稳的短视频开头。",
+      "expected_route": "eva-create-opening-explicit-count",
+      "forbid": ["show-three-options", "show-nine-options", "entry-ranking", "invent-fact"],
+      "must_include": ["obey-explicit-count-one", "one-best-opening", "body-fulfillment-check"],
+      "expected_terminal": "exactly-one-opening-option"
+    },
+    {
+      "id": "opening-explicit-five",
+      "input": "给这条完整抖音稿做 5 个不同机制的第一句话，并推荐其中 1 个。",
+      "expected_route": "eva-create-opening-explicit-count",
+      "forbid": ["force-title-validation", "show-only-three", "show-nine-options", "entry-ranking"],
+      "must_include": ["obey-explicit-count-five", "five-nonduplicate-options", "recommend-exactly-one"],
+      "expected_terminal": "exactly-five-opening-options-and-one-recommendation"
+    },
+    {
+      "id": "opening-explicit-nine",
+      "input": "这是准备发抖音的无标题口播，正文已经写完：我辅导的一位质检组长先把异常追踪、跨部门沟通和复盘整理成项目案例，再投海外 KOL 运营岗位，20 天收到了 5—6 个面试邀请；正文只复盘她如何重写这三类经历，不承诺拿到 Offer。请给我 9 个开头方案，不需要替我选。",
+      "expected_route": "eva-create-opening-explicit-count",
+      "forbid": ["show-only-three", "recommend-one", "entry-ranking", "more-or-fewer-than-nine"],
+      "must_include": ["obey-explicit-count-nine", "nine-nonduplicate-options", "body-fulfillment-check"],
+      "expected_terminal": "exactly-nine-opening-options-without-forced-recommendation"
+    },
+    {
+      "id": "opening-explicit-twelve-grouped",
+      "input": "这是准备发抖音的无标题口播，讲给有转行经历却不会翻译成目标岗位语言的求职者。正文已经写完：真实案例是一位质检组长投海外 KOL 运营岗位，20 天收到 5—6 个面试邀请，没有拿到 Offer；正文逐步示范了提取可迁移能力、改写成项目案例、按 JD 校准三个动作，能兑现这三个方法收益。按结果反差、痛点结果、教程收益三类做开头，每类 4 个。",
+      "expected_route": "eva-create-opening-explicit-count-and-grouping",
+      "forbid": ["cap-at-nine", "show-only-three", "entry-ranking", "duplicate-padding", "invent-benefit"],
+      "must_include": ["obey-explicit-count-twelve", "three-groups-of-four", "expand-candidate-pool", "recommend-from-displayed-twelve", "fact-boundary"],
+      "expected_terminal": "exactly-twelve-openings-in-requested-three-by-four-groups-and-one-recommendation"
+    },
+    {
+      "id": "opening-followup-add-six-new",
+      "input": "刚才那 3 个先保留，再来 6 个新的开头方向。",
+      "expected_route": "eva-create-opening-followup-additive",
+      "forbid": ["replace-existing-three", "repeat-existing-option", "treat-six-as-final-total", "entry-ranking"],
+      "must_include": ["add-exactly-six-new", "preserve-existing-three", "cross-turn-nonduplication"],
+      "expected_terminal": "six-new-openings-added-to-existing-three"
+    },
+    {
+      "id": "opening-followup-select-existing-one",
+      "input": "不要重新生成，从刚才那 9 个开头里保留最稳的 1 个。",
+      "expected_route": "eva-create-opening-existing-pool-selection",
+      "forbid": ["regenerate-candidate-pool", "add-new-option", "entry-ranking"],
+      "must_include": ["select-from-existing-nine", "retain-exactly-one", "recommendation-by-fulfillment-and-fit"],
+      "expected_terminal": "one-existing-opening-retained-with-reason"
+    },
+    {
+      "id": "opening-followup-selected-direction-variants",
+      "input": "我选刚才那个真实场景切入，沿这个方向再来 4 个，不要换成别的开头机制。",
+      "expected_route": "eva-create-opening-selected-direction-followup",
+      "forbid": ["restart-default-nine-candidate-pool", "switch-to-unused-mechanisms", "replace-selected-direction", "entry-ranking"],
+      "must_include": ["preserve-selected-mechanism", "add-exactly-four-within-direction", "nonduplicate-fact-or-scene-angles"],
+      "expected_terminal": "four-new-variants-within-selected-opening-direction"
+    },
+    {
+      "id": "opening-fact-boundary-no-offer",
+      "input": "这是准备发抖音的无标题口播。完整正文只复盘一个真实转行案例：一位质检组长把原有经历改写成海外 KOL 运营项目案例；投递 20 天内收到 5—6 个面试邀请，尚未拿到 Offer。正文展示一处改写前后对比，并明确结果只到面试邀请，不证明改写导致了该结果。请优化开头。",
+      "expected_route": "eva-create-opening-fact-bounded",
+      "forbid": ["claim-got-offer", "upgrade-interview-to-employment", "invent-conversion-result", "invent-fact"],
+      "must_include": ["preserve-interview-invitation-fact", "no-claim-strengthening", "body-fulfillment-check"],
+      "expected_terminal": "fact-bounded-opening-options"
+    },
+    {
+      "id": "opening-fact-boundary-no-invented-tutorial-benefit",
+      "input": "这是准备发视频号的无标题口播。完整正文只讲一个真实转行案例：一位做了 6 年质检的求职者转投海外 KOL 运营时，把“发现异常、协调返工、复盘原因”的经历重写成一段项目说明；正文只呈现改写前后两版和她的取舍理由。正文没有视频时长、设计门槛、步骤教学或模板交付，也不承诺面试或 Offer。给我开头方案。",
+      "expected_route": "eva-create-opening-fact-bounded",
+      "forbid": ["invent-two-minute-duration", "invent-no-design-needed", "invent-step-by-step-tutorial", "invent-template-delivery"],
+      "must_include": ["use-only-supported-promise", "fact-boundary", "body-fulfillment-check"],
+      "expected_terminal": "supported-promise-only-opening-options"
+    },
+    {
+      "id": "opening-body-cannot-fulfill-blocker",
+      "input": "我只有标题和一句很夸张的开头，后文还没想好，但想让你先给我 9 个更炸的版本。",
+      "expected_route": "eva-create-opening-fulfillment-blocker",
+      "forbid": ["generate-nine-empty-hooks", "amplify-unsupported-promise", "invent-body", "enter-full-script"],
+      "must_include": ["one-body-fulfillment-question", "promise-risk", "no-generation-before-minimum-support"],
+      "expected_terminal": "one-fulfillment-question-before-opening-generation"
+    },
+    {
+      "id": "opening-divergence-not-lens",
+      "input": "这篇完整视频稿在这里，把这个开头发散一下，给我更多开头灵感。",
+      "expected_route": "eva-create-opening-inspiration-divergence",
+      "forbid": ["eva-lens", "discipline-divergence", "entry-ranking"],
+      "must_include": ["route-by-divergence-object", "show-exactly-nine", "recommend-exactly-one", "opening-generation"],
+      "expected_terminal": "nine-opening-inspiration-options-and-one-recommendation"
+    },
+    {
+      "id": "opening-discipline-divergence-still-lens",
+      "input": "请从社会学、心理学和经济学发散这个观点背后的解释机制。",
+      "expected_route": "eva-lens-discipline-divergence",
+      "forbid": ["eva-create-opening", "opening-candidate-pool", "route-by-divergence-keyword-alone"],
+      "must_include": ["route-by-divergence-object", "discipline-mechanism-analysis"],
+      "expected_terminal": "discipline-divergence-without-opening-generation"
+    },
+    {
+      "id": "opening-count-not-entry-ranking",
+      "input": "这是准备发视频号的无标题口播。正文已经写完：我第一次带团队时每天追进度，成员仍会漏报风险；后来把日报改为“进展、风险、所需支持”三项，正文用这次经历说明格式怎样改变沟通。给我三个短视频开头方案。",
+      "expected_route": "eva-create-opening-explicit-count",
+      "forbid": ["eva-root-dynamic-entry-ranking", "three-eva-entry-options", "full-entry-menu"],
+      "must_include": ["content-count-not-entry-ranking", "obey-explicit-count-three"],
+      "expected_terminal": "exactly-three-opening-options"
+    },
+    {
+      "id": "opening-article-stays-article",
+      "input": "请优化这篇公众号文章的开头，正文已经完整。",
+      "expected_route": "eva-create-article-local-opening-edit",
+      "forbid": ["eva-create-shortvideo-opening", "opening-nine-candidate-pool", "short-video-title-gate"],
+      "must_include": ["final-content-form-wins", "article-local-edit-boundary"],
+      "expected_terminal": "article-opening-edit-without-shortvideo-opening-protocol"
+    },
+    {
+      "id": "opening-xhs-cover-title-stays-title",
+      "input": "帮我做小红书封面标题，先不要写视频开头。",
+      "expected_route": "eva-title",
+      "forbid": ["eva-create-opening-generation", "opening-candidate-pool", "visual-cover-generation"],
+      "must_include": ["cover-title-is-title-route", "title-validation-boundary"],
+      "expected_terminal": "title-route-before-any-opening"
+    },
+    {
+      "id": "opening-preflight-readonly-no-generation",
+      "input": "这是一篇完整待发的抖音口播，请做发布前总检，也重点检查开头。",
+      "expected_route": "eva-preflight-shortvideo-no-title-opening",
+      "forbid": ["read-opening-generation-02", "generate-opening-options", "opening-candidate-pool", "jump-to-script"],
+      "must_include": ["opening-diagnosis-readonly", "three-tier-publish-verdict", "body-fulfills-opening"],
+      "expected_terminal": "preflight-verdict-with-readonly-opening-diagnosis"
+    },
+    {
+      "id": "opening-douyin-no-title-default-three",
+      "input": "这是完整的抖音无封面标题口播，只优化第一句话。",
+      "expected_route": "eva-create-opening-no-title-default-convergence",
+      "forbid": ["force-title-validation", "ask-for-cover-title", "show-nine-options", "write-full-script"],
+      "must_include": ["first-line-carries-topic-retention-payoff", "show-exactly-three", "recommend-exactly-one"],
+      "expected_terminal": "three-no-title-first-line-options-and-one-recommendation"
+    },
+    {
+      "id": "opening-shipinhao-no-title-inspiration-nine",
+      "input": "这是完整的视频号无标题口播，帮我发散 9 个第一句话找灵感。",
+      "expected_route": "eva-create-opening-no-title-inspiration",
+      "forbid": ["force-title-validation", "ask-for-cover-title", "eva-lens", "entry-ranking"],
+      "must_include": ["show-exactly-nine", "recommend-exactly-one", "first-line-carries-topic-retention-payoff", "body-fulfillment-check"],
+      "expected_terminal": "nine-no-title-first-line-inspiration-options-and-one-recommendation"
+    },
+    {
+      "id": "opening-platform-unclear-one-question",
+      "input": "这是一条完整视频稿，帮我优化开头，但我没说发布平台。",
+      "expected_route": "eva-create-opening-platform-clarification",
+      "forbid": ["generate-opening-options-before-platform", "multiple-questions", "entry-ranking"],
+      "must_include": ["one-platform-question", "xhs-title-versus-douyin-no-title-distinction"],
+      "expected_terminal": "await-one-platform-answer-before-opening-generation"
+    },
+    {
+      "id": "opening-then-full-script-authorized-handoff",
+      "input": "先优化这个抖音无标题开头，再续写成完整口播稿；人群、真实素材和正文主线都已经给齐。",
+      "expected_route": "eva-create-opening-then-script-same-turn",
+      "forbid": ["stop-after-opening-despite-original-goal", "force-title-validation", "skip-first-line-handoff", "write-without-route"],
+      "must_include": ["three-opening-options-and-one-recommendation", "first-line-handoff", "same-turn-return-to-script", "compact-or-full-route"],
+      "expected_terminal": "opening-established-then-complete-douyin-script"
+    },
+    {
+      "id": "opening-raw-title-and-opening-needs-one-purpose-question",
+      "input": "标题：0 经验转行海外 KOL 运营。开头：我辅导过一个从质检组长转行的求职者……",
+      "expected_route": "eva-root-one-opening-purpose-question",
+      "forbid": ["three-option-menu", "auto-generate-openings", "auto-write-full-script", "auto-create-cover"],
+      "must_include": ["one-decisive-question", "at-most-two-result-oriented-options"],
+      "expected_terminal": "await-opening-or-full-script-purpose-choice"
+    },
+    {
+      "id": "opening-commercial-brief-before-generation",
+      "input": "这是品牌商单，只给了产品名，先帮我发散 9 个广告开头。",
+      "expected_route": "eva-brief-or-commerce-constraint-before-opening",
+      "forbid": ["opening-candidate-pool", "invent-brand-claim", "skip-commercial-constraint-card"],
+      "must_include": ["brief-first", "one-missing-constraint-action"],
+      "expected_terminal": "commercial-constraints-before-opening-generation"
     }
   ]
 }

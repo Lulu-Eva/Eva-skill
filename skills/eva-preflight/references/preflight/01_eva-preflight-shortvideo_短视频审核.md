@@ -17,13 +17,13 @@
 按需只读调用：
 
 1. `../eva-create/references/create/shortvideo/title/04_eva-title-promise-check_标题承诺与原稿检查.md`
-2. `../eva-create/references/create/shortvideo/opening/00_eva-opening_开头针对性优化.md` 的“有标题开头”分支
+2. `../eva-create/references/create/shortvideo/opening/01_eva-opening-diagnosis_开头承接与兑现诊断.md` 的“有标题开头”只读诊断分支
 3. `../eva-create/references/create/shortvideo/script/01_eva-script-logic_正文逻辑链推理.md`
 4. `../eva-shared/references/quality/00_eva-ai-check_表达真实性审查.md`
 
 先检查“标题 -> 开头 -> 正文”的承诺是否连续。已有标题验证状态时原样读取；没有验证线索时只能返回“无法判断”，不得替用户假装完成平台搜索。该缺口固定映射为 `暂不建议发布`，不是“修改一个关键问题后发布”；若在这里早停，必须声明“其余维度尚未完成审核”。需要验证时，下一步指向 `/eva-title`，Preflight 不生成标题或搜索结果。
 
-完成标题承诺主路径后，再用 Opening 的无标题标准检查第一句和前三句能否在脱离标题时仍有基本可理解性。这个第二层是**软韧性检查**：
+完成标题承诺主路径后，再用 Opening Diagnosis 的无标题标准检查第一句和前三句能否在脱离标题时仍有基本可理解性。这个第二层是**软韧性检查**：
 
 - 不要求一个自然承接可见标题的开头独立重复标题全部信息。
 - 单独不够完整通常只算优化建议。
@@ -32,14 +32,14 @@
 
 ## 3. 抖音、视频号等无标题场景
 
-直接只读调用 Opening 的“无标题第一句话”分支作为主路径，不强制标题验证。检查：
+直接只读调用 `../eva-create/references/create/shortvideo/opening/01_eva-opening-diagnosis_开头承接与兑现诊断.md` 的“无标题第一句话”分支作为主路径，不强制标题验证。检查：
 
 - 第一句是否能独立交代在讲什么、为什么继续看、后面能兑现什么。
 - 前三句是否完成停留、解释和回报承诺。
 - 正文是否真正支撑第一句，而不是换词重复或只留情绪。
 - 口播是否能自然念出，是否存在关键逻辑跳跃。
 
-再按需调用 Script Logic 和 AI Check。不得生成第一句话交接卡，不得跳转正文路线图，不得改写开头。
+再按需调用 Script Logic 和 AI Check。开头审核只读 `../eva-create/references/create/shortvideo/opening/01_eva-opening-diagnosis_开头承接与兑现诊断.md`，不读取 `../eva-create/references/create/shortvideo/opening/02_eva-opening-generation_开头方案生成与推荐.md`，不改稿。
 
 ## 4. 人群与商单条件
 
@@ -49,4 +49,4 @@
 
 ## 5. 返回边界
 
-本分支按 05 的统一字段返回，最终三档结论只归 00 主控。不改稿，不生成第一句话交接卡或其他生产资产，不跳转生产路径，不保存。
+本分支按 05 的统一字段返回，最终三档结论只归 00 主控。不生成第一句话交接卡或其他生产资产，不跳转生产路径，不保存。

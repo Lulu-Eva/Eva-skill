@@ -1,7 +1,7 @@
 ---
 name: eva-create
 description: |
-  Eva Create 2.2.3 内容生产入口。处理两条独立分支：短视频、口播稿、视频标题/开头/正文；非虚构自媒体文章、公众号文章、观点长文的新写、续写和修改。不处理朋友圈、微博、小红书短图文、虚构文学、学术论文或专业文书。触发：/eva-create、/eva-shortvideo、/eva-title、/eva-script、做一条短视频、写完整视频稿、写一篇公众号文章、把想法或资料写成文章。
+  Eva Create 2.2.4 内容生产入口。处理两条独立分支：短视频、口播稿、视频标题/开头/正文；非虚构自媒体文章、公众号文章、观点长文的新写、续写和修改。不处理朋友圈、微博、小红书短图文、虚构文学、学术论文或专业文书。触发：/eva-create、/eva-shortvideo、/eva-title、/eva-script、做一条短视频、优化视频开头、写完整视频稿、写一篇公众号文章、把想法或资料写成文章。
 ---
 
 # Eva Create
@@ -28,6 +28,8 @@ references/create/article/02_eva-article-writing_文章撰写与长度调节.md
 references/create/shortvideo/00_eva-shortvideo_主入口.md
 references/create/shortvideo/title/00_eva-title_标题即选题.md
 references/create/shortvideo/opening/00_eva-opening_开头针对性优化.md
+references/create/shortvideo/opening/01_eva-opening-diagnosis_开头承接与兑现诊断.md
+references/create/shortvideo/opening/02_eva-opening-generation_开头方案生成与推荐.md
 references/create/shortvideo/script/00_eva-script_思维流爆款内容创作.md
 references/create/shortvideo/script/03_eva-script-runtime_普通正文简版路线.md
 ../eva-shared/references/commerce/00_eva-commerce_商单主入口.md

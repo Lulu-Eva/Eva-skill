@@ -21,7 +21,7 @@ Preflight 是编排器。它读取既有模块时，只继承判断标准、真�
 | 检查对象 | 真源 | Preflight 只读取得 |
 |---|---|---|
 | 标题承诺与正文兑现 | `../eva-create/references/create/shortvideo/title/04_eva-title-promise-check_标题承诺与原稿检查.md` | 承诺、用户期待、已回答/未回答、验证状态是否可判断 |
-| 有标题/无标题开头 | `../eva-create/references/create/shortvideo/opening/00_eva-opening_开头针对性优化.md` | 第一句、前三句、后文兑现的通过/问题/证据 |
+| 有标题/无标题开头 | `../eva-create/references/create/shortvideo/opening/01_eva-opening-diagnosis_开头承接与兑现诊断.md` | 第一句、前三句、后文兑现与事实边界的通过/问题/证据 |
 | 短视频正文逻辑 | `../eva-create/references/create/shortvideo/script/01_eva-script-logic_正文逻辑链推理.md` | 入口承诺、逻辑跳跃、重复、材料缺口 |
 | 文章观点与论证 | `../eva-create/references/create/article/01_eva-article-argument_观点与论证路线.md` | 读者任务、中心判断、证据等级、论证跳跃 |
 | 文章写作与篇幅 | `../eva-create/references/create/article/02_eva-article-writing_文章撰写与长度调节.md` | 标题兑现、重复/缺论证、事实边界、CTA |
@@ -31,6 +31,8 @@ Preflight 是编排器。它读取既有模块时，只继承判断标准、真�
 | 人群基础（仅承诺已无法判断时） | `../eva-shared/references/audience/00_eva-audience-finder_话题人群识别器.md` 的 `Preflight 只读调用` | 具体人群、认知缺口、用户问题的通过/问题/无法判断；不取得内容入口 |
 
 只有人群明显失焦且已导致承诺无法判断时，才只读参考 shared Audience Finder；不要默认把所有 Preflight 变成人群分析。
+
+开头审核只允许读取 Opening Diagnosis。禁止读取 `../eva-create/references/create/shortvideo/opening/02_eva-opening-generation_开头方案生成与推荐.md`，也不得通过 Opening 00 间接进入候选生成。
 
 ## 3. 不继承的生产动作
 

@@ -4,16 +4,16 @@
     "name": "Lulu-Eva"
   },
   "metadata": {
-    "description": "Eva-skill v2.2.3 创作者工作台。新增动态选路、下一步推荐与按需工作流。",
-    "version": "2.2.3"
+    "description": "Eva-skill v2.2.4 创作者工作台。增强短视频开头诊断、差异化候选生成与事实保护。",
+    "version": "2.2.4"
   },
   "plugins": [
     {
       "name": "eva",
-      "description": "Eva-skill v2.2.3 创作者工作台。包含 New User、Think、Audience Finder、Create、Preflight、Learn、Brief、Link、Review、Lens 和 shared 真源包，支持动态选路、下一步推荐、按需工作流与 Memory 记忆盘点。",
+      "description": "Eva-skill v2.2.4 创作者工作台。包含 New User、Think、Audience Finder、Create、Preflight、Learn、Brief、Link、Review、Lens 和 shared 真源包，支持短视频开头诊断与候选生成、动态选路、按需工作流和 Memory 记忆盘点。",
       "source": "./",
       "strict": false,
-      "version": "2.2.3",
+      "version": "2.2.4",
       "category": "content-creation",
       "keywords": ["creator", "new-user", "tutorial", "short-video", "xiaohongshu", "script", "script-structure", "content-writing", "title", "body-title", "audience", "audience-finder", "thinking", "discipline-divergence", "preflight", "content-audit", "reframe", "benchmark-copy", "commercial-brief", "brand-brief", "sponsored-content", "memory", "memory-inventory", "persona", "persona-memory", "user-voice", "voice-card", "ai-check", "learn", "learning", "reading", "research", "study", "review", "content-review", "multi-perspective", "lens", "next-step", "dynamic-routing", "workflow", "thought-seed-card", "voice", "chinese"],
       "skills": ["./skills/eva", "./skills/eva-new-user", "./skills/eva-shared", "./skills/eva-think", "./skills/eva-audience-finder", "./skills/eva-create", "./skills/eva-preflight", "./skills/eva-learn", "./skills/eva-brief", "./skills/eva-link", "./skills/eva-review", "./skills/eva-lens"]
