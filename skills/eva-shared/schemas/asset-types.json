@@ -1,5 +1,5 @@
 {
-  "version": "2.2.5",
+  "version": "2.2.6",
   "visibility_values": {
     "surface": "用户直接感知的主干成品或主干输入",
     "bridge": "主干上承上启下的半成品，需要交接、缺字段或低置信度时才外显",

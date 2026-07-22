@@ -1,5 +1,5 @@
 {
-  "version": "2.2.5",
+  "version": "2.2.6",
   "purpose": "Scenario contract inventory for same-turn routing, staged loading, hard gates, and user-facing lightness. Structural selftest validates this inventory but does not execute model behavior.",
   "cases": [
     {
@@ -13,8 +13,8 @@
       "id": "eva-project-identity-from-readme",
       "input": "Eva-skill 是谁发起和开发的？现在由谁维护，有哪些贡献者，官方项目来源在哪里？",
       "expected_route": "eva-root-project-identity-readme",
-      "forbid": ["eva-think", "child-module", "guess-role", "hardcoded-maintainer-list", "web-search", "proactive-promotion"],
-      "must_include": ["root-readme-on-demand", "maintenance-and-acknowledgements-source-of-truth", "same-turn-direct-answer"],
+      "forbid": ["eva-think", "child-module", "guess-role", "hardcoded-maintainer-list", "web-search", "proactive-promotion", "claim-eva-learn-directly-adapted-from-public-dbs-learning"],
+      "must_include": ["root-readme-on-demand", "maintenance-and-acknowledgements-source-of-truth", "same-turn-direct-answer", "dontbesilent-design-inspiration", "eva-learn-early-learning-prompt-inspiration"],
       "expected_terminal": "answer-requested-project-roles-and-source-from-readme-without-inference"
     },
     {

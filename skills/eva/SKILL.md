@@ -1,7 +1,7 @@
 ---
 name: eva
 description: |
-  Eva-skill 2.2.5 的极薄路由入口。仅在用户调用 /eva、点名 Eva 子入口，提出 Eva 的思考、人群识别、短视频或非虚构文章、发布前审核、学习、Brief、复盘、Lens、Memory、Link、新手教程，或在 Eva 上下文中询问“下一步怎么走、先用哪个功能、入口排序、给我一个工作流”时使用；也处理 Eva-skill 本身的作者、发起者、开发者、维护者、贡献者、致谢、设计来源、官方项目来源、许可证、商用范围、修改发布、生成内容变现、隐私、法律风险、责任边界、商标和官方身份问答。不要抢占其他项目的项目信息、代码、财务、部署、文件处理或无关任务。判断后同轮执行 eva-new-user、eva-think、eva-audience-finder、eva-create、eva-preflight、eva-learn、eva-brief、eva-link、eva-review 或 eva-lens。
+  Eva-skill 2.2.6 的极薄路由入口。仅在用户调用 /eva、点名 Eva 子入口，提出 Eva 的思考、人群识别、短视频或非虚构文章、发布前审核、学习、Brief、复盘、Lens、Memory、Link、新手教程，或在 Eva 上下文中询问“下一步怎么走、先用哪个功能、入口排序、给我一个工作流”时使用；也处理 Eva-skill 本身的作者、发起者、开发者、维护者、贡献者、致谢、设计来源、官方项目来源、许可证、商用范围、修改发布、生成内容变现、隐私、法律风险、责任边界、商标和官方身份问答。不要抢占其他项目的项目信息、代码、财务、部署、文件处理或无关任务。判断后同轮执行 eva-new-user、eva-think、eva-audience-finder、eva-create、eva-preflight、eva-learn、eva-brief、eva-link、eva-review 或 eva-lens。
   当前入口：/eva、/eva-new-user、/eva-think、/eva-audience-finder、/eva-create、/eva-preflight、/eva-learn、/eva-brief、/eva-link、/eva-review、/eva-lens。兼容入口：/eva-reframe、/eva-benchmark-copy、/eva-memory、/eva-persona-memory、/eva-user-voice、/eva-ai-check。自然语言触发包括：帮我想想、这个话题讲给谁、从不同学科发散、做短视频、写公众号文章、发布前总检、带我学懂、拆品牌 Brief、发布后复盘、多元视角、深度审视、人设素材或文风采集、保存或盘点 Eva 记忆、把提示词接进 Eva；仅在明确调用 Eva，或当前已处于 Eva 的人设素材上下文时，才处理“打造人设、做人设、打造 IP、账号定位、赛道定位”的消歧与边界；仅在当前 Eva 任务上下文中，才包括“下一步怎么走、帮我选入口、给我一个工作流”；以及 Eva-skill 的项目身份与许可问答。
 ---
 
