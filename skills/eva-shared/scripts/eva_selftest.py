@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Eva 2.2.4 structural checks and prompt scenario-contract validation."""
+"""Eva 2.2.5 structural checks and prompt scenario-contract validation."""
 
 from __future__ import annotations
 
@@ -900,6 +900,73 @@ REQUIRED_224_CASE_CONTRACTS = {
 
 REQUIRED_SCENARIO_CASES.update(REQUIRED_224_CASE_CONTRACTS)
 
+REQUIRED_225_CASE_CONTRACTS = {
+    "persona-material-explicit-direct": {
+        "expected_route": "eva-think-to-shared-persona-material-collection",
+        "expected_terminal": "persona-material-or-one-missing-layer-without-positioning-question",
+        "forbid": {
+            "persona-intent-disambiguation",
+            "account-positioning",
+            "track-positioning",
+            "invent-personal-story",
+            "save-without-confirmation",
+        },
+        "must_include": {
+            "real-experience-material",
+            "expression-qualification",
+            "direct-persona-collection",
+            "seven-step-persona-funnel",
+        },
+    },
+    "persona-build-bare-one-disambiguation": {
+        "expected_route": "eva-think-persona-intent-disambiguation",
+        "expected_terminal": "await-account-positioning-or-persona-material-choice",
+        "forbid": {
+            "enter-persona-collection-before-answer",
+            "account-positioning-output",
+            "create-persona-card",
+            "multiple-questions",
+        },
+        "must_include": {
+            "ask-exactly-one-question",
+            "账号定位和赛道",
+            "从真实经历里挖出可以用于内容的人设素材",
+        },
+    },
+    "persona-account-positioning-boundary": {
+        "expected_route": "eva-think-persona-account-positioning-boundary",
+        "expected_terminal": "explain-boundary-and-offer-light-think-or-reframe-only",
+        "forbid": {
+            "enter-shared-persona-seven-step",
+            "create-persona-card",
+            "save-persona-card",
+            "promise-full-account-positioning",
+        },
+        "must_include": {
+            "persona-material-collection-boundary",
+            "not-account-positioning",
+            "recommend-think-or-reframe-light-reorientation-only",
+        },
+    },
+    "persona-track-positioning-boundary": {
+        "expected_route": "eva-think-persona-track-positioning-boundary",
+        "expected_terminal": "explain-boundary-and-offer-light-think-or-reframe-only",
+        "forbid": {
+            "enter-shared-persona-seven-step",
+            "create-persona-card",
+            "save-persona-card",
+            "promise-full-track-positioning",
+        },
+        "must_include": {
+            "persona-material-collection-boundary",
+            "not-track-positioning",
+            "recommend-think-or-reframe-light-reorientation-only",
+        },
+    },
+}
+
+REQUIRED_SCENARIO_CASES.update(REQUIRED_225_CASE_CONTRACTS)
+
 REQUIRED_ROUTER_MARKERS = {
     "eva-new-user": "Router must expose the adaptive new-user tutorial",
     "eva-think": "Router must expose eva-think as the default light entry",
@@ -917,6 +984,11 @@ REQUIRED_ROUTER_MARKERS = {
     "带我系统学": "Router must route semantic learning requests to eva-learn",
     "提取我朋友圈的语气": "Router must disambiguate moments voice extraction from creation",
     "人设立不住": "Router must expose persona credibility diagnosis through eva-think",
+    "人设素材采集": "Router must expose the front-facing persona material collection name",
+    "人设采集": "Router must preserve the legacy natural-language persona collection alias",
+    "打造人设": "Router must recognize the ambiguous persona-building intent",
+    "账号定位": "Router must expose the account-positioning boundary through eva-think",
+    "赛道定位": "Router must expose the track-positioning boundary through eva-think",
     "不读取 Harness / Asset / schema": "Router must stay thin and not load shared heavy protocols",
     "立即读取目标入口": "Router must load the target sibling entry immediately",
     "同一轮": "Router must continue in the same turn",
@@ -1915,6 +1987,23 @@ def main() -> None:
                         + ", ".join(missing_markers)
                     )
 
+        for case_id, contract in REQUIRED_225_CASE_CONTRACTS.items():
+            case = case_by_id.get(case_id) or {}
+            for scalar_field in ("expected_route", "expected_terminal"):
+                if case.get(scalar_field) != contract[scalar_field]:
+                    errors.append(
+                        f"prompt scenario case {case_id!r} {scalar_field} must be "
+                        f"{contract[scalar_field]!r}"
+                    )
+            for list_field in ("forbid", "must_include"):
+                actual = set(case.get(list_field) or [])
+                missing_markers = sorted(contract[list_field] - actual)
+                if missing_markers:
+                    errors.append(
+                        f"prompt scenario case {case_id!r} missing {list_field} marker(s): "
+                        + ", ".join(missing_markers)
+                    )
+
     shared_skill_path = base / "SKILL.md"
     if not shared_skill_path.exists():
         errors.append("eva-shared must have SKILL.md so GitHub skill installers copy the shared package")
@@ -2550,6 +2639,9 @@ def main() -> None:
             ):
                 if marker in think_default_reads:
                     errors.append(f"eva-think default reads must stay light; found: {marker}")
+        for marker in ("人设素材采集", "打造人设", "账号定位", "赛道定位"):
+            if marker not in think_entry_text:
+                errors.append(f"eva-think missing persona-material boundary marker: {marker}")
 
     create_entry_path = (base / "../eva-create/SKILL.md").resolve()
     create_openai_path = (base / "../eva-create/agents/openai.yaml").resolve()
@@ -2739,7 +2831,7 @@ def main() -> None:
     think_path = (base / "../eva-think/references/think/00_eva-think_思考助理.md").resolve()
     if think_path.exists():
         think_text = think_path.read_text(encoding="utf-8")
-        for marker in ("Memory 转接消歧", "提取我朋友圈的语气", "人设立不住", "朋友圈 Link / 用我的朋友圈 Link"):
+        for marker in ("Memory 转接消歧", "提取我朋友圈的语气", "人设立不住", "人设素材采集", "打造人设", "账号定位", "赛道定位", "朋友圈 Link / 用我的朋友圈 Link"):
             if marker not in think_text:
                 errors.append(f"eva-think missing disambiguation marker: {marker}")
         for marker in (
@@ -2758,9 +2850,17 @@ def main() -> None:
     persona_path = (base / "references/memory/01_eva-persona-memory_人设记忆采集.md").resolve()
     if persona_path.exists():
         persona_text = persona_path.read_text(encoding="utf-8")
-        for marker in ("人设资格诊断模式", "具体经历", "选择代价", "反复模式", "公开边界", "默认只输出诊断，不保存"):
+        for marker in ("人设素材采集", "人设资格诊断模式", "具体经历", "选择代价", "反复模式", "公开边界", "七步漏斗", "默认只输出诊断，不保存"):
             if marker not in persona_text:
                 errors.append(f"persona-memory missing credibility diagnosis marker: {marker}")
+        for marker in (
+            "你说的“打造人设”，是想确定账号定位和赛道，还是想从真实经历里挖出可以用于内容的人设素材？",
+            "不进入七步漏斗",
+            "不生成 persona-card",
+            "Eva Think 用 Reframe",
+        ):
+            if marker not in persona_text:
+                errors.append(f"persona-memory missing positioning-boundary marker: {marker}")
 
     internal_pending_dir = base / "references" / "internal-pending"
     if internal_pending_dir.exists():

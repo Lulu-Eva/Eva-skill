@@ -1,5 +1,5 @@
 {
-  "version": "2.2.4",
+  "version": "2.2.5",
   "purpose": "Scenario contract inventory for same-turn routing, staged loading, hard gates, and user-facing lightness. Structural selftest validates this inventory but does not execute model behavior.",
   "cases": [
     {
@@ -81,7 +81,7 @@
     },
     {
       "id": "eva-extra-permission-version-and-cure",
-      "input": "我现在合规使用 Eva-skill 2.2.4 做自己的账号。如果以后许可变了，旧版本还能继续用吗？不小心违约后还能补救吗？以前做的内容怎么办？",
+      "input": "我现在合规使用 Eva-skill 2.2.5 做自己的账号。如果以后许可变了，旧版本还能继续用吗？不小心违约后还能补救吗？以前做的内容怎么办？",
       "expected_route": "eva-root-project-output-extra-permission-term",
       "forbid": ["apply-future-license-retroactively", "revoke-compliant-version-without-breach", "invalidate-prior-compliant-output", "eva-think"],
       "must_include": ["version-specific-additional-permission", "irrevocable-while-compliant", "thirty-day-cure", "future-versions-only", "prior-compliant-output-survives"],
@@ -279,6 +279,38 @@
       "expected_route": "eva-persona-credibility-diagnosis",
       "forbid": ["generic-think-only", "account-positioning", "save-persona-card-by-default"],
       "expected_terminal": "diagnose-missing-persona-qualification-layer"
+    },
+    {
+      "id": "persona-material-explicit-direct",
+      "input": "帮我从这段真实经历里挖出可以用于内容的人设素材，看看它为什么能支撑我讲这个话题。",
+      "expected_route": "eva-think-to-shared-persona-material-collection",
+      "forbid": ["persona-intent-disambiguation", "account-positioning", "track-positioning", "invent-personal-story", "save-without-confirmation"],
+      "must_include": ["real-experience-material", "expression-qualification", "direct-persona-collection", "seven-step-persona-funnel"],
+      "expected_terminal": "persona-material-or-one-missing-layer-without-positioning-question"
+    },
+    {
+      "id": "persona-build-bare-one-disambiguation",
+      "input": "/eva 帮我打造人设",
+      "expected_route": "eva-think-persona-intent-disambiguation",
+      "forbid": ["enter-persona-collection-before-answer", "account-positioning-output", "create-persona-card", "multiple-questions"],
+      "must_include": ["ask-exactly-one-question", "账号定位和赛道", "从真实经历里挖出可以用于内容的人设素材"],
+      "expected_terminal": "await-account-positioning-or-persona-material-choice"
+    },
+    {
+      "id": "persona-account-positioning-boundary",
+      "input": "/eva 帮我做账号定位，再打造一个适合涨粉的账号人设。",
+      "expected_route": "eva-think-persona-account-positioning-boundary",
+      "forbid": ["enter-shared-persona-seven-step", "create-persona-card", "save-persona-card", "promise-full-account-positioning"],
+      "must_include": ["persona-material-collection-boundary", "not-account-positioning", "recommend-think-or-reframe-light-reorientation-only"],
+      "expected_terminal": "explain-boundary-and-offer-light-think-or-reframe-only"
+    },
+    {
+      "id": "persona-track-positioning-boundary",
+      "input": "用 Eva 帮我定一下赛道，选一个最好变现的方向。",
+      "expected_route": "eva-think-persona-track-positioning-boundary",
+      "forbid": ["enter-shared-persona-seven-step", "create-persona-card", "save-persona-card", "promise-full-track-positioning"],
+      "must_include": ["persona-material-collection-boundary", "not-track-positioning", "recommend-think-or-reframe-light-reorientation-only"],
+      "expected_terminal": "explain-boundary-and-offer-light-think-or-reframe-only"
     },
     {
       "id": "explicit-save",
