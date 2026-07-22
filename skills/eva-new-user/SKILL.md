@@ -1,6 +1,6 @@
 ---
 name: eva-new-user
-description: Eva New User 2.2.4 独立新手教程。用于用户明确说 /eva-new-user、Eva New User、我是新用户、开启新手教程、教我怎么用 Eva，或在裸 /eva 欢迎语后选择新手教程时使用。开始前动态扫描当前环境已安装的 Eva 子 Skill，再围绕用户当前目标完成“演示、跟做、独立发起”的最小闭环；允许用户随时说“跳过”、指定提前学习的功能，或退出教程直接处理真实任务。
+description: Eva New User 2.2.5 独立新手教程。用于用户明确说 /eva-new-user、Eva New User、我是新用户、开启新手教程、教我怎么用 Eva，或在裸 /eva 欢迎语后选择新手教程时使用。开始前动态扫描当前环境已安装的 Eva 子 Skill，再围绕用户当前目标完成“演示、跟做、独立发起”的最小闭环；允许用户随时说“跳过”、指定提前学习的功能，或退出教程直接处理真实任务。
 ---
 
 # Eva New User
@@ -46,7 +46,7 @@ description: Eva New User 2.2.4 独立新手教程。用于用户明确说 /eva-
 
 - 脑子里有想法但说不清：Eva Think。
 - 有话题但不知道讲给谁：话题人群识别器。
-- 想梳理自己的经历和表达资格：人设采集。
+- 想梳理自己的真实经历和表达资格：人设素材采集。
 - 想做短视频或写非虚构自媒体文章：Eva Create。
 - 想从学科机制打开一个话题：Eva Lens。
 - 稿子已经写完，想在发布前总检：Eva Preflight。
@@ -116,7 +116,7 @@ description: Eva New User 2.2.4 独立新手教程。用于用户明确说 /eva-
 路由参考：
 
 ```text
-想法梳理、人设、表达真实性 -> eva-think
+想法梳理、人设素材采集、表达真实性 -> eva-think
 明确的话题人群识别 -> eva-audience-finder
 短视频、标题、开头、视频稿、公众号文章和观点长文 -> eva-create
 系统学习、带读 -> eva-learn
