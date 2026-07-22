@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Eva 2.2.5 structural checks and prompt scenario-contract validation."""
+"""Eva 2.2.6 structural checks and prompt scenario-contract validation."""
 
 from __future__ import annotations
 
@@ -482,8 +482,8 @@ REQUIRED_221_CASE_CONTRACTS = {
     "eva-project-identity-from-readme": {
         "expected_route": "eva-root-project-identity-readme",
         "expected_terminal": "answer-requested-project-roles-and-source-from-readme-without-inference",
-        "forbid": {"eva-think", "child-module", "guess-role", "hardcoded-maintainer-list", "web-search", "proactive-promotion"},
-        "must_include": {"root-readme-on-demand", "maintenance-and-acknowledgements-source-of-truth", "same-turn-direct-answer"},
+        "forbid": {"eva-think", "child-module", "guess-role", "hardcoded-maintainer-list", "web-search", "proactive-promotion", "claim-eva-learn-directly-adapted-from-public-dbs-learning"},
+        "must_include": {"root-readme-on-demand", "maintenance-and-acknowledgements-source-of-truth", "same-turn-direct-answer", "dontbesilent-design-inspiration", "eva-learn-early-learning-prompt-inspiration"},
     },
     "generic-project-identity-not-eva": {
         "expected_route": "not-eva-without-eva-context",
@@ -2113,6 +2113,10 @@ def main() -> None:
             "[第三方材料与许可排除说明](THIRD_PARTY_NOTICES.md)",
             "Eva-skill 由璐璐Eva 发起开发并持续维护",
             "官方开源仓库：https://github.com/Lulu-Eva/Eva-skill",
+            "dontbesilent 开源 dbskill",
+            "基于 Bloom2Sigma 的学习提示词",
+            "Eva Learn",
+            "独立的学习系统",
             "需求与产品灵感贡献者",
             "凯瑟琳学姐",
             "梦野学姐",
@@ -2127,6 +2131,10 @@ def main() -> None:
             for marker in (
                 "璐璐Eva 发起开发并持续维护",
                 "https://github.com/Lulu-Eva/Eva-skill",
+                "dontbesilent 开源 dbskill",
+                "基于 Bloom2Sigma 的学习提示词",
+                "Eva Learn",
+                "独立的学习系统",
                 "需求与产品灵感贡献者",
             ):
                 if marker not in maintenance_section:
@@ -2174,6 +2182,8 @@ def main() -> None:
             "THIRD_PARTY_NOTICES.md": (
                 "# Eva-skill 第三方材料与许可排除说明",
                 "dontbesilent 开源 dbskill",
+                "自 2.2.6 起",
+                "不等于认定当前 Eva Learn 是公开版 `dbs-learning` 的直接改编",
                 "需求与产品灵感贡献者",
                 "未包含需要随发行分发的图片、字体、音视频或 PDF 素材",
                 "外部贡献只有",
@@ -2525,6 +2535,10 @@ def main() -> None:
         for marker in (
             "Eva-skill 由璐璐Eva 发起开发并持续维护",
             "https://github.com/Lulu-Eva/Eva-skill",
+            "dontbesilent 开源 dbskill",
+            "基于 Bloom2Sigma 的学习提示词",
+            "Eva Learn",
+            "独立的学习系统",
             "CC BY-NC 4.0",
             "个人创作者最终内容商业化额外许可",
             "普通最终内容",
