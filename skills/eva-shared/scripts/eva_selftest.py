@@ -1,20 +1,27 @@
 #!/usr/bin/env python3
-"""Eva 2.2.6 structural checks and prompt scenario-contract validation."""
+"""Eva 2.2.7 structural checks and prompt scenario-contract validation."""
 
 from __future__ import annotations
 
 import argparse
 from datetime import date
+import errno
+import hashlib
 import json
 import os
 from pathlib import Path
 import shutil
+import stat
 import subprocess
 import sys
 import tempfile
 from unittest.mock import patch
+import zipfile
 
+import eva_data_export as data_export
 import eva_memory_inventory as memory_inventory
+import eva_memory_save as memory_save
+from eva_asset_validate import load_asset as load_canonical_asset, validate_asset_payload
 from eva_link_check import link_sha256, validate_expected_asset as validate_link_expected_asset
 from eva_memory_inventory import run_inventory
 from eva_common import (
@@ -967,6 +974,119 @@ REQUIRED_225_CASE_CONTRACTS = {
 
 REQUIRED_SCENARIO_CASES.update(REQUIRED_225_CASE_CONTRACTS)
 
+REQUIRED_227_CASE_CONTRACTS = {
+    "persona-complete-invite-save-once": {
+        "expected_route": "eva-think-to-shared-persona-material-collection",
+        "expected_terminal": "complete-persona-material-result-then-one-save-invitation",
+        "forbid": {"save-before-confirmation", "ask-save-before-result", "repeat-save-invitation"},
+        "must_include": {"result-first", "not-yet-written-to-memory", "one-save-invitation"},
+    },
+    "voice-complete-invite-save-once": {
+        "expected_route": "eva-think-to-shared-user-voice",
+        "expected_terminal": "complete-voice-result-then-one-save-invitation",
+        "forbid": {"save-before-confirmation", "ask-save-before-result", "create-separate-voiceprint-card"},
+        "must_include": {"result-first", "not-yet-written-to-memory", "one-save-invitation", "voice-card"},
+    },
+    "persona-incomplete-no-save-invitation": {
+        "expected_route": "eva-think-to-shared-persona-material-collection",
+        "expected_terminal": "one-missing-layer-question-without-save-invitation",
+        "forbid": {"save-invitation", "create-persona-card", "claim-ready-to-save"},
+        "must_include": {"one-missing-layer-question"},
+    },
+    "voice-preauthorized-save-no-repeat": {
+        "expected_route": "eva-think-to-shared-user-voice-then-memory-save",
+        "expected_terminal": "canonical-voice-card-saved-without-repeated-save-question",
+        "forbid": {"repeat-save-invitation", "save-without-asset-validation", "create-separate-voiceprint-card"},
+        "must_include": {"preauthorized-save", "canonical-asset-validation", "voice-card"},
+    },
+    "persona-private-preauthorization-still-confirms": {
+        "expected_route": "eva-think-to-shared-persona-private-save-confirmation",
+        "expected_terminal": "await-separate-privacy-confirmation-before-saving",
+        "forbid": {"save-private-card-without-privacy-confirmation", "repeat-general-save-question"},
+        "must_include": {"privacy-flags", "separate-privacy-confirmation"},
+    },
+    "persona-positioning-no-save-invitation": {
+        "expected_route": "eva-think-persona-account-positioning-boundary",
+        "expected_terminal": "positioning-boundary-without-collection-or-save-invitation",
+        "forbid": {"enter-persona-collection", "save-invitation", "create-persona-card"},
+        "must_include": {"persona-material-collection-boundary", "not-account-positioning"},
+    },
+    "memory-multiple-candidates-one-save-question": {
+        "expected_route": "eva-think-to-shared-memory-batch-save-confirmation",
+        "expected_terminal": "one-batch-save-question-for-eligible-candidates",
+        "forbid": {"one-question-per-card", "auto-save-all", "include-ineligible-runtime-state"},
+        "must_include": {"merged-save-confirmation", "eligible-asset-types-only"},
+    },
+    "memory-save-refusal-not-repeated": {
+        "expected_route": "eva-think-to-shared-memory-save-declined",
+        "expected_terminal": "result-kept-unsaved-without-second-invitation",
+        "forbid": {"repeat-save-invitation", "write-memory-file", "mark-saved-true"},
+        "must_include": {"respect-save-refusal", "remain-unsaved"},
+    },
+    "eva-data-export-preview-first": {
+        "expected_route": "eva-think-to-shared-memory-data-export-preview",
+        "expected_terminal": "readonly-source-preview-then-one-scope-choice",
+        "forbid": {"create-zip-before-confirmation", "scan-entire-computer", "show-file-bodies"},
+        "must_include": {"memory-learn-review-preview", "three-scope-options", "unencrypted-local-zip-warning"},
+    },
+    "eva-data-export-memory-only": {
+        "expected_route": "eva-think-to-shared-memory-data-export",
+        "expected_terminal": "verified-memory-only-zip",
+        "forbid": {"include-eva-learn", "include-eva-review", "overwrite-existing-backup", "modify-source"},
+        "must_include": {"memory-only-scope", "crc-and-sha256-verification", "immutable-snapshot"},
+    },
+    "eva-data-export-complete": {
+        "expected_route": "eva-think-to-shared-memory-data-export",
+        "expected_terminal": "verified-complete-eva-data-zip",
+        "forbid": {"omit-learn-original-sources-silently", "scan-entire-computer", "include-absolute-source-path"},
+        "must_include": {"memory", "all-known-learn-projects", "learn-original-sources", "current-authorized-review"},
+    },
+    "eva-data-export-custom-exclude-learn-sources": {
+        "expected_route": "eva-think-to-shared-memory-data-export",
+        "expected_terminal": "verified-custom-eva-data-zip-without-learn-original-sources",
+        "forbid": {"include-learn-original-sources", "expand-beyond-selected-scope"},
+        "must_include": {"custom-scope", "explicit-original-source-exclusion"},
+    },
+    "eva-data-export-current-candidates-save-first": {
+        "expected_route": "eva-think-to-shared-memory-candidate-save-before-export",
+        "expected_terminal": "selected-candidates-canonically-saved-then-exported",
+        "forbid": {"place-unsaved-candidate-directly-in-zip", "export-harness-state", "save-without-confirmation"},
+        "must_include": {"current-visible-candidates-only", "asset-validation-before-save", "save-before-export"},
+    },
+    "eva-data-export-historical-unsaved-unrecoverable": {
+        "expected_route": "eva-think-to-shared-memory-data-export-preview",
+        "expected_terminal": "truthful-export-preview-with-historical-unsaved-limit",
+        "forbid": {"claim-recover-historical-unsaved-content", "scan-chat-history-cache", "invent-candidate-assets"},
+        "must_include": {"historical-unsaved-content-unavailable"},
+    },
+    "eva-data-export-ordinary-file-zip-not-eva": {
+        "expected_route": "ordinary-file-compression-not-eva",
+        "expected_terminal": "normal-file-compression-path",
+        "forbid": {"eva-memory", "eva-data-export-preview", "scan-memory-learn-review"},
+        "must_include": set(),
+    },
+    "eva-memory-inventory-does-not-export": {
+        "expected_route": "eva-think-to-shared-memory-inventory",
+        "expected_terminal": "readonly-metadata-inventory-then-stop",
+        "forbid": {"eva-data-export-preview", "create-zip", "scan-eva-learn", "scan-eva-review"},
+        "must_include": {"readonly-memory-inventory"},
+    },
+    "eva-data-export-no-python-preview-only": {
+        "expected_route": "eva-think-to-shared-memory-data-export-text-preview",
+        "expected_terminal": "text-preview-with-explicit-write-blocker",
+        "forbid": {"claim-zip-created", "skip-integrity-check", "silent-output-fallback"},
+        "must_include": {"text-preview-only", "cannot-generate-verified-zip"},
+    },
+    "eva-data-export-empty-scope-no-zip": {
+        "expected_route": "eva-think-to-shared-memory-data-export-preview",
+        "expected_terminal": "report-empty-selected-scope-without-zip",
+        "forbid": {"create-empty-zip", "create-placeholder-data", "scan-other-projects"},
+        "must_include": {"zero-selected-files", "no-final-zip"},
+    },
+}
+
+REQUIRED_SCENARIO_CASES.update(REQUIRED_227_CASE_CONTRACTS)
+
 REQUIRED_ROUTER_MARKERS = {
     "eva-new-user": "Router must expose the adaptive new-user tutorial",
     "eva-think": "Router must expose eva-think as the default light entry",
@@ -1034,6 +1154,9 @@ REQUIRED_ROUTER_MARKERS = {
     "内容候选数量不是入口排序": "Router must not mistake content option operations for entry navigation",
     "公众号文章开头进入 Create Article": "Router must keep article openings out of short-video Opening",
     "小红书封面标题进入 Title": "Router must keep cover-title work in Title",
+    "导出或备份 Eva 数据": "Router frontmatter must expose explicit Eva data-export intents",
+    "备份全部 Eva 记忆卡": "Router must route explicit Eva memory backup requests",
+    "普通文件压缩不触发": "Router must not hijack ordinary archive tasks",
 }
 
 REQUIRED_LICENSE_ROUTING_MARKERS = {
@@ -1108,12 +1231,18 @@ REQUIRED_ARCHITECTURE_PATHS = (
     "references/learn/00_eva-learn.md",
     "references/learn/05_eva-learn-project_分级建档与恢复.md",
     "references/commerce/00_eva-commerce_商单主入口.md",
+    "references/memory/00_eva-memory_点子卡沉淀与回溯.md",
+    "references/memory/01_eva-persona-memory_人设记忆采集.md",
+    "references/memory/02_eva-user-voice_用户表达文风提取.md",
+    "references/memory/03_eva-data-export_统一数据备份.md",
     "references/shared/04_light-interaction_轻交互协议.md",
     "references/shared/05_expression-asset-preload_表达资产轻量预加载协议.md",
     "references/shared/06_external-material-safety_外部材料安全边界.md",
     "references/shared/07_next-step-navigation_动态选路与下一步推荐.md",
     "references/lens/00_eva-lens-discipline-divergence_学科发散.md",
     "references/harness/00_eva-harness_状态与交接校验.md",
+    "scripts/eva_memory_save.py",
+    "scripts/eva_data_export.py",
 )
 
 RUNTIME_VERSION_FREE_PATHS = (
@@ -1149,6 +1278,7 @@ EXTERNAL_MATERIAL_SAFETY_REQUIRED_ENTRIES = (
 def validate_asset(asset: dict, schema: dict, base) -> list[str]:
     errors = simple_schema_validate(asset, schema)
     asset_type = asset.get("asset_type")
+    asset_type_config: dict = {}
     if asset_type not in VALID_ASSET_TYPES:
         errors.append(f"asset_type {asset_type!r} is invalid")
     else:
@@ -1169,6 +1299,25 @@ def validate_asset(asset: dict, schema: dict, base) -> list[str]:
     invalid_next = sorted(set(asset.get("valid_next") or []) - VALID_HANDOFF_TARGETS)
     if invalid_next:
         errors.append("valid_next contains invalid target(s): " + ", ".join(invalid_next))
+    allowed_valid_next = {
+        canonical_handoff_target(str(target), base)
+        for target in (asset_type_config.get("valid_next") or [])
+    }
+    normalized_valid_next = {
+        canonical_handoff_target(str(target), base)
+        for target in (asset.get("valid_next") or [])
+        if isinstance(target, str)
+    }
+    disallowed_next = sorted(
+        target
+        for target in normalized_valid_next
+        if allowed_valid_next and target not in allowed_valid_next
+    )
+    if disallowed_next:
+        errors.append(
+            f"asset_type {asset_type!r} disallows valid_next target(s): "
+            + ", ".join(disallowed_next)
+        )
     return errors
 
 
@@ -1615,6 +1764,1039 @@ locked body
         check("部分检查中发现" in unreadable_markdown and "未完整检查" in unreadable_markdown, "unreadable partial Markdown must qualify duplicate results")
 
 
+def run_memory_save_selftests(errors: list[str], base: Path) -> None:
+    """Exercise canonical JSON -> Markdown -> validation -> inventory saving."""
+
+    def check(condition: bool, message: str) -> None:
+        if not condition:
+            errors.append("memory save runtime: " + message)
+
+    schema = read_json(base / "schemas" / "asset-card.schema.json")
+    examples = {
+        "idea-card": {
+            "source_module": "eva-think",
+            "valid_next": ["eva-create", "eva-memory"],
+        },
+        "persona-card": {
+            "source_module": "eva-memory",
+            "valid_next": ["eva-create", "eva-link"],
+        },
+        "voice-card": {
+            "source_module": "eva-memory",
+            "valid_next": ["eva-create", "eva-link"],
+        },
+    }
+
+    with tempfile.TemporaryDirectory(prefix="eva-memory-save-selftest-") as temp_dir:
+        root = Path(temp_dir)
+        project = root / "creator-project"
+        project.mkdir()
+        saved_paths: list[Path] = []
+
+        legacy_path = root / "legacy-card.md"
+        legacy_path.write_text(
+            "---\n"
+            "type: idea-card\n"
+            "created: 2026-07-23\n"
+            "keywords: [legacy]\n"
+            "---\n"
+            "资产类型：idea-card\n"
+            "来源模块：eva-think\n"
+            "核心内容：legacy body content\n"
+            "用户问题：legacy question\n"
+            "关键证据或材料：legacy evidence\n"
+            "适合交给哪个下游：eva-create, eva-memory\n"
+            "是否已保存：是\n",
+            encoding="utf-8",
+        )
+        legacy_loaded = load_canonical_asset(legacy_path)
+        check(
+            legacy_loaded.get("core_content") == "legacy body content",
+            "type-only legacy frontmatter must keep body-field fallback",
+        )
+
+        canonical_without_evidence = root / "canonical-without-evidence.md"
+        canonical_without_evidence.write_text(
+            "---\n"
+            "asset_type: inquiry-question-card\n"
+            "source_module: eva-learn\n"
+            "core_content: question seed\n"
+            "user_question: what remains unclear\n"
+            "valid_next: [eva-learn, eva-think]\n"
+            "saved: false\n"
+            "---\n",
+            encoding="utf-8",
+        )
+        no_evidence_loaded = load_canonical_asset(canonical_without_evidence)
+        check(
+            no_evidence_loaded.get("asset_type") == "inquiry-question-card",
+            "canonical card types that do not require evidence must still load",
+        )
+
+        tampered_canonical = root / "tampered-canonical.md"
+        tampered_canonical.write_text(
+            "---\n"
+            "asset_type: idea-card\n"
+            "source_module: eva-think\n"
+            "core_content: canonical content\n"
+            "user_question: canonical question\n"
+            "valid_next: [eva-create]\n"
+            "---\n"
+            "是否已保存：是\n",
+            encoding="utf-8",
+        )
+        tampered_loaded = load_canonical_asset(tampered_canonical)
+        tampered_validation = validate_asset_payload(tampered_loaded, schema, base)
+        check(
+            not tampered_validation.get("ok") and "saved" not in tampered_loaded,
+            "canonical frontmatter missing a required field must not be repaired from body text",
+        )
+
+        for asset_type, routing in examples.items():
+            secret = f"PRIVATE_BODY_{asset_type}"
+            asset = {
+                "asset_type": asset_type,
+                "source_module": routing["source_module"],
+                "core_content": {"summary": secret, "colon": "中文：冒号"},
+                "user_question": f"用户为什么需要 {asset_type}？",
+                "evidence": ["真实材料", {"source": "conversation"}],
+                "valid_next": routing["valid_next"],
+                "saved": False,
+                "confidence": "medium",
+                "low_confidence_reason": [],
+                "missing_fields": [],
+                "privacy_flags": [],
+                "keywords": ["回归测试", asset_type],
+                "title": f"{asset_type} roundtrip",
+            }
+            asset_path = root / f"{asset_type}.json"
+            asset_path.write_text(
+                json.dumps(asset, ensure_ascii=False), encoding="utf-8"
+            )
+            payload = memory_save.save_memory_asset(
+                asset_path=asset_path,
+                project_root=project,
+                confirm_save=True,
+                confirm_privacy=False,
+                today=date(2026, 7, 23),
+            )
+            check(bool(payload.get("ok")), f"{asset_type} canonical save must pass")
+            public_json = json.dumps(payload, ensure_ascii=False)
+            check(secret not in public_json, f"{asset_type} result must not expose card body")
+            relative = (payload.get("data") or {}).get("relative_path")
+            check(isinstance(relative, str), f"{asset_type} result must return a relative path")
+            if not isinstance(relative, str):
+                continue
+            saved_path = project / relative
+            saved_paths.append(saved_path)
+            check(saved_path.is_file(), f"{asset_type} output file must exist")
+            if not saved_path.is_file():
+                continue
+            try:
+                reloaded = load_canonical_asset(saved_path)
+            except Exception as exc:
+                errors.append(
+                    f"memory save runtime: {asset_type} Markdown reload failed: "
+                    f"{exc.__class__.__name__}"
+                )
+                continue
+            validation = validate_asset_payload(reloaded, schema, base)
+            check(bool(validation.get("ok")), f"{asset_type} roundtrip validation must pass")
+            check(reloaded.get("type") == asset_type, f"{asset_type} storage type must match")
+            check(reloaded.get("asset_type") == asset_type, f"{asset_type} canonical type must match")
+            check(reloaded.get("saved") is True, f"{asset_type} final card must be saved=true")
+
+        inventory_payload = run_inventory(project, today=date(2026, 7, 23))
+        inventory_data = _inventory_data(inventory_payload)
+        check(inventory_data.get("total_cards") == 3, "three saved cards must be inventory-visible")
+        check(
+            (inventory_data.get("classification_counts") or {}).get("declared_recognized") == 3,
+            "new cards must be formally declared, not directory-inferred",
+        )
+        check(
+            (inventory_data.get("health") or {}).get("conflicting_type_fields") == 0,
+            "new cards must keep type and asset_type aligned",
+        )
+
+        collision_payload = memory_save.save_memory_asset(
+            asset_path=root / "idea-card.json",
+            project_root=project,
+            confirm_save=True,
+            confirm_privacy=False,
+            today=date(2026, 7, 23),
+        )
+        check(bool(collision_payload.get("ok")), "same-name second save must not overwrite")
+        check(
+            int((collision_payload.get("data") or {}).get("collision_index") or 0) == 2,
+            "same-name second save must use -02",
+        )
+        check(all(path.exists() for path in saved_paths), "collision handling must preserve original cards")
+
+        with patch.object(
+            memory_save.os,
+            "link",
+            side_effect=OSError(errno.ENOTSUP, "hard links unsupported"),
+        ):
+            fallback_payload = memory_save.save_memory_asset(
+                asset_path=root / "idea-card.json",
+                project_root=project,
+                confirm_save=True,
+                confirm_privacy=False,
+                today=date(2026, 7, 23),
+            )
+        check(
+            bool(fallback_payload.get("ok")),
+            "filesystems without hard-link support must use the O_EXCL+replace fallback",
+        )
+        fallback_relative = (fallback_payload.get("data") or {}).get("relative_path")
+        check(
+            isinstance(fallback_relative, str)
+            and (project / fallback_relative).is_file(),
+            "hard-link fallback must publish one visible final card",
+        )
+        check(
+            not list((project / "eva-memory").rglob(".eva-memory-save-*.md.tmp")),
+            "hard-link fallback must not leave a hidden temporary card",
+        )
+
+        invalid_next_asset = {
+            "asset_type": "persona-card",
+            "source_module": "eva-memory",
+            "core_content": "persona",
+            "user_question": "why me",
+            "evidence": ["experience"],
+            "valid_next": ["eva-review"],
+            "saved": False,
+            "keywords": ["persona"],
+        }
+        invalid_next_path = root / "invalid-next.json"
+        invalid_next_path.write_text(
+            json.dumps(invalid_next_asset, ensure_ascii=False), encoding="utf-8"
+        )
+        invalid_next_validation = validate_asset_payload(
+            invalid_next_asset, schema, base
+        )
+        check(
+            not invalid_next_validation.get("ok"),
+            "asset-type-specific valid_next violations must fail validation",
+        )
+        invalid_next_save = memory_save.save_memory_asset(
+            asset_path=invalid_next_path,
+            project_root=project,
+            confirm_save=True,
+            confirm_privacy=False,
+        )
+        check(
+            not invalid_next_save.get("ok"),
+            "contract-invalid valid_next must never be formally saved",
+        )
+
+        no_keyword_asset = {
+            "asset_type": "idea-card",
+            "source_module": "eva-think",
+            "core_content": "schema-valid idea without index keyword",
+            "user_question": "what should be indexed",
+            "evidence": ["conversation"],
+            "valid_next": ["eva-create"],
+            "saved": False,
+        }
+        no_keyword_validation = validate_asset_payload(
+            no_keyword_asset, schema, base
+        )
+        check(
+            bool(no_keyword_validation.get("ok")),
+            "keywords must remain a Memory-specific prerequisite, not a canonical schema field",
+        )
+        no_keyword_path = root / "no-keyword.json"
+        no_keyword_path.write_text(
+            json.dumps(no_keyword_asset, ensure_ascii=False), encoding="utf-8"
+        )
+        no_keyword_save = memory_save.save_memory_asset(
+            asset_path=no_keyword_path,
+            project_root=project,
+            confirm_save=True,
+            confirm_privacy=False,
+        )
+        check(
+            not no_keyword_save.get("ok")
+            and "keyword" in json.dumps(no_keyword_save, ensure_ascii=False),
+            "save without an Asset keyword or --keyword override must fail clearly",
+        )
+        keyword_override_save = memory_save.save_memory_asset(
+            asset_path=no_keyword_path,
+            project_root=project,
+            confirm_save=True,
+            confirm_privacy=False,
+            keyword_overrides=["索引关键词"],
+        )
+        check(
+            bool(keyword_override_save.get("ok")),
+            "documented --keyword override must satisfy the Memory-specific index contract",
+        )
+
+        private_asset = {
+            "asset_type": "persona-card",
+            "source_module": "eva-memory",
+            "core_content": "private experience",
+            "user_question": "why can I say this",
+            "evidence": ["private evidence"],
+            "valid_next": ["eva-create"],
+            "saved": False,
+            "confidence": "medium",
+            "low_confidence_reason": [],
+            "missing_fields": [],
+            "privacy_flags": ["family"],
+            "keywords": ["privacy"],
+        }
+        private_path = root / "private.json"
+        private_path.write_text(
+            json.dumps(private_asset, ensure_ascii=False), encoding="utf-8"
+        )
+        before_private_files = set(project.rglob("*.md"))
+        private_payload = memory_save.save_memory_asset(
+            asset_path=private_path,
+            project_root=project,
+            confirm_save=True,
+            confirm_privacy=False,
+        )
+        check(not private_payload.get("ok"), "privacy flags must require a second confirmation")
+        check(
+            set(project.rglob("*.md")) == before_private_files,
+            "privacy failure must not write a card",
+        )
+
+        legacy_privacy_asset = dict(private_asset)
+        legacy_privacy_asset["privacy_flags"] = []
+        legacy_privacy_asset["privacy"] = {
+            "public": "可以公开",
+            "private": "关系细节不可公开",
+        }
+        legacy_privacy_path = root / "legacy-privacy.json"
+        legacy_privacy_path.write_text(
+            json.dumps(legacy_privacy_asset, ensure_ascii=False), encoding="utf-8"
+        )
+        legacy_privacy_payload = memory_save.save_memory_asset(
+            asset_path=legacy_privacy_path,
+            project_root=project,
+            confirm_save=True,
+            confirm_privacy=False,
+        )
+        check(
+            not legacy_privacy_payload.get("ok"),
+            "legacy private privacy mapping must still require privacy confirmation",
+        )
+
+        malformed = dict(private_asset)
+        malformed["privacy_flags"] = {"bad": True}
+        malformed["valid_next"] = [{"bad": True}]
+        malformed_validation = validate_asset_payload(malformed, schema, base)
+        check(
+            not malformed_validation.get("ok"),
+            "malformed list fields must fail without crashing",
+        )
+
+        no_confirmation = memory_save.save_memory_asset(
+            asset_path=root / "idea-card.json",
+            project_root=project,
+            confirm_save=False,
+            confirm_privacy=False,
+        )
+        check(not no_confirmation.get("ok"), "save must require explicit confirmation")
+
+        bundle_root = root / "bundle"
+        (bundle_root / "modules" / "eva-shared").mkdir(parents=True)
+        (bundle_root / "SKILL.md").write_text("bundle", encoding="utf-8")
+        (bundle_root / "modules" / "eva-shared" / "support.md").write_text(
+            "support", encoding="utf-8"
+        )
+        bundle_payload = memory_save.save_memory_asset(
+            asset_path=root / "idea-card.json",
+            project_root=bundle_root,
+            confirm_save=True,
+            confirm_privacy=False,
+        )
+        check(not bundle_payload.get("ok"), "distribution bundle root must be rejected")
+        check(
+            not (bundle_root / "eva-memory").exists(),
+            "bundle-root refusal must happen before creating runtime memory",
+        )
+
+        split_skill_root = root / "installed-eva-skill"
+        (split_skill_root / "agents").mkdir(parents=True)
+        (split_skill_root / "SKILL.md").write_text(
+            "---\nname: eva\n---\n", encoding="utf-8"
+        )
+        split_skill_payload = memory_save.save_memory_asset(
+            asset_path=root / "idea-card.json",
+            project_root=split_skill_root,
+            confirm_save=True,
+            confirm_privacy=False,
+        )
+        check(
+            not split_skill_payload.get("ok"),
+            "split Skill installation root must be rejected",
+        )
+        check(
+            not (split_skill_root / "eva-memory").exists(),
+            "split Skill refusal must happen before creating runtime memory",
+        )
+
+        temp_fault_dir = root / "temp-fault"
+        temp_fault_dir.mkdir()
+        with patch.object(memory_save.os, "fsync", side_effect=OSError("fault")):
+            try:
+                memory_save._write_temp_card(
+                    temp_fault_dir, "PRIVATE_TEMP_CONTENT"
+                )
+            except memory_save.MemorySaveError:
+                pass
+            else:
+                errors.append(
+                    "memory save runtime: injected fsync failure must fail the temp write"
+                )
+        check(
+            not list(temp_fault_dir.glob(".eva-memory-save-*.md.tmp")),
+            "temp-write failure must not leave a hidden privacy-bearing card",
+        )
+
+        try:
+            memory_save._write_temp_card(temp_fault_dir, "\ud800")
+        except memory_save.MemorySaveError:
+            pass
+        else:
+            errors.append(
+                "memory save runtime: Unicode encoding failure must fail the temp write"
+            )
+        check(
+            not list(temp_fault_dir.glob(".eva-memory-save-*.md.tmp")),
+            "Unicode encoding failure must not leave a hidden privacy-bearing card",
+        )
+
+
+def run_data_export_selftests(errors: list[str]) -> None:
+    """Exercise preview, complete/custom export, verification and safety boundaries."""
+
+    def check(condition: bool, message: str) -> None:
+        if not condition:
+            errors.append("data export runtime: " + message)
+
+    def write_file(path: Path, text: str) -> Path:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(text, encoding="utf-8")
+        return path
+
+    def write_crafted_archive(
+        path: Path,
+        *,
+        scope: str,
+        included_kinds: list[str],
+        exclude_learn_sources: bool,
+        data_entries: list[tuple[str, str, bytes, int | None]],
+    ) -> Path:
+        backup_root = "Eva-data-backup-20260723-000000"
+        readme_path = f"{backup_root}/README.md"
+        manifest_path = f"{backup_root}/MANIFEST.json"
+        readme_bytes = b"# Eva data backup selftest\n"
+        rows: list[dict[str, object]] = [
+            {
+                "path": readme_path,
+                "kind": "metadata",
+                "source_label": "generated",
+                "size": len(readme_bytes),
+                "sha256": hashlib.sha256(readme_bytes).hexdigest(),
+            }
+        ]
+        with zipfile.ZipFile(path, "w", compression=zipfile.ZIP_DEFLATED) as archive:
+            archive.writestr(
+                data_export._zip_info(readme_path, 1_700_000_000),
+                readme_bytes,
+            )
+            for relative_path, kind, content, unix_mode in data_entries:
+                rooted_path = f"{backup_root}/{relative_path}"
+                info = data_export._zip_info(rooted_path, 1_700_000_000)
+                if unix_mode is not None:
+                    info.external_attr = unix_mode << 16
+                archive.writestr(info, content)
+                rows.append(
+                    {
+                        "path": rooted_path,
+                        "kind": kind,
+                        "source_label": "selftest",
+                        "size": len(content),
+                        "sha256": hashlib.sha256(content).hexdigest(),
+                    }
+                )
+            manifest = {
+                "format_version": data_export.BACKUP_FORMAT_VERSION,
+                "eva_skill_version": data_export.SCRIPT_VERSION,
+                "created_at": "2026-07-23T00:00:00+08:00",
+                "scope": scope,
+                "included_kinds": included_kinds,
+                "selection": {
+                    "scope": scope,
+                    "included_kinds": included_kinds,
+                    "exclude_learn_sources": exclude_learn_sources,
+                },
+                "archive_root": backup_root,
+                "file_count": len(rows),
+                "total_bytes": sum(int(row["size"]) for row in rows),
+                "files": rows,
+                "skipped": {},
+            }
+            archive.writestr(
+                data_export._zip_info(manifest_path, 1_700_000_000),
+                data_export._manifest_bytes(manifest),
+            )
+        return path
+
+    with tempfile.TemporaryDirectory(prefix="eva-data-export-selftest-") as temp_dir:
+        root = Path(temp_dir)
+        project = root / "creator-project"
+        output = root / "output"
+        fake_home = root / "home"
+        project.mkdir()
+        output.mkdir()
+        fake_home.mkdir()
+
+        memory_file = write_file(
+            project / "eva-memory" / "idea-cards" / "idea.md",
+            "---\ntype: idea-card\ncreated: 2026-07-23\nkeywords: [backup]\n---\nsecret memory\n",
+        )
+        write_file(project / "eva-memory" / ".hidden.md", "hidden")
+        write_file(project / "eva-memory" / "scratch.tmp", "temporary")
+        write_file(project / "eva-memory" / "debug.log", "log")
+        write_file(project / "eva-memory" / "logs" / "session.txt", "runtime log")
+        current_learn = project / "eva-learn" / "当前学习"
+        write_file(current_learn / "00-学习进度.md", "进行中")
+        write_file(current_learn / "07-学习问答原稿.md", "lesson")
+        write_file(current_learn / "sources" / "原始资料" / "source.txt", "raw-current")
+        default_learn = fake_home / "Documents" / "eva-learn" / "默认学习"
+        write_file(default_learn / "00-学习进度.md", "进行中")
+        write_file(default_learn / "sources" / "原始资料" / "book.txt", "raw-default")
+        write_file(
+            fake_home / "Documents" / "eva-learn" / "无效目录" / "note.md",
+            "must not be discovered",
+        )
+        write_file(project / "eva-review" / "00_review-settings.md", "authorized: true")
+        write_file(
+            project
+            / "eva-review"
+            / "accounts"
+            / "xiaohongshu__eva"
+            / "records"
+            / "record.md",
+            "review record",
+        )
+
+        symlink_supported = True
+        try:
+            (project / "eva-memory" / "outside-link").symlink_to(
+                root / "outside", target_is_directory=True
+            )
+        except OSError:
+            symlink_supported = False
+
+        with patch.object(data_export.Path, "home", return_value=fake_home):
+            before_paths = sorted(path.relative_to(root).as_posix() for path in root.rglob("*"))
+            plan = data_export._build_plan(
+                project_root=project,
+                scope="complete",
+                custom_includes=[],
+                extra_learn_paths=[],
+                exclude_learn_sources=False,
+                proposed_output_dir=output,
+                max_files=1000,
+                max_bytes=10_000_000,
+            )
+            check(bool(plan.get("ok")), "complete preview must pass")
+            plan_data = plan.get("data") or {}
+            check(plan_data.get("will_write") is False, "preview must declare will_write=false")
+            check(
+                (plan_data.get("memory") or {}).get("card_count") == 1,
+                "preview must count formal Memory cards separately",
+            )
+            check(
+                (plan_data.get("learn") or {}).get("project_count") == 2,
+                "preview must discover current and Documents Learn projects",
+            )
+            check(
+                (plan_data.get("learn") or {}).get("raw_source_files") == 2,
+                "complete preview must count Learn original sources",
+            )
+            check(
+                (plan_data.get("review") or {}).get("account_count") == 1,
+                "preview must count Review accounts",
+            )
+            after_preview_paths = sorted(path.relative_to(root).as_posix() for path in root.rglob("*"))
+            check(before_paths == after_preview_paths, "preview must not create or modify files")
+            check(not list(output.glob("*.zip")), "preview must not create ZIP")
+            skipped = plan_data.get("skipped") or {}
+            check(int(skipped.get("hidden") or 0) >= 1, "preview must count hidden skips")
+            check(int(skipped.get("temporary") or 0) >= 1, "preview must count temporary skips")
+            check(
+                int(skipped.get("logs") or 0) >= 2,
+                "preview must skip both log files and exact log/logs directories",
+            )
+            if symlink_supported:
+                check(int(skipped.get("symlinks") or 0) >= 1, "preview must count symlink skips")
+
+            source_before = memory_file.read_bytes()
+            plan_id = str(plan_data.get("plan_id") or "")
+            exported = data_export._export_plan(
+                plan,
+                output_dir=output,
+                expected_plan_id=plan_id,
+            )
+            check(bool(exported.get("ok")), "complete export must pass")
+            export_data = exported.get("data") or {}
+            archive_path = Path(str(export_data.get("archive_path") or ""))
+            check(archive_path.is_file(), "export must create a final ZIP")
+            check(export_data.get("verified") is True, "export result must report verification")
+            check(
+                export_data.get("file_count") == plan_data.get("file_count")
+                and export_data.get("total_bytes") == plan_data.get("total_bytes"),
+                "successful export must preserve the preview's user-data count and size",
+            )
+            check(memory_file.read_bytes() == source_before, "export must not modify sources")
+            check(bool(export_data.get("archive_sha256")), "export must return ZIP SHA-256")
+            check("skipped" in export_data, "export must return skipped summary")
+            verified = data_export._validate_zip(archive_path)
+            check(bool(verified.get("ok")), "independent ZIP verification must pass")
+            if archive_path.is_file():
+                with zipfile.ZipFile(archive_path, "r") as archive:
+                    names = archive.namelist()
+                    top_levels = {Path(name).parts[0] for name in names}
+                    check(len(top_levels) == 1, "ZIP must have one timestamped top-level directory")
+                    check(
+                        any("/eva-memory/" in name for name in names),
+                        "complete ZIP must include Memory",
+                    )
+                    check(
+                        any("/eva-learn/" in name for name in names),
+                        "complete ZIP must include Learn",
+                    )
+                    check(
+                        any("/eva-review/" in name for name in names),
+                        "complete ZIP must include Review",
+                    )
+                    check(
+                        any("sources/原始资料" in name for name in names),
+                        "complete ZIP must include Learn original sources",
+                    )
+                    check(
+                        all(not name.startswith("/") and ".." not in Path(name).parts for name in names),
+                        "ZIP entries must not contain absolute paths or traversal",
+                    )
+                    manifest_name = next(
+                        (name for name in names if name.endswith("/MANIFEST.json")),
+                        "",
+                    )
+                    manifest = json.loads(archive.read(manifest_name).decode("utf-8"))
+                    check(
+                        str(project) not in json.dumps(manifest, ensure_ascii=False),
+                        "Manifest must not contain absolute source paths",
+                    )
+                    check(
+                        manifest.get("selection")
+                        == {
+                            "scope": "complete",
+                            "included_kinds": ["memory", "learn", "review"],
+                            "exclude_learn_sources": False,
+                        },
+                        "Manifest must record the normalized user selection",
+                    )
+
+            second = data_export._export_plan(
+                plan,
+                output_dir=output,
+                expected_plan_id=plan_id,
+            )
+            check(bool(second.get("ok")), "second same-second export must pass")
+            check(
+                (second.get("data") or {}).get("archive_path")
+                != export_data.get("archive_path"),
+                "second export must not overwrite the first snapshot",
+            )
+
+            custom = data_export._build_plan(
+                project_root=project,
+                scope="custom",
+                custom_includes=["learn"],
+                extra_learn_paths=[],
+                exclude_learn_sources=True,
+                proposed_output_dir=output,
+                max_files=1000,
+                max_bytes=10_000_000,
+            )
+            check(bool(custom.get("ok")), "custom Learn preview must pass")
+            custom_files = (custom.get("data") or {}).get("_files") or []
+            check(
+                all("sources/原始资料" not in item.archive_path for item in custom_files),
+                "custom source exclusion must remove Learn original sources",
+            )
+            custom_data = custom.get("data") or {}
+            custom_export = data_export._export_plan(
+                custom,
+                output_dir=output,
+                expected_plan_id=str(custom_data.get("plan_id") or ""),
+            )
+            check(bool(custom_export.get("ok")), "custom Learn export must pass")
+            custom_archive = Path(
+                str((custom_export.get("data") or {}).get("archive_path") or "")
+            )
+            if custom_archive.is_file():
+                with zipfile.ZipFile(custom_archive, "r") as archive:
+                    custom_names = archive.namelist()
+                    custom_manifest_name = next(
+                        (
+                            name
+                            for name in custom_names
+                            if name.endswith("/MANIFEST.json")
+                        ),
+                        "",
+                    )
+                    custom_manifest = json.loads(
+                        archive.read(custom_manifest_name).decode("utf-8")
+                    )
+                    check(
+                        (custom_manifest.get("selection") or {}).get(
+                            "exclude_learn_sources"
+                        )
+                        is True,
+                        "custom Manifest must preserve raw-source exclusion",
+                    )
+                    check(
+                        all(
+                            "sources/原始资料" not in name
+                            for name in custom_names
+                        ),
+                        "custom ZIP must honor raw-source exclusion",
+                    )
+
+            old_plan_id = plan_id
+            write_file(project / "eva-memory" / "idea-cards" / "changed.md", "changed")
+            changed_plan = data_export._build_plan(
+                project_root=project,
+                scope="complete",
+                custom_includes=[],
+                extra_learn_paths=[],
+                exclude_learn_sources=False,
+                proposed_output_dir=output,
+                max_files=1000,
+                max_bytes=10_000_000,
+            )
+            stale = data_export._export_plan(
+                changed_plan,
+                output_dir=output,
+                expected_plan_id=old_plan_id,
+            )
+            check(not stale.get("ok"), "changed plan must reject stale preview confirmation")
+
+            before_fault_archives = set(output.glob("*.zip"))
+            original_unlink = Path.unlink
+            fault_state = {"raised": False}
+
+            def fail_first_temp_unlink(path: Path, *args, **kwargs):
+                if (
+                    path.name.startswith(".eva-data-export-")
+                    and not fault_state["raised"]
+                ):
+                    fault_state["raised"] = True
+                    raise OSError("injected temp cleanup failure")
+                return original_unlink(path, *args, **kwargs)
+
+            changed_plan_id = str((changed_plan.get("data") or {}).get("plan_id") or "")
+            with patch.object(data_export.Path, "unlink", new=fail_first_temp_unlink):
+                fault_export = data_export._export_plan(
+                    changed_plan,
+                    output_dir=output,
+                    expected_plan_id=changed_plan_id,
+                )
+            check(
+                not fault_export.get("ok"),
+                "post-link temp cleanup failure must not be reported as success",
+            )
+            check(
+                set(output.glob("*.zip")) == before_fault_archives,
+                "failed atomic publication must roll back the visible final ZIP",
+            )
+            check(
+                not list(output.glob(".eva-data-export-*.tmp")),
+                "failed atomic publication must not leave hidden temp archives",
+            )
+
+        missing_output = root / "missing-output"
+        missing_output_plan = data_export._build_plan(
+            project_root=project,
+            scope="memory",
+            custom_includes=[],
+            extra_learn_paths=[],
+            exclude_learn_sources=False,
+            proposed_output_dir=missing_output,
+            max_files=100,
+            max_bytes=1000,
+        )
+        check(
+            not missing_output_plan.get("ok"),
+            "preview must reject a nonexistent output directory",
+        )
+        check(
+            not missing_output.exists(),
+            "preview must not create a missing output directory",
+        )
+
+        review_without_consent = root / "review-without-consent"
+        review_without_consent.mkdir()
+        write_file(
+            review_without_consent
+            / "eva-review"
+            / "accounts"
+            / "xiaohongshu__eva"
+            / "records"
+            / "record.md",
+            "review record without settings",
+        )
+        unauthorized_review_plan = data_export._build_plan(
+            project_root=review_without_consent,
+            scope="custom",
+            custom_includes=["review"],
+            extra_learn_paths=[],
+            exclude_learn_sources=False,
+            proposed_output_dir=output,
+            max_files=100,
+            max_bytes=1000,
+        )
+        check(
+            not unauthorized_review_plan.get("ok"),
+            "Review without 00_review-settings.md must not be exportable",
+        )
+        check(
+            "00_review-settings.md"
+            in json.dumps(
+                unauthorized_review_plan.get("warnings") or [],
+                ensure_ascii=False,
+            ),
+            "Review authorization refusal must explain the missing settings file",
+        )
+
+        quota_project = root / "quota-project"
+        quota_project.mkdir()
+        quota_learn = root / "quota-learn-project"
+        write_file(quota_learn / "00-学习进度.md", "x")
+        write_file(
+            quota_learn / "sources" / "原始资料" / "large.txt",
+            "r" * 100,
+        )
+        quota_home = root / "quota-home"
+        quota_home.mkdir()
+        with patch.object(data_export.Path, "home", return_value=quota_home):
+            quota_plan = data_export._build_plan(
+                project_root=quota_project,
+                scope="custom",
+                custom_includes=["learn"],
+                extra_learn_paths=[quota_learn],
+                exclude_learn_sources=True,
+                proposed_output_dir=output,
+                max_files=10,
+                max_bytes=5,
+            )
+        check(
+            bool(quota_plan.get("ok")),
+            "excluded Learn raw sources must not consume export byte quota",
+        )
+        quota_learn_stats = (quota_plan.get("data") or {}).get("learn") or {}
+        check(
+            int(quota_learn_stats.get("raw_source_bytes") or 0) == 100,
+            "preview must still report excluded Learn raw-source size",
+        )
+        check(
+            int((quota_plan.get("data") or {}).get("total_bytes") or 0) == 1,
+            "export total must count only included files",
+        )
+
+        empty_project = root / "empty-project"
+        empty_project.mkdir()
+        empty_plan = data_export._build_plan(
+            project_root=empty_project,
+            scope="memory",
+            custom_includes=[],
+            extra_learn_paths=[],
+            exclude_learn_sources=False,
+            proposed_output_dir=output,
+            max_files=100,
+            max_bytes=1000,
+        )
+        check(not empty_plan.get("ok"), "empty selected scope must not be exportable")
+
+        bundle_root = root / "bundle"
+        (bundle_root / "modules" / "eva-shared").mkdir(parents=True)
+        (bundle_root / "SKILL.md").write_text("bundle", encoding="utf-8")
+        (bundle_root / "modules" / "eva-shared" / "support.md").write_text(
+            "support", encoding="utf-8"
+        )
+        bundle_plan = data_export._build_plan(
+            project_root=bundle_root,
+            scope="memory",
+            custom_includes=[],
+            extra_learn_paths=[],
+            exclude_learn_sources=False,
+            proposed_output_dir=output,
+            max_files=100,
+            max_bytes=1000,
+        )
+        check(not bundle_plan.get("ok"), "distribution bundle root must be rejected")
+
+        split_skill_root = root / "installed-skill"
+        (split_skill_root / "scripts").mkdir(parents=True)
+        write_file(split_skill_root / "SKILL.md", "---\nname: eva\n---\n")
+        write_file(
+            split_skill_root / "eva-memory" / "idea-cards" / "idea.md",
+            "must not be scanned",
+        )
+        split_skill_plan = data_export._build_plan(
+            project_root=split_skill_root,
+            scope="memory",
+            custom_includes=[],
+            extra_learn_paths=[],
+            exclude_learn_sources=False,
+            proposed_output_dir=output,
+            max_files=100,
+            max_bytes=1000,
+        )
+        check(
+            not split_skill_plan.get("ok"),
+            "split Skill installation root must be rejected as a data project",
+        )
+
+        unsafe_name_project = root / "unsafe-name-project"
+        unsafe_name_project.mkdir()
+        write_file(
+            unsafe_name_project / "eva-memory" / "idea-cards" / "a\\b.md",
+            "unsafe archive filename",
+        )
+        unsafe_name_plan = data_export._build_plan(
+            project_root=unsafe_name_project,
+            scope="memory",
+            custom_includes=[],
+            extra_learn_paths=[],
+            exclude_learn_sources=False,
+            proposed_output_dir=output,
+            max_files=100,
+            max_bytes=1000,
+        )
+        check(
+            not unsafe_name_plan.get("ok"),
+            "unsafe archive filenames must return a structured preview failure",
+        )
+        check(
+            "路径无法安全写入 ZIP"
+            in json.dumps(unsafe_name_plan.get("errors") or [], ensure_ascii=False),
+            "unsafe filename failure must identify the path safety boundary",
+        )
+
+        malicious_symlink_zip = write_crafted_archive(
+            root / "malicious-symlink.zip",
+            scope="memory",
+            included_kinds=["memory"],
+            exclude_learn_sources=False,
+            data_entries=[
+                (
+                    "eva-memory/link.md",
+                    "memory",
+                    b"../../outside",
+                    stat.S_IFLNK | 0o777,
+                )
+            ],
+        )
+        symlink_verification = data_export._validate_zip(malicious_symlink_zip)
+        check(
+            not symlink_verification.get("ok"),
+            "verifier must reject a ZIP entry declared as a symbolic link",
+        )
+
+        empty_archive = write_crafted_archive(
+            root / "empty-backup.zip",
+            scope="memory",
+            included_kinds=["memory"],
+            exclude_learn_sources=False,
+            data_entries=[],
+        )
+        check(
+            not data_export._validate_zip(empty_archive).get("ok"),
+            "verifier must reject metadata-only backups without user data",
+        )
+
+        mismatched_scope_archive = write_crafted_archive(
+            root / "mismatched-scope.zip",
+            scope="memory",
+            included_kinds=["memory"],
+            exclude_learn_sources=False,
+            data_entries=[
+                (
+                    "eva-review/accounts/example/records/record.md",
+                    "review",
+                    b"review",
+                    None,
+                )
+            ],
+        )
+        check(
+            not data_export._validate_zip(mismatched_scope_archive).get("ok"),
+            "verifier must reject files outside the declared data scope",
+        )
+
+        excluded_raw_archive = write_crafted_archive(
+            root / "excluded-raw-source.zip",
+            scope="custom",
+            included_kinds=["learn"],
+            exclude_learn_sources=True,
+            data_entries=[
+                (
+                    "eva-learn/project/sources/原始资料/source.txt",
+                    "learn",
+                    b"raw source",
+                    None,
+                )
+            ],
+        )
+        check(
+            not data_export._validate_zip(excluded_raw_archive).get("ok"),
+            "verifier must reject raw Learn files when the manifest excludes them",
+        )
+
+        oversized_manifest_archive = root / "oversized-manifest.zip"
+        backup_root = "Eva-data-backup-20260723-010000"
+        with zipfile.ZipFile(
+            oversized_manifest_archive,
+            "w",
+            compression=zipfile.ZIP_DEFLATED,
+        ) as archive:
+            archive.writestr(
+                data_export._zip_info(f"{backup_root}/README.md", 1_700_000_000),
+                b"readme",
+            )
+            archive.writestr(
+                data_export._zip_info(
+                    f"{backup_root}/MANIFEST.json",
+                    1_700_000_000,
+                ),
+                b"{" + (b" " * 128) + b"}",
+            )
+        with patch.object(data_export, "DEFAULT_MAX_MANIFEST_BYTES", 64):
+            oversized_manifest_verification = data_export._validate_zip(
+                oversized_manifest_archive
+            )
+        check(
+            not oversized_manifest_verification.get("ok")
+            and "Manifest 超过安全读取上限"
+            in json.dumps(
+                oversized_manifest_verification.get("errors") or [],
+                ensure_ascii=False,
+            ),
+            "verifier must reject an oversized Manifest before reading it into memory",
+        )
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Run Eva structural checks and validate the prompt scenario contract.")
     parser.add_argument("--base", default=None, help="Base folder containing schemas/ and examples/.")
@@ -1626,6 +2808,8 @@ def main() -> None:
     warnings: list[str] = []
 
     run_memory_inventory_selftests(errors)
+    run_memory_save_selftests(errors, base)
+    run_data_export_selftests(errors)
 
     schema = read_json(base / "schemas" / "asset-card.schema.json")
     example_asset = read_json(base / "examples" / "asset-card.example.json")
@@ -2004,6 +3188,23 @@ def main() -> None:
                         + ", ".join(missing_markers)
                     )
 
+        for case_id, contract in REQUIRED_227_CASE_CONTRACTS.items():
+            case = case_by_id.get(case_id) or {}
+            for scalar_field in ("expected_route", "expected_terminal"):
+                if case.get(scalar_field) != contract[scalar_field]:
+                    errors.append(
+                        f"prompt scenario case {case_id!r} {scalar_field} must be "
+                        f"{contract[scalar_field]!r}"
+                    )
+            for list_field in ("forbid", "must_include"):
+                actual = set(case.get(list_field) or [])
+                missing_markers = sorted(contract[list_field] - actual)
+                if missing_markers:
+                    errors.append(
+                        f"prompt scenario case {case_id!r} missing {list_field} marker(s): "
+                        + ", ".join(missing_markers)
+                    )
+
     shared_skill_path = base / "SKILL.md"
     if not shared_skill_path.exists():
         errors.append("eva-shared must have SKILL.md so GitHub skill installers copy the shared package")
@@ -2032,7 +3233,7 @@ def main() -> None:
     else:
         memory_truth_text = memory_truth_path.read_text(encoding="utf-8")
         for marker in (
-            "保存、任务回捞，还是记忆盘点",
+            "保存、任务回捞、记忆盘点，还是 Eva 数据备份",
             "只返回最相关的 1—3 张卡",
             "扫描范围固定为当前运行项目的 `./eva-memory/`",
             "不跟随任何符号链接",
@@ -2054,6 +3255,8 @@ def main() -> None:
             "生成或更新必须经过两次明确确认",
             "<!-- eva-memory-derived-index:v1 -->",
             "只读盘点脚本始终不负责写 INDEX",
+            "03_eva-data-export_统一数据备份.md",
+            "eva_memory_save.py",
         ):
             if marker not in memory_truth_text:
                 errors.append(f"Memory inventory source of truth missing stable marker: {marker}")
@@ -2875,6 +4078,57 @@ def main() -> None:
         ):
             if marker not in persona_text:
                 errors.append(f"persona-memory missing positioning-boundary marker: {marker}")
+        for marker in (
+            "采集完成后的保存邀请",
+            "尚未写入 Eva 记忆库",
+            "先交付完整结果",
+            "用户说“整理一下”只授权整理草案",
+            "本轮不得再次邀请",
+            "privacy_flags",
+        ):
+            if marker not in persona_text:
+                errors.append(f"persona-memory missing confirm-before-save marker: {marker}")
+
+    voice_path = (base / "references/memory/02_eva-user-voice_用户表达文风提取.md").resolve()
+    if voice_path.exists():
+        voice_text = voice_path.read_text(encoding="utf-8")
+        for marker in (
+            "提取完成后的保存邀请",
+            "尚未写入 Eva 记忆库",
+            "先交付完整结果",
+            "不构成保存授权",
+            "用户拒绝保存后，本轮不再次邀请",
+            "不新增独立“声纹卡”",
+        ):
+            if marker not in voice_text:
+                errors.append(f"user-voice missing confirm-before-save marker: {marker}")
+
+    data_export_path = (base / "references/memory/03_eva-data-export_统一数据备份.md").resolve()
+    if not data_export_path.exists():
+        errors.append("missing Eva data export source of truth")
+    else:
+        data_export_text = data_export_path.read_text(encoding="utf-8")
+        for marker in (
+            "当前会话中仍然可见",
+            "历史会话中没有落盘",
+            "只导出全部记忆卡",
+            "导出完整 Eva 数据包",
+            "自定义导出范围",
+            "eva_memory_save.py",
+            "一次性 0600",
+            "finally",
+            "eva_data_export.py preview",
+            "最终参数重新运行一次 `preview`",
+            "此前的 `plan_id` 失效",
+            "--confirm-export",
+            "--expected-plan-id",
+            "不跟随文件或目录符号链接",
+            "MANIFEST.json",
+            "未加密本地备份",
+            "不联网、不上传、不删除",
+        ):
+            if marker not in data_export_text:
+                errors.append(f"Eva data export truth missing stable marker: {marker}")
 
     internal_pending_dir = base / "references" / "internal-pending"
     if internal_pending_dir.exists():

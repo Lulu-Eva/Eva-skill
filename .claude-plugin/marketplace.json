@@ -4,18 +4,18 @@
     "name": "Lulu-Eva"
   },
   "metadata": {
-    "description": "Eva-skill v2.2.6 创作者工作台。将前台能力统一为“人设素材采集”，专注从真实经历提炼内容素材与表达资格，不代做账号或赛道定位。",
-    "version": "2.2.6"
+    "description": "Eva-skill v2.2.7 创作者工作台。新增采集完成后的确认保存邀请，以及 Memory、Learn、Review 的本地统一数据备份。",
+    "version": "2.2.7"
   },
   "plugins": [
     {
       "name": "eva",
-      "description": "Eva-skill v2.2.6 创作者工作台。包含 New User、Think、Audience Finder、Create、Preflight、Learn、Brief、Link、Review、Lens 和 shared 真源包；“人设素材采集”专注从真实经历提炼内容素材与表达资格，不代做账号或赛道定位。",
+      "description": "Eva-skill v2.2.7 创作者工作台。包含 New User、Think、Audience Finder、Create、Preflight、Learn、Brief、Link、Review、Lens 和 shared 真源包；新增确认式记忆保存与本地统一数据备份。",
       "source": "./",
       "strict": false,
-      "version": "2.2.6",
+      "version": "2.2.7",
       "category": "content-creation",
-      "keywords": ["creator", "new-user", "tutorial", "short-video", "xiaohongshu", "script", "script-structure", "content-writing", "title", "body-title", "audience", "audience-finder", "thinking", "discipline-divergence", "preflight", "content-audit", "reframe", "benchmark-copy", "commercial-brief", "brand-brief", "sponsored-content", "memory", "memory-inventory", "persona", "persona-memory", "user-voice", "voice-card", "ai-check", "learn", "learning", "reading", "research", "study", "review", "content-review", "multi-perspective", "lens", "next-step", "dynamic-routing", "workflow", "thought-seed-card", "voice", "chinese"],
+      "keywords": ["creator", "new-user", "tutorial", "short-video", "xiaohongshu", "script", "script-structure", "content-writing", "title", "body-title", "audience", "audience-finder", "thinking", "discipline-divergence", "preflight", "content-audit", "reframe", "benchmark-copy", "commercial-brief", "brand-brief", "sponsored-content", "memory", "memory-inventory", "memory-backup", "data-export", "persona", "persona-memory", "user-voice", "voice-card", "ai-check", "learn", "learning", "reading", "research", "study", "review", "content-review", "multi-perspective", "lens", "next-step", "dynamic-routing", "workflow", "thought-seed-card", "voice", "chinese"],
       "skills": ["./skills/eva", "./skills/eva-new-user", "./skills/eva-shared", "./skills/eva-think", "./skills/eva-audience-finder", "./skills/eva-create", "./skills/eva-preflight", "./skills/eva-learn", "./skills/eva-brief", "./skills/eva-link", "./skills/eva-review", "./skills/eva-lens"]
     }
   ]

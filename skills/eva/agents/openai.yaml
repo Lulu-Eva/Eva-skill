@@ -1,4 +1,4 @@
 interface:
   display_name: "Eva"
-  short_description: "Eva 主入口：按任务选路，并根据当前结论推荐下一步"
-  default_prompt: "用 $eva 判断我现在该进入哪个任务入口；如果已有结果，推荐当前最值得推进的下一步。"
+  short_description: "Eva 主入口：按任务选路、根据结论推荐下一步，并支持数据备份"
+  default_prompt: "用 $eva 判断我现在该进入哪个任务入口；如果已有结果，推荐当前最值得推进的下一步；需要备份时，先帮我预览 Eva 数据范围。"
