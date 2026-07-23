@@ -1,5 +1,5 @@
 {
-  "version": "2.2.6",
+  "version": "2.2.7",
   "purpose": "Scenario contract inventory for same-turn routing, staged loading, hard gates, and user-facing lightness. Structural selftest validates this inventory but does not execute model behavior.",
   "cases": [
     {
@@ -1536,6 +1536,150 @@
       "forbid": ["opening-candidate-pool", "invent-brand-claim", "skip-commercial-constraint-card"],
       "must_include": ["brief-first", "one-missing-constraint-action"],
       "expected_terminal": "commercial-constraints-before-opening-generation"
+    },
+    {
+      "id": "persona-complete-invite-save-once",
+      "input": "我们已经把这段真实经历、选择代价、长期判断和能公开的边界都聊清楚了。请把人设素材整理完整。",
+      "expected_route": "eva-think-to-shared-persona-material-collection",
+      "forbid": ["save-before-confirmation", "ask-save-before-result", "repeat-save-invitation"],
+      "must_include": ["result-first", "not-yet-written-to-memory", "one-save-invitation"],
+      "expected_terminal": "complete-persona-material-result-then-one-save-invitation"
+    },
+    {
+      "id": "voice-complete-invite-save-once",
+      "input": "这是我本人在朋友圈、公众号和短视频里的 5 段样本，都超过 300 字。请提炼我的表达文风。",
+      "expected_route": "eva-think-to-shared-user-voice",
+      "forbid": ["save-before-confirmation", "ask-save-before-result", "create-separate-voiceprint-card"],
+      "must_include": ["result-first", "not-yet-written-to-memory", "one-save-invitation", "voice-card"],
+      "expected_terminal": "complete-voice-result-then-one-save-invitation"
+    },
+    {
+      "id": "persona-incomplete-no-save-invitation",
+      "input": "我就是一个很独立的人，帮我做人设素材采集。",
+      "expected_route": "eva-think-to-shared-persona-material-collection",
+      "forbid": ["save-invitation", "create-persona-card", "claim-ready-to-save"],
+      "must_include": ["one-missing-layer-question"],
+      "expected_terminal": "one-missing-layer-question-without-save-invitation"
+    },
+    {
+      "id": "voice-preauthorized-save-no-repeat",
+      "input": "这些都是我本人跨场景的写作样本。提炼完直接保存成文风卡，不用再问我。",
+      "expected_route": "eva-think-to-shared-user-voice-then-memory-save",
+      "forbid": ["repeat-save-invitation", "save-without-asset-validation", "create-separate-voiceprint-card"],
+      "must_include": ["preauthorized-save", "canonical-asset-validation", "voice-card"],
+      "expected_terminal": "canonical-voice-card-saved-without-repeated-save-question"
+    },
+    {
+      "id": "persona-private-preauthorization-still-confirms",
+      "input": "采集完直接保存。这段经历里有我的收入、家庭关系和不方便公开的他人信息。",
+      "expected_route": "eva-think-to-shared-persona-private-save-confirmation",
+      "forbid": ["save-private-card-without-privacy-confirmation", "repeat-general-save-question"],
+      "must_include": ["privacy-flags", "separate-privacy-confirmation"],
+      "expected_terminal": "await-separate-privacy-confirmation-before-saving"
+    },
+    {
+      "id": "persona-positioning-no-save-invitation",
+      "input": "/eva-persona-memory 帮我确定账号定位和赛道，不是挖经历。",
+      "expected_route": "eva-think-persona-account-positioning-boundary",
+      "forbid": ["enter-persona-collection", "save-invitation", "create-persona-card"],
+      "must_include": ["persona-material-collection-boundary", "not-account-positioning"],
+      "expected_terminal": "positioning-boundary-without-collection-or-save-invitation"
+    },
+    {
+      "id": "memory-multiple-candidates-one-save-question",
+      "input": "这轮已经整理出了两个点子、一张人设素材卡和一张文风卡。你看看哪些能保存。",
+      "expected_route": "eva-think-to-shared-memory-batch-save-confirmation",
+      "forbid": ["one-question-per-card", "auto-save-all", "include-ineligible-runtime-state"],
+      "must_include": ["merged-save-confirmation", "eligible-asset-types-only"],
+      "expected_terminal": "one-batch-save-question-for-eligible-candidates"
+    },
+    {
+      "id": "memory-save-refusal-not-repeated",
+      "input": "刚才那张人设素材卡先不用保存，我们继续聊。",
+      "expected_route": "eva-think-to-shared-memory-save-declined",
+      "forbid": ["repeat-save-invitation", "write-memory-file", "mark-saved-true"],
+      "must_include": ["respect-save-refusal", "remain-unsaved"],
+      "expected_terminal": "result-kept-unsaved-without-second-invitation"
+    },
+    {
+      "id": "eva-data-export-preview-first",
+      "input": "/eva-memory 把我的 Eva 数据打包到桌面。",
+      "expected_route": "eva-think-to-shared-memory-data-export-preview",
+      "forbid": ["create-zip-before-confirmation", "scan-entire-computer", "show-file-bodies"],
+      "must_include": ["memory-learn-review-preview", "three-scope-options", "unencrypted-local-zip-warning"],
+      "expected_terminal": "readonly-source-preview-then-one-scope-choice"
+    },
+    {
+      "id": "eva-data-export-memory-only",
+      "input": "我看过预览了，这次只导出全部 Eva 记忆卡，确认生成。",
+      "expected_route": "eva-think-to-shared-memory-data-export",
+      "forbid": ["include-eva-learn", "include-eva-review", "overwrite-existing-backup", "modify-source"],
+      "must_include": ["memory-only-scope", "fresh-final-scope-preview", "crc-and-sha256-verification", "immutable-snapshot"],
+      "expected_terminal": "verified-memory-only-zip"
+    },
+    {
+      "id": "eva-data-export-complete",
+      "input": "预览没问题，确认导出完整 Eva 数据包，学习原始资料也一起备份。",
+      "expected_route": "eva-think-to-shared-memory-data-export",
+      "forbid": ["omit-learn-original-sources-silently", "scan-entire-computer", "include-absolute-source-path"],
+      "must_include": ["memory", "all-known-learn-projects", "learn-original-sources", "current-authorized-review", "fresh-final-scope-preview"],
+      "expected_terminal": "verified-complete-eva-data-zip"
+    },
+    {
+      "id": "eva-data-export-custom-exclude-learn-sources",
+      "input": "自定义导出 Memory 和 Eva Learn，但不要带 sources/原始资料。",
+      "expected_route": "eva-think-to-shared-memory-data-export",
+      "forbid": ["include-learn-original-sources", "expand-beyond-selected-scope"],
+      "must_include": ["custom-scope", "explicit-original-source-exclusion", "fresh-final-scope-preview"],
+      "expected_terminal": "verified-custom-eva-data-zip-without-learn-original-sources"
+    },
+    {
+      "id": "eva-data-export-current-candidates-save-first",
+      "input": "把这轮刚整理好的两张未保存点子卡也放进完整 Eva 数据备份。",
+      "expected_route": "eva-think-to-shared-memory-candidate-save-before-export",
+      "forbid": ["place-unsaved-candidate-directly-in-zip", "export-harness-state", "save-without-confirmation"],
+      "must_include": ["current-visible-candidates-only", "asset-validation-before-save", "save-before-export", "fresh-final-scope-preview-after-save"],
+      "expected_terminal": "selected-candidates-canonically-saved-then-exported"
+    },
+    {
+      "id": "eva-data-export-historical-unsaved-unrecoverable",
+      "input": "把我过去所有聊天里没点保存的 Eva 卡也找回来，一起备份。",
+      "expected_route": "eva-think-to-shared-memory-data-export-preview",
+      "forbid": ["claim-recover-historical-unsaved-content", "scan-chat-history-cache", "invent-candidate-assets"],
+      "must_include": ["historical-unsaved-content-unavailable"],
+      "expected_terminal": "truthful-export-preview-with-historical-unsaved-limit"
+    },
+    {
+      "id": "eva-data-export-ordinary-file-zip-not-eva",
+      "input": "帮我把这个普通项目文件夹压缩成 zip 放桌面。",
+      "expected_route": "ordinary-file-compression-not-eva",
+      "forbid": ["eva-memory", "eva-data-export-preview", "scan-memory-learn-review"],
+      "must_include": [],
+      "expected_terminal": "normal-file-compression-path"
+    },
+    {
+      "id": "eva-memory-inventory-does-not-export",
+      "input": "/eva-memory 盘点一下我的 Eva 记忆库，不要导出。",
+      "expected_route": "eva-think-to-shared-memory-inventory",
+      "forbid": ["eva-data-export-preview", "create-zip", "scan-eva-learn", "scan-eva-review"],
+      "must_include": ["readonly-memory-inventory"],
+      "expected_terminal": "readonly-metadata-inventory-then-stop"
+    },
+    {
+      "id": "eva-data-export-no-python-preview-only",
+      "input": "当前环境没有 Python，但我想把完整 Eva 数据导出。",
+      "expected_route": "eva-think-to-shared-memory-data-export-text-preview",
+      "forbid": ["claim-zip-created", "skip-integrity-check", "silent-output-fallback"],
+      "must_include": ["text-preview-only", "cannot-generate-verified-zip"],
+      "expected_terminal": "text-preview-with-explicit-write-blocker"
+    },
+    {
+      "id": "eva-data-export-empty-scope-no-zip",
+      "input": "这个新项目还没有任何 Eva 数据，但请给我导出一个备份。",
+      "expected_route": "eva-think-to-shared-memory-data-export-preview",
+      "forbid": ["create-empty-zip", "create-placeholder-data", "scan-other-projects"],
+      "must_include": ["zero-selected-files", "no-final-zip"],
+      "expected_terminal": "report-empty-selected-scope-without-zip"
     }
   ]
 }

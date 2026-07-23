@@ -1,4 +1,4 @@
 interface:
   display_name: "Eva Think"
-  short_description: "陪聊梳理、问题归位、人设素材与表达诊断、Memory 保存回捞盘点"
-  default_prompt: "用 $eva-think 陪我聊清问题，或处理对标、AI 味、Eva 记忆保存/回捞/盘点、人设素材采集和文风诊断。"
+  short_description: "陪聊梳理、问题归位、人设素材与表达诊断、Memory 保存回捞盘点备份"
+  default_prompt: "用 $eva-think 陪我聊清问题，或处理对标、AI 味、Eva 记忆保存/回捞/盘点/备份、人设素材采集和文风诊断。"

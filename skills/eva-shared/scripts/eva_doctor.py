@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Check Eva Shared 2.2.6 local structure and dependencies."""
+"""Check Eva Shared 2.2.7 local structure and dependencies."""
 
 from __future__ import annotations
 
@@ -41,6 +41,8 @@ REQUIRED_SCRIPTS = [
     "eva_prompt_lint.py",
     "eva_selftest.py",
     "eva_memory_inventory.py",
+    "eva_memory_save.py",
+    "eva_data_export.py",
 ]
 
 OPTIONAL_SCRIPTS = []
@@ -64,6 +66,7 @@ REQUIRED_PEER_SKILLS = {
         "../eva-shared/references/quality/00_eva-ai-check_表达真实性审查.md",
         "../eva-shared/references/shared/06_external-material-safety_外部材料安全边界.md",
         "../eva-shared/references/lens/00_eva-lens-discipline-divergence_学科发散.md",
+        "../eva-shared/references/memory/03_eva-data-export_统一数据备份.md",
     ],
     "eva-create": [
         "references/create/00_eva-create_创作主入口.md",
@@ -145,6 +148,7 @@ REQUIRED_PEER_SKILLS = {
 }
 
 NAVIGATION_TRUTH_PATH = "references/shared/07_next-step-navigation_动态选路与下一步推荐.md"
+DATA_EXPORT_TRUTH_PATH = "references/memory/03_eva-data-export_统一数据备份.md"
 
 NAVIGATION_TRUTH_MARKERS = (
     "跨模块导航真源",
@@ -159,6 +163,19 @@ NAVIGATION_TRUTH_MARKERS = (
     "谁调用，控制权返回给谁",
     "不保存用户的默认工作流偏好",
     "不新增导航资产、状态字段、schema 或 handoff target",
+)
+
+DATA_EXPORT_TRUTH_MARKERS = (
+    "统一数据备份真源",
+    "当前会话中仍然可见",
+    "历史会话",
+    "只导出全部记忆卡",
+    "导出完整 Eva 数据包",
+    "自定义导出范围",
+    "未加密 ZIP",
+    "不跟随文件或目录符号链接",
+    "MANIFEST.json",
+    "不联网、不上传、不删除",
 )
 
 
@@ -185,6 +202,20 @@ def check_navigation_truth(base: Path) -> tuple[list[str], dict]:
     for marker in NAVIGATION_TRUTH_MARKERS:
         if marker not in text:
             errors.append(f"{NAVIGATION_TRUTH_PATH} missing navigation marker: {marker}")
+    return errors, data
+
+
+def check_data_export_truth(base: Path) -> tuple[list[str], dict]:
+    errors: list[str] = []
+    path = base / DATA_EXPORT_TRUTH_PATH
+    data = {"data_export_truth": str(path) if path.exists() else None}
+    if not path.exists():
+        errors.append(f"missing {DATA_EXPORT_TRUTH_PATH}")
+        return errors, data
+    text = path.read_text(encoding="utf-8")
+    for marker in DATA_EXPORT_TRUTH_MARKERS:
+        if marker not in text:
+            errors.append(f"{DATA_EXPORT_TRUTH_PATH} missing data-export marker: {marker}")
     return errors, data
 
 
@@ -492,6 +523,10 @@ def main() -> None:
     navigation_errors, navigation_data = check_navigation_truth(base)
     errors.extend(navigation_errors)
     data.update(navigation_data)
+
+    export_errors, export_data = check_data_export_truth(base)
+    errors.extend(export_errors)
+    data.update(export_data)
 
     if args.link:
         data["links"] = [str(normalize_path(item)) for item in args.link]
