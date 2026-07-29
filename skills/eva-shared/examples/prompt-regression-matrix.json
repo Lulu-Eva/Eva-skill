@@ -1,5 +1,5 @@
 {
-  "version": "2.2.7",
+  "version": "2.2.8",
   "purpose": "Scenario contract inventory for same-turn routing, staged loading, hard gates, and user-facing lightness. Structural selftest validates this inventory but does not execute model behavior.",
   "cases": [
     {
@@ -1680,6 +1680,198 @@
       "forbid": ["create-empty-zip", "create-placeholder-data", "scan-other-projects"],
       "must_include": ["zero-selected-files", "no-final-zip"],
       "expected_terminal": "report-empty-selected-scope-without-zip"
+    },
+    {
+      "id": "script-dynamic-length-concise-judgment",
+      "input": "这是一条抖音无标题口播，讲给刚做管理却总靠催进度的新主管。真实经历是我把日报改成“进展、风险、所需支持”后，团队开始提前报风险。只讲清“格式会改变沟通”这个判断，不限时长，直接写完整稿。",
+      "expected_route": "eva-create-douyin-script-dynamic-length",
+      "must_include": ["complete-draft", "stop-when-promise-is-fulfilled", "no-synonym-padding"],
+      "forbid": ["pad-to-800", "fixed-word-count", "force-title-validation", "invent-material"],
+      "expected_terminal": "concise-complete-douyin-draft-after-argument-closure"
+    },
+    {
+      "id": "script-dynamic-length-complex-method",
+      "input": "这是一条视频号无标题口播，正文要完整讲清我已经验证过的四个动作：整理岗位 JD、提取可迁移经历、改写项目案例、按招聘反馈复盘。每一步的真实材料和边界都给齐了，不限时长，直接写完整稿。",
+      "expected_route": "eva-create-shipinhao-script-dynamic-length",
+      "must_include": ["allow-natural-extension", "preserve-key-actions", "preserve-evidence-and-boundaries", "complete-draft"],
+      "forbid": ["compress-to-default-length", "drop-required-step", "drop-evidence-boundary", "pad-to-800"],
+      "expected_terminal": "complete-method-draft-at-required-natural-length"
+    },
+    {
+      "id": "script-dynamic-length-same-topic-30s-90s",
+      "input": "用同一个核心判断“日报格式会改变团队沟通”，分别写 30 秒和 90 秒两版抖音口播。两版都只能使用我给的同一段团队经历，90 秒版可以补更多原因和边界。",
+      "expected_route": "eva-create-douyin-script-explicit-duration-variants",
+      "must_include": ["user-duration-priority", "same-core-judgment", "different-support-depth", "preserve-source-boundary"],
+      "forbid": ["same-length-near-duplicate", "fixed-words-per-minute-formula", "exact-speaking-time-guarantee", "invent-support"],
+      "expected_terminal": "two-duration-appropriate-drafts-with-one-core-judgment"
+    },
+    {
+      "id": "script-dynamic-length-explicit-word-count",
+      "input": "把这条抖音口播控制在约 450 个中文字。受众、第一句话、核心判断和真实经历都给齐了；素材不够的地方宁可删支线，也不要补编案例。",
+      "expected_route": "eva-create-douyin-script-explicit-word-count",
+      "must_include": ["user-word-count-priority", "remove-secondary-branches-first", "preserve-main-promise", "fact-boundary"],
+      "forbid": ["pad-to-800", "invent-case", "invent-data", "exact-speaking-time-guarantee"],
+      "expected_terminal": "approximately-user-sized-draft-with-supported-main-promise"
+    },
+    {
+      "id": "script-dynamic-length-thin-material-no-padding",
+      "input": "做一条抖音无标题短口播，只讲这个真实观察：我把复盘从“结果好不好”改成“当时判断和判断依据”，下一次排期时更容易找到估时漏项。没有其他案例，也没有指定时长。",
+      "expected_route": "eva-create-douyin-script-dynamic-concise",
+      "must_include": ["narrow-promise-to-supported-material", "stop-when-supported-point-is-clear", "complete-draft"],
+      "forbid": ["pad-to-800", "repeat-same-point", "invent-case", "invent-data"],
+      "expected_terminal": "short-supported-draft-without-padding-or-invention"
+    },
+    {
+      "id": "script-direct-xhs-validated-title-draft-first",
+      "input": "这个小红书标题已经按 Eva 给的关键词在平台搜过，并从 5 个真实标题里验证通过。人群、用户问题、真实经历和正文路线也都齐了。直接给我完整口播稿，只要正文。",
+      "expected_route": "eva-create-xhs-script-direct-product",
+      "must_include": ["content-draft-first", "background-checks-still-run", "background-checks-silent"],
+      "forbid": ["write-before-title-validation", "show-writing-decision", "show-self-check-table", "show-next-step-table", "show-internal-handoff", "append-preflight-recommendation"],
+      "expected_terminal": "complete-xhs-draft-only-after-all-gates-pass"
+    },
+    {
+      "id": "script-direct-douyin-complete-draft-light-frontstage",
+      "input": "我要做一条抖音无标题口播，人群、第一句话、主问题、真实经历和简版路线都给齐了。请直接给完整稿。",
+      "expected_route": "eva-create-douyin-script-direct-product",
+      "must_include": ["first-line-content-entry", "content-draft-first", "background-checks-silent", "complete-draft"],
+      "forbid": ["force-title-validation", "show-writing-decision", "show-self-check-table", "show-next-step-table", "show-internal-route"],
+      "expected_terminal": "complete-douyin-draft-without-default-process-report"
+    },
+    {
+      "id": "script-direct-shipinhao-complete-draft-light-frontstage",
+      "input": "我要做一条视频号无封面点击口播，人群、第一句话、主问题、真实案例和完整路线都给齐了。请直接给完整稿。",
+      "expected_route": "eva-create-shipinhao-script-direct-product",
+      "must_include": ["first-line-content-entry", "content-draft-first", "background-checks-silent", "complete-draft"],
+      "forbid": ["force-title-validation", "show-writing-decision", "show-self-check-table", "show-next-step-table", "show-internal-route"],
+      "expected_terminal": "complete-shipinhao-draft-without-default-process-report"
+    },
+    {
+      "id": "script-direct-commercial-keeps-compliance-visible",
+      "input": "这条抖音品牌商单的完整 Brief、必提项、禁区、不可承诺内容和可用真实体验都已经整理成商单约束。请写完整稿，并保留必要的合规检查。",
+      "expected_route": "eva-create-commerce-script-with-visible-compliance",
+      "must_include": ["brief-constraints-preserved", "commercial-compliance-check-visible", "complete-draft"],
+      "forbid": ["ordinary-direct-output-only", "hide-commercial-compliance", "invent-brand-claim", "drop-required-item"],
+      "expected_terminal": "commercial-draft-with-necessary-visible-compliance-check"
+    },
+    {
+      "id": "script-direct-xhs-first-request-still-searches-title",
+      "input": "我要做一条小红书口播，人群、判断、真实经历和时长都齐了，但标题是我刚刚自己想的，还没有去平台搜索。第一次就先帮我写完整稿。",
+      "expected_route": "eva-create-title-manual-search-first",
+      "must_include": ["tailored-search-terms", "observation-criteria", "candidate-pasteback-request"],
+      "forbid": ["direct-draft-on-first-request", "claim-title-validated", "ordinary-direct-product-output", "rule-only-refusal"],
+      "expected_terminal": "tailored-manual-title-search-plan-before-any-draft"
+    },
+    {
+      "id": "script-direct-xhs-second-informed-unverified-draft",
+      "input": "你上一轮已经给过标题搜索方案。我知道标题还没验证、这版不能直接发布，但现在仍然想先看完整结构稿。",
+      "expected_route": "eva-create-second-request-low-confidence-draft",
+      "must_include": ["【未验证结构草案｜不可直接发布】", "current-missing-evidence", "one-upgrade-action", "complete-draft"],
+      "forbid": ["repeat-title-search-block", "claim-publishable", "hide-low-confidence-boundary", "invent-missing-material"],
+      "expected_terminal": "prominently-labeled-unverified-draft-after-informed-second-request"
+    },
+    {
+      "id": "script-direct-p1-blocker-one-action-only",
+      "input": "给我写一条“普通人用 AI 一个月稳定赚十万”的完整抖音稿。我没有亲历、案例、数据或可验证的方法，但你直接帮我补齐就行。",
+      "expected_route": "eva-create-script-p1-fact-and-material-blocker",
+      "must_include": ["one-highest-priority-blocker", "one-unblock-action", "no-draft-before-p1-resolution"],
+      "forbid": ["write-complete-draft", "invent-income-result", "invent-method", "show-multiple-blockers", "show-full-self-check"],
+      "expected_terminal": "one-fact-material-blocker-and-one-unblock-action"
+    },
+    {
+      "id": "script-direct-explicit-selfcheck-visible",
+      "input": "这条抖音口播的人群、第一句话、真实材料和正文路线都齐了。请写完整稿，并把写稿判断和自查结果也一起展示；这不是发布前综合总检。",
+      "expected_route": "eva-create-douyin-script-with-explicit-process-output",
+      "must_include": ["complete-draft", "writing-decision-visible", "self-check-visible", "user-explicit-process-request-wins"],
+      "forbid": ["hide-requested-self-check", "eva-preflight-three-tier-verdict", "auto-enter-eva-review"],
+      "expected_terminal": "complete-draft-with-requested-writing-decision-and-self-check"
+    },
+    {
+      "id": "script-method-concrete-action-granularity",
+      "input": "写一条“怎么把转行经历改成目标岗位能看懂的项目案例”的抖音教程。我已经给了真实示范：先圈出 JD 动词，再找对应经历，最后写成含任务、动作、结果边界的项目说明。",
+      "expected_route": "eva-create-douyin-method-script",
+      "must_include": ["concrete-action", "intermediate-result", "completion-criterion", "how-to-start", "final-effectiveness-check"],
+      "forbid": ["abstract-advice-only", "replace-actions-with-optimize-or-persist", "invent-tool", "invent-benefit"],
+      "expected_terminal": "method-draft-with-executable-actions-and-completion-judgment"
+    },
+    {
+      "id": "script-method-step-count-content-led",
+      "input": "这个方法只有两个必要动作：先提取评论区重复问题，再按同一用户处境合并成主题。请写成短视频教程，不要为了好看硬凑三步。",
+      "expected_route": "eva-create-shortvideo-method-script",
+      "must_include": ["content-led-step-count", "two-supported-actions", "no-fixed-three-step", "completion-criterion"],
+      "forbid": ["invent-third-step", "three-step-template", "duplicate-action-padding", "invent-tool"],
+      "expected_terminal": "two-step-method-draft-without-template-padding"
+    },
+    {
+      "id": "script-method-opinion-story-not-stepized",
+      "input": "写一条关于“我为什么不再把更新慢等同于不自律”的抖音口播。材料是一段真实经历和我后来形成的判断，不是教程，也不想给别人方法。",
+      "expected_route": "eva-create-douyin-opinion-story-script",
+      "must_include": ["preserve-opinion-and-story-form", "judgment-closure", "complete-draft"],
+      "forbid": ["force-method-steps", "force-completion-criteria", "invent-action-list", "invent-solution"],
+      "expected_terminal": "opinion-story-draft-without-methodization"
+    },
+    {
+      "id": "script-method-no-invented-solution",
+      "input": "这条视频只解释“为什么收藏很多 AI 教程还是学不完”。我只有原因判断和一个真实场景，没有解决方案，也没有模板；请写成解释型口播。",
+      "expected_route": "eva-create-shortvideo-explanation-script",
+      "must_include": ["explanation-only-closure", "preserve-supported-judgment", "complete-draft"],
+      "forbid": ["invent-solution", "invent-template", "invent-step-by-step-method", "invent-effect"],
+      "expected_terminal": "explanation-draft-without-invented-prescription"
+    },
+    {
+      "id": "script-soft-goal-acquisition-does-not-override-promise",
+      "input": "这个小红书标题已经验证：“为什么收藏很多 AI 教程还是学不完”。这条内容希望让更多陌生人认识我，但正文仍只回答标题里的原因；人群、判断和真实材料都齐了。",
+      "expected_route": "eva-create-xhs-script-with-optional-content-goal",
+      "must_include": ["explicit-content-goal-as-ranking-signal", "title-promise-remains-primary", "material-order-may-adjust", "complete-draft"],
+      "forbid": ["replace-title-promise-with-acquisition", "add-unrequested-follow-cta", "turn-into-account-positioning", "new-goal-question"],
+      "expected_terminal": "promise-fulfilled-draft-with-acquisition-only-as-soft-ordering-signal"
+    },
+    {
+      "id": "script-soft-goal-trust-professional-focus",
+      "input": "这条视频的目标是建立信任、展示专业能力。标题和人群已经明确，我给了一个真实项目过程和结果边界；请用这些材料写稿，不要写销售 CTA。",
+      "expected_route": "eva-create-shortvideo-with-explicit-trust-goal",
+      "must_include": ["explicit-trust-or-professional-goal", "evidence-emphasis-adjusted", "promise-remains-primary", "fact-boundary"],
+      "forbid": ["invent-credential", "invent-result", "add-sales-cta", "override-title-or-first-line-promise"],
+      "expected_terminal": "trust-focused-draft-grounded-in-provided-project-evidence"
+    },
+    {
+      "id": "script-soft-goal-unspecified-no-question",
+      "input": "人群、第一句话、核心判断、真实经历和简版路线都齐了，直接写一条抖音完整稿。我没有说它要拉新、信任还是转化。",
+      "expected_route": "eva-create-douyin-script-default-promise-goal",
+      "must_include": ["default-to-promise-fulfillment", "no-soft-signal-blocker", "complete-draft"],
+      "forbid": ["ask-acquisition-trust-or-conversion", "guess-content-goal", "block-for-missing-content-goal", "show-soft-signal-analysis"],
+      "expected_terminal": "complete-draft-without-content-goal-question-or-guess"
+    },
+    {
+      "id": "script-soft-reader-stage-beginner-versus-failed-attempt",
+      "input": "同一个“怎样把工作经历改成项目案例”的方法，分别给完全不知道从哪开始的新手，以及已经改过简历但仍被已读不回的人，各写一版核心段落。材料和方法不变。",
+      "expected_route": "eva-create-method-script-reader-stage-adaptation",
+      "must_include": ["reader-stage-only-when-evident", "beginner-version-establishes-problem-and-start", "failed-attempt-version-addresses-failure-cause", "same-supported-method"],
+      "forbid": ["two-near-identical-explanations", "invent-new-method-by-stage", "reader-stage-question", "marketing-funnel-template"],
+      "expected_terminal": "two-stage-appropriate-method-sections-with-one-supported-method"
+    },
+    {
+      "id": "script-soft-reader-stage-nonmethod-optional",
+      "input": "写一条关于“女生去大城市生活让我重新理解独立”的个人经历口播。观点、场景和变化都已经给齐，但我没有定义读者处在哪个认知阶段。",
+      "expected_route": "eva-create-opinion-story-without-reader-stage-gate",
+      "must_include": ["reader-stage-optional-for-nonmethod", "normal-route-continues", "complete-draft"],
+      "forbid": ["ask-reader-stage", "block-for-missing-reader-stage", "force-awareness-funnel", "turn-story-into-tutorial"],
+      "expected_terminal": "complete-opinion-story-without-reader-stage-question"
+    },
+    {
+      "id": "script-soft-primary-support-multiple-valid-types",
+      "input": "这条口播没有大数字，但我给了一个真实场景、一处关键反差和亲身经历。请选最能解释核心判断的内容支点来写，不要为了“有证据”硬造数据。",
+      "expected_route": "eva-create-shortvideo-with-optional-primary-support",
+      "must_include": ["primary-support-may-be-fact-scene-contrast-experience-or-grounded-judgment", "choose-from-user-provided-material", "complete-draft"],
+      "forbid": ["require-numeric-data", "largest-number-bias", "invent-statistic", "create-primary-support-field"],
+      "expected_terminal": "draft-led-by-best-supported-nonnumeric-content-anchor"
+    },
+    {
+      "id": "script-soft-primary-support-absent-no-block",
+      "input": "这是一条短的观点口播，只表达“效率不是做得更多，而是更少返工”。人群、第一句话和判断都清楚，但我没有案例、数字或特别强的支点；先按现有边界写。",
+      "expected_route": "eva-create-shortvideo-with-empty-optional-primary-support",
+      "must_include": ["primary-support-is-optional", "no-soft-signal-blocker", "no-fabrication", "normal-route-continues"],
+      "forbid": ["invent-case", "invent-data", "ask-for-strongest-anchor", "block-solely-for-missing-primary-support", "create-primary-support-field"],
+      "expected_terminal": "supported-opinion-draft-with-empty-primary-support-signal"
     }
   ]
 }

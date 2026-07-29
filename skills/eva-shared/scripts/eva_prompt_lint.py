@@ -116,6 +116,12 @@ OPENING_GENERATION_POLICY_MARKERS = (
     "不重复",
 )
 
+SHORTVIDEO_OPTIONAL_SCRIPT_SIGNAL_MARKERS = (
+    "内容目标",
+    "读者阶段",
+    "首要内容支点",
+)
+
 FRONTSTAGE_TEMPLATE_HEADINGS = (
     "## 默认启动",
     "## 输出格式",
@@ -245,6 +251,15 @@ SOURCE_OF_TRUTH_RULES = (
         "fields": OPENING_GENERATION_POLICY_MARKERS,
         "min_hits": 4,
     },
+    {
+        "name": "shortvideo optional script-ranking signals",
+        "allowed": (
+            "../eva-create/references/create/shortvideo/script/"
+            "00_eva-script_思维流爆款内容创作.md",
+        ),
+        "fields": SHORTVIDEO_OPTIONAL_SCRIPT_SIGNAL_MARKERS,
+        "min_hits": 2,
+    },
 )
 
 
@@ -344,6 +359,12 @@ def lint(base: Path) -> dict:
             for coupling in SHORTVIDEO_FORBIDDEN_ARTICLE_COUPLINGS:
                 if coupling in text:
                     errors.append(f"{path_rel}: short-video protocol couples to Article branch: {coupling}")
+        if "/eva-create/references/create/shortvideo/script/" in normalized_path:
+            for forbidden in ("800 字左右", "800字左右"):
+                if forbidden in text:
+                    errors.append(
+                        f"{path_rel}: short-video script protocol contains fixed-length wording {forbidden!r}"
+                    )
         if "/eva-preflight/" in normalized_path and has_positive_reference(
             text, "02_eva-opening-generation_开头方案生成与推荐.md"
         ):
