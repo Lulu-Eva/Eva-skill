@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Eva 2.2.7 structural checks and prompt scenario-contract validation."""
+"""Eva 2.2.8 structural checks and prompt scenario-contract validation."""
 
 from __future__ import annotations
 
@@ -141,6 +141,22 @@ REQUIRED_SCENARIO_CASES = {
     "shipinhao-information-complete-direct-draft",
     "second-explicit-draft-request",
 }
+
+REQUIRED_SCENARIO_CASES.update(
+    {
+        "eva-brand-second-use-ordinary-output",
+        "eva-enterprise-noncommercial-not-automatic-denial",
+        "eva-extra-permission-version-and-cure",
+        "manual-platform-benchmark-search",
+        "prepublish-metric-forecast-boundary",
+        "adjustable-action-number",
+        "high-stakes-professional-boundary",
+    }
+)
+
+LEGACY_227_CASE_COUNT = 219
+EXPECTED_SCENARIO_CASE_COUNT = 243
+LEGACY_227_CASES_SHA256 = "ff19d3d85cf46c80425303ab090e960a7826a14c457633fef9dc59444f9e015d"
 
 REQUIRED_ARTICLE_CASE_CONTRACTS = {
     "article-information-complete-direct-draft": {
@@ -1086,6 +1102,315 @@ REQUIRED_227_CASE_CONTRACTS = {
 }
 
 REQUIRED_SCENARIO_CASES.update(REQUIRED_227_CASE_CONTRACTS)
+
+REQUIRED_228_CASE_CONTRACTS = {
+    "script-dynamic-length-concise-judgment": {
+        "expected_route": "eva-create-douyin-script-dynamic-length",
+        "expected_terminal": "concise-complete-douyin-draft-after-argument-closure",
+        "forbid": {"pad-to-800", "fixed-word-count", "force-title-validation", "invent-material"},
+        "must_include": {"complete-draft", "stop-when-promise-is-fulfilled", "no-synonym-padding"},
+    },
+    "script-dynamic-length-complex-method": {
+        "expected_route": "eva-create-shipinhao-script-dynamic-length",
+        "expected_terminal": "complete-method-draft-at-required-natural-length",
+        "forbid": {"compress-to-default-length", "drop-required-step", "drop-evidence-boundary", "pad-to-800"},
+        "must_include": {
+            "allow-natural-extension",
+            "preserve-key-actions",
+            "preserve-evidence-and-boundaries",
+            "complete-draft",
+        },
+    },
+    "script-dynamic-length-same-topic-30s-90s": {
+        "expected_route": "eva-create-douyin-script-explicit-duration-variants",
+        "expected_terminal": "two-duration-appropriate-drafts-with-one-core-judgment",
+        "forbid": {
+            "same-length-near-duplicate",
+            "fixed-words-per-minute-formula",
+            "exact-speaking-time-guarantee",
+            "invent-support",
+        },
+        "must_include": {
+            "user-duration-priority",
+            "same-core-judgment",
+            "different-support-depth",
+            "preserve-source-boundary",
+        },
+    },
+    "script-dynamic-length-explicit-word-count": {
+        "expected_route": "eva-create-douyin-script-explicit-word-count",
+        "expected_terminal": "approximately-user-sized-draft-with-supported-main-promise",
+        "forbid": {"pad-to-800", "invent-case", "invent-data", "exact-speaking-time-guarantee"},
+        "must_include": {
+            "user-word-count-priority",
+            "remove-secondary-branches-first",
+            "preserve-main-promise",
+            "fact-boundary",
+        },
+    },
+    "script-dynamic-length-thin-material-no-padding": {
+        "expected_route": "eva-create-douyin-script-dynamic-concise",
+        "expected_terminal": "short-supported-draft-without-padding-or-invention",
+        "forbid": {"pad-to-800", "repeat-same-point", "invent-case", "invent-data"},
+        "must_include": {
+            "narrow-promise-to-supported-material",
+            "stop-when-supported-point-is-clear",
+            "complete-draft",
+        },
+    },
+    "script-direct-xhs-validated-title-draft-first": {
+        "expected_route": "eva-create-xhs-script-direct-product",
+        "expected_terminal": "complete-xhs-draft-only-after-all-gates-pass",
+        "forbid": {
+            "write-before-title-validation",
+            "show-writing-decision",
+            "show-self-check-table",
+            "show-next-step-table",
+            "show-internal-handoff",
+            "append-preflight-recommendation",
+        },
+        "must_include": {"content-draft-first", "background-checks-still-run", "background-checks-silent"},
+    },
+    "script-direct-douyin-complete-draft-light-frontstage": {
+        "expected_route": "eva-create-douyin-script-direct-product",
+        "expected_terminal": "complete-douyin-draft-without-default-process-report",
+        "forbid": {
+            "force-title-validation",
+            "show-writing-decision",
+            "show-self-check-table",
+            "show-next-step-table",
+            "show-internal-route",
+        },
+        "must_include": {
+            "first-line-content-entry",
+            "content-draft-first",
+            "background-checks-silent",
+            "complete-draft",
+        },
+    },
+    "script-direct-shipinhao-complete-draft-light-frontstage": {
+        "expected_route": "eva-create-shipinhao-script-direct-product",
+        "expected_terminal": "complete-shipinhao-draft-without-default-process-report",
+        "forbid": {
+            "force-title-validation",
+            "show-writing-decision",
+            "show-self-check-table",
+            "show-next-step-table",
+            "show-internal-route",
+        },
+        "must_include": {
+            "first-line-content-entry",
+            "content-draft-first",
+            "background-checks-silent",
+            "complete-draft",
+        },
+    },
+    "script-direct-commercial-keeps-compliance-visible": {
+        "expected_route": "eva-create-commerce-script-with-visible-compliance",
+        "expected_terminal": "commercial-draft-with-necessary-visible-compliance-check",
+        "forbid": {
+            "ordinary-direct-output-only",
+            "hide-commercial-compliance",
+            "invent-brand-claim",
+            "drop-required-item",
+        },
+        "must_include": {"brief-constraints-preserved", "commercial-compliance-check-visible", "complete-draft"},
+    },
+    "script-direct-xhs-first-request-still-searches-title": {
+        "expected_route": "eva-create-title-manual-search-first",
+        "expected_terminal": "tailored-manual-title-search-plan-before-any-draft",
+        "forbid": {
+            "direct-draft-on-first-request",
+            "claim-title-validated",
+            "ordinary-direct-product-output",
+            "rule-only-refusal",
+        },
+        "must_include": {"tailored-search-terms", "observation-criteria", "candidate-pasteback-request"},
+    },
+    "script-direct-xhs-second-informed-unverified-draft": {
+        "expected_route": "eva-create-second-request-low-confidence-draft",
+        "expected_terminal": "prominently-labeled-unverified-draft-after-informed-second-request",
+        "forbid": {
+            "repeat-title-search-block",
+            "claim-publishable",
+            "hide-low-confidence-boundary",
+            "invent-missing-material",
+        },
+        "must_include": {
+            "【未验证结构草案｜不可直接发布】",
+            "current-missing-evidence",
+            "one-upgrade-action",
+            "complete-draft",
+        },
+    },
+    "script-direct-p1-blocker-one-action-only": {
+        "expected_route": "eva-create-script-p1-fact-and-material-blocker",
+        "expected_terminal": "one-fact-material-blocker-and-one-unblock-action",
+        "forbid": {
+            "write-complete-draft",
+            "invent-income-result",
+            "invent-method",
+            "show-multiple-blockers",
+            "show-full-self-check",
+        },
+        "must_include": {"one-highest-priority-blocker", "one-unblock-action", "no-draft-before-p1-resolution"},
+    },
+    "script-direct-explicit-selfcheck-visible": {
+        "expected_route": "eva-create-douyin-script-with-explicit-process-output",
+        "expected_terminal": "complete-draft-with-requested-writing-decision-and-self-check",
+        "forbid": {"hide-requested-self-check", "eva-preflight-three-tier-verdict", "auto-enter-eva-review"},
+        "must_include": {
+            "complete-draft",
+            "writing-decision-visible",
+            "self-check-visible",
+            "user-explicit-process-request-wins",
+        },
+    },
+    "script-method-concrete-action-granularity": {
+        "expected_route": "eva-create-douyin-method-script",
+        "expected_terminal": "method-draft-with-executable-actions-and-completion-judgment",
+        "forbid": {
+            "abstract-advice-only",
+            "replace-actions-with-optimize-or-persist",
+            "invent-tool",
+            "invent-benefit",
+        },
+        "must_include": {
+            "concrete-action",
+            "intermediate-result",
+            "completion-criterion",
+            "how-to-start",
+            "final-effectiveness-check",
+        },
+    },
+    "script-method-step-count-content-led": {
+        "expected_route": "eva-create-shortvideo-method-script",
+        "expected_terminal": "two-step-method-draft-without-template-padding",
+        "forbid": {"invent-third-step", "three-step-template", "duplicate-action-padding", "invent-tool"},
+        "must_include": {
+            "content-led-step-count",
+            "two-supported-actions",
+            "no-fixed-three-step",
+            "completion-criterion",
+        },
+    },
+    "script-method-opinion-story-not-stepized": {
+        "expected_route": "eva-create-douyin-opinion-story-script",
+        "expected_terminal": "opinion-story-draft-without-methodization",
+        "forbid": {"force-method-steps", "force-completion-criteria", "invent-action-list", "invent-solution"},
+        "must_include": {"preserve-opinion-and-story-form", "judgment-closure", "complete-draft"},
+    },
+    "script-method-no-invented-solution": {
+        "expected_route": "eva-create-shortvideo-explanation-script",
+        "expected_terminal": "explanation-draft-without-invented-prescription",
+        "forbid": {"invent-solution", "invent-template", "invent-step-by-step-method", "invent-effect"},
+        "must_include": {"explanation-only-closure", "preserve-supported-judgment", "complete-draft"},
+    },
+    "script-soft-goal-acquisition-does-not-override-promise": {
+        "expected_route": "eva-create-xhs-script-with-optional-content-goal",
+        "expected_terminal": "promise-fulfilled-draft-with-acquisition-only-as-soft-ordering-signal",
+        "forbid": {
+            "replace-title-promise-with-acquisition",
+            "add-unrequested-follow-cta",
+            "turn-into-account-positioning",
+            "new-goal-question",
+        },
+        "must_include": {
+            "explicit-content-goal-as-ranking-signal",
+            "title-promise-remains-primary",
+            "material-order-may-adjust",
+            "complete-draft",
+        },
+    },
+    "script-soft-goal-trust-professional-focus": {
+        "expected_route": "eva-create-shortvideo-with-explicit-trust-goal",
+        "expected_terminal": "trust-focused-draft-grounded-in-provided-project-evidence",
+        "forbid": {
+            "invent-credential",
+            "invent-result",
+            "add-sales-cta",
+            "override-title-or-first-line-promise",
+        },
+        "must_include": {
+            "explicit-trust-or-professional-goal",
+            "evidence-emphasis-adjusted",
+            "promise-remains-primary",
+            "fact-boundary",
+        },
+    },
+    "script-soft-goal-unspecified-no-question": {
+        "expected_route": "eva-create-douyin-script-default-promise-goal",
+        "expected_terminal": "complete-draft-without-content-goal-question-or-guess",
+        "forbid": {
+            "ask-acquisition-trust-or-conversion",
+            "guess-content-goal",
+            "block-for-missing-content-goal",
+            "show-soft-signal-analysis",
+        },
+        "must_include": {"default-to-promise-fulfillment", "no-soft-signal-blocker", "complete-draft"},
+    },
+    "script-soft-reader-stage-beginner-versus-failed-attempt": {
+        "expected_route": "eva-create-method-script-reader-stage-adaptation",
+        "expected_terminal": "two-stage-appropriate-method-sections-with-one-supported-method",
+        "forbid": {
+            "two-near-identical-explanations",
+            "invent-new-method-by-stage",
+            "reader-stage-question",
+            "marketing-funnel-template",
+        },
+        "must_include": {
+            "reader-stage-only-when-evident",
+            "beginner-version-establishes-problem-and-start",
+            "failed-attempt-version-addresses-failure-cause",
+            "same-supported-method",
+        },
+    },
+    "script-soft-reader-stage-nonmethod-optional": {
+        "expected_route": "eva-create-opinion-story-without-reader-stage-gate",
+        "expected_terminal": "complete-opinion-story-without-reader-stage-question",
+        "forbid": {
+            "ask-reader-stage",
+            "block-for-missing-reader-stage",
+            "force-awareness-funnel",
+            "turn-story-into-tutorial",
+        },
+        "must_include": {"reader-stage-optional-for-nonmethod", "normal-route-continues", "complete-draft"},
+    },
+    "script-soft-primary-support-multiple-valid-types": {
+        "expected_route": "eva-create-shortvideo-with-optional-primary-support",
+        "expected_terminal": "draft-led-by-best-supported-nonnumeric-content-anchor",
+        "forbid": {
+            "require-numeric-data",
+            "largest-number-bias",
+            "invent-statistic",
+            "create-primary-support-field",
+        },
+        "must_include": {
+            "primary-support-may-be-fact-scene-contrast-experience-or-grounded-judgment",
+            "choose-from-user-provided-material",
+            "complete-draft",
+        },
+    },
+    "script-soft-primary-support-absent-no-block": {
+        "expected_route": "eva-create-shortvideo-with-empty-optional-primary-support",
+        "expected_terminal": "supported-opinion-draft-with-empty-primary-support-signal",
+        "forbid": {
+            "invent-case",
+            "invent-data",
+            "ask-for-strongest-anchor",
+            "block-solely-for-missing-primary-support",
+            "create-primary-support-field",
+        },
+        "must_include": {
+            "primary-support-is-optional",
+            "no-soft-signal-blocker",
+            "no-fabrication",
+            "normal-route-continues",
+        },
+    },
+}
+
+REQUIRED_SCENARIO_CASES.update(REQUIRED_228_CASE_CONTRACTS)
 
 REQUIRED_ROUTER_MARKERS = {
     "eva-new-user": "Router must expose the adaptive new-user tutorial",
@@ -3021,6 +3346,23 @@ def main() -> None:
                 f"{expected_version}, got {scenario_contract.get('version', '<missing>')}"
             )
         cases = scenario_contract.get("cases") or []
+        if len(cases) != EXPECTED_SCENARIO_CASE_COUNT:
+            errors.append(
+                "prompt scenario contract must contain exactly "
+                f"{EXPECTED_SCENARIO_CASE_COUNT} cases, got {len(cases)}"
+            )
+        legacy_cases_payload = json.dumps(
+            cases[:LEGACY_227_CASE_COUNT],
+            ensure_ascii=False,
+            sort_keys=True,
+            separators=(",", ":"),
+        ).encode("utf-8")
+        legacy_cases_digest = hashlib.sha256(legacy_cases_payload).hexdigest()
+        if legacy_cases_digest != LEGACY_227_CASES_SHA256:
+            errors.append(
+                "the original 2.2.7 scenario baseline was changed, removed, or reordered; "
+                f"expected {LEGACY_227_CASES_SHA256}, got {legacy_cases_digest}"
+            )
         case_ids = {case.get("id") for case in cases if isinstance(case, dict)}
         duplicate_ids = sorted({case_id for case_id in case_ids if sum(1 for case in cases if isinstance(case, dict) and case.get("id") == case_id) > 1})
         if duplicate_ids:
@@ -3189,6 +3531,23 @@ def main() -> None:
                     )
 
         for case_id, contract in REQUIRED_227_CASE_CONTRACTS.items():
+            case = case_by_id.get(case_id) or {}
+            for scalar_field in ("expected_route", "expected_terminal"):
+                if case.get(scalar_field) != contract[scalar_field]:
+                    errors.append(
+                        f"prompt scenario case {case_id!r} {scalar_field} must be "
+                        f"{contract[scalar_field]!r}"
+                    )
+            for list_field in ("forbid", "must_include"):
+                actual = set(case.get(list_field) or [])
+                missing_markers = sorted(contract[list_field] - actual)
+                if missing_markers:
+                    errors.append(
+                        f"prompt scenario case {case_id!r} missing {list_field} marker(s): "
+                        + ", ".join(missing_markers)
+                    )
+
+        for case_id, contract in REQUIRED_228_CASE_CONTRACTS.items():
             case = case_by_id.get(case_id) or {}
             for scalar_field in ("expected_route", "expected_terminal"):
                 if case.get(scalar_field) != contract[scalar_field]:
@@ -3946,6 +4305,19 @@ def main() -> None:
         if required_asset not in registered_assets:
             errors.append(f"Article requires existing shared asset type to remain available: {required_asset}")
     handoff_registry = read_json(base / "schemas" / "handoff-targets.json")
+    registered_handoff_targets = set(handoff_registry.get("targets") or [])
+    if len(CORE_ENTRIES) != 12:
+        errors.append(f"2.2.8 must keep exactly 12 Eva core entries, got {len(CORE_ENTRIES)}")
+    if len(registered_assets) != 17:
+        errors.append(f"2.2.8 must keep exactly 17 shared asset types, got {len(registered_assets)}")
+    if len(registered_handoff_targets) != 19:
+        errors.append(
+            "2.2.8 must keep exactly 19 shared handoff targets, "
+            f"got {len(registered_handoff_targets)}"
+        )
+    python_script_count = len(list((base / "scripts").glob("*.py")))
+    if python_script_count != 9:
+        errors.append(f"2.2.8 must keep exactly 9 shared Python scripts, got {python_script_count}")
     if "eva-article" in set(handoff_registry.get("targets") or []):
         errors.append("Article must remain an internal eva-create branch; eva-article handoff target is forbidden")
 
@@ -3994,6 +4366,114 @@ def main() -> None:
                 errors.append(f"script writing missing direct-draft scope marker: {marker}")
         if "只允许在完整稿件之后追加一句事实说明" in script_writing_text:
             errors.append("script writing must place the unverified-draft warning before the draft body")
+        for marker in (
+            "### 动态时长",
+            "商单 Brief 的明确时长约束",
+            "讲清即停",
+            "不建立统一的每分钟固定字数公式",
+            "这个内容无法同时保留完整承诺和当前时长。你希望缩小这次回答的范围，还是适当延长时长？",
+            "用户要求的较长时长超过真实素材承载量时",
+            "默认交付当前材料能支撑的最短完整稿",
+            "本规则只处理短视频正文，不覆盖 Article",
+        ):
+            if marker not in script_writing_text:
+                errors.append(f"script writing missing 2.2.8 dynamic-length marker: {marker}")
+        direct_section_start = script_writing_text.find("### 普通完整稿直接交付")
+        direct_section_end = script_writing_text.find("### 必要检查展示")
+        if direct_section_start < 0 or direct_section_end <= direct_section_start:
+            errors.append("script writing must keep a bounded ordinary direct-delivery section")
+        else:
+            direct_section = script_writing_text[direct_section_start:direct_section_end]
+            for marker in (
+                "## 内容稿",
+                "后台判断、自查和交接字段默认静默",
+                "用户说“只要正文”时不附推荐",
+            ):
+                if marker not in direct_section:
+                    errors.append(f"ordinary direct-delivery section missing marker: {marker}")
+            for forbidden in ("## 写稿前判断", "## 自查", "## 下一步动作"):
+                if forbidden in direct_section:
+                    errors.append(f"ordinary direct-delivery section must not expose default process block: {forbidden}")
+        for marker in (
+            "### 方法型内容的动作颗粒度",
+            "具体做什么",
+            "会得到什么中间结果",
+            "怎样判断这一步完成或可用",
+            "步骤数量服从内容本身，不固定为三步",
+            "观点、故事和情绪内容不强制步骤化",
+            "不得为凑教程发明",
+        ):
+            if marker not in script_writing_text:
+                errors.append(f"script writing missing 2.2.8 method-granularity marker: {marker}")
+
+    shortvideo_script_root = (base / "../eva-create/references/create/shortvideo/script").resolve()
+    if shortvideo_script_root.exists():
+        for shortvideo_script_path in sorted(shortvideo_script_root.glob("*.md")):
+            shortvideo_script_text = shortvideo_script_path.read_text(encoding="utf-8")
+            for forbidden in ("800 字左右", "800字左右"):
+                if forbidden in shortvideo_script_text:
+                    errors.append(
+                        f"short-video script protocol still contains fixed-length wording "
+                        f"{forbidden!r}: {shortvideo_script_path}"
+                    )
+
+    script_router_path = direct_draft_paths["script router"]
+    if script_router_path.exists():
+        script_router_text = script_router_path.read_text(encoding="utf-8")
+        for marker in (
+            "## 可选排序信号",
+            "内容目标",
+            "读者阶段",
+            "首要内容支点",
+            "不是交接卡字段",
+            "不主动增加问题",
+            "不得因此阻塞成稿",
+            "不修改 Opening",
+            "不得仅凭内容目标补造",
+            "材料长度本身不是额外闸门",
+            "直接把该角度交给 `/eva-title` 或 Opening",
+            "宽泛标签时保持为空",
+            "不能充当证明自身的独立证据",
+        ):
+            if marker not in script_router_text:
+                errors.append(f"script router missing 2.2.8 stability marker: {marker}")
+
+    shortvideo_entry_path = (base / "../eva-create/references/create/shortvideo/00_eva-shortvideo_主入口.md").resolve()
+    if shortvideo_entry_path.exists():
+        shortvideo_entry_text = shortvideo_entry_path.read_text(encoding="utf-8")
+        for marker in (
+            "唯一角度与入口已明确时直接进入对应标题 / 第一句话链路",
+            "仍有多个竞争方向时提炼 3-5 个可写点再选入口",
+            "不因材料长而重复选点",
+        ):
+            if marker not in shortvideo_entry_text:
+                errors.append(f"short-video entry missing 2.2.8 long-material marker: {marker}")
+
+    long_material_path = (base / "../eva-create/references/create/shortvideo/script/02_eva-script-long-material_长素材消化.md").resolve()
+    if long_material_path.exists():
+        long_material_text = long_material_path.read_text(encoding="utf-8")
+        for marker in (
+            "只在长素材仍有多个竞争方向，或平台与核心角度尚未确定时加载",
+            "不得把“材料很长”本身当成阻塞理由",
+        ):
+            if marker not in long_material_text:
+                errors.append(f"long-material protocol missing 2.2.8 scoped-load marker: {marker}")
+
+    optional_signal_forbidden_paths = (
+        (base / "references/shared/00_handoff-cards_交接卡字段真源.md").resolve(),
+        (base / "schemas/asset-types.json").resolve(),
+        (base / "schemas/handoff-targets.json").resolve(),
+    )
+    for optional_signal_path in optional_signal_forbidden_paths:
+        if not optional_signal_path.exists():
+            continue
+        optional_signal_text = optional_signal_path.read_text(encoding="utf-8")
+        for forbidden in ("内容目标", "读者阶段", "首要内容支点", "结尾目的：", "CTA 目的：", "转化结尾："):
+            if forbidden in optional_signal_text:
+                errors.append(
+                    f"2.2.8 optional script signal must not become a shared field "
+                    f"{forbidden!r}: {optional_signal_path}"
+                )
 
     learn_entry_path = (base / "../eva-learn/SKILL.md").resolve()
     learn_source_path = (base / "references/learn/00_eva-learn.md").resolve()
