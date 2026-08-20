@@ -50,9 +50,20 @@ DIRECTORY_TYPE_HINTS = {
     "voice-cards": "voice-card",
     "voice-card": "voice-card",
     "文风": "voice-card",
+    "product-service": "product-service-card",
+    "product-service-cards": "product-service-card",
+    "product-service-card": "product-service-card",
+    "产品与服务": "product-service-card",
 }
 
-TYPE_BUCKETS = ("idea-card", "persona-card", "voice-card", "other-recognized", "unrecognized")
+TYPE_BUCKETS = (
+    "idea-card",
+    "persona-card",
+    "voice-card",
+    "product-service-card",
+    "other-recognized",
+    "unrecognized",
+)
 
 HEALTH_KEYS = (
     "missing_frontmatter",
@@ -556,7 +567,12 @@ def inventory_project(
             if effective_type:
                 recognized_cards += 1
                 recognized_type_counts[effective_type] += 1
-                if effective_type in {"idea-card", "persona-card", "voice-card"}:
+                if effective_type in {
+                    "idea-card",
+                    "persona-card",
+                    "voice-card",
+                    "product-service-card",
+                }:
                     type_buckets[effective_type] += 1
                 else:
                     type_buckets["other-recognized"] += 1
@@ -808,13 +824,20 @@ def render_markdown(payload: dict[str, Any]) -> str:
         f"- idea-card：{int(declared_type_counts.get('idea-card') or 0)}",
         f"- persona-card：{int(declared_type_counts.get('persona-card') or 0)}",
         f"- voice-card：{int(declared_type_counts.get('voice-card') or 0)}",
+        f"- product-service-card：{int(declared_type_counts.get('product-service-card') or 0)}",
         "- 其他已识别类型："
         + str(
             sum(
                 int(count or 0)
                 for asset_type, count in declared_type_counts.items()
                 if asset_type in VALID_ASSET_TYPES
-                and asset_type not in {"idea-card", "persona-card", "voice-card"}
+                and asset_type
+                not in {
+                    "idea-card",
+                    "persona-card",
+                    "voice-card",
+                    "product-service-card",
+                }
             )
         ),
         f"- 无法识别类型：{int(type_counts.get('unrecognized') or 0)}",
@@ -824,6 +847,7 @@ def render_markdown(payload: dict[str, Any]) -> str:
         f"- idea-card：{int(inferred_type_counts.get('idea-card') or 0)}",
         f"- persona-card：{int(inferred_type_counts.get('persona-card') or 0)}",
         f"- voice-card：{int(inferred_type_counts.get('voice-card') or 0)}",
+        f"- product-service-card：{int(inferred_type_counts.get('product-service-card') or 0)}",
         "",
         "## 时间与关键词",
         "",

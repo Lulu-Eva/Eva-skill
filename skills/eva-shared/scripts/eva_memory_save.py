@@ -24,6 +24,7 @@ from eva_common import (
     add_common_arguments,
     default_base_from_script,
     exit_with,
+    read_frontmatter_metadata,
     read_json,
     result,
     sha256_file,
@@ -53,11 +54,23 @@ SUPPORTED_MEMORY_TYPES = {
         "fallback_title": "用户表达文风",
         "default_source": "user_samples",
     },
+    "product-service-card": {
+        "directory": "product-service",
+        "filename_label": "产品与服务卡",
+        "heading_label": "产品与服务事实底稿",
+        "fallback_title": "未命名产品与服务",
+        "default_source": "conversation",
+    },
 }
 
 PREFERRED_FRONTMATTER_KEYS = (
     "type",
     "asset_type",
+    "profile_id",
+    "revision",
+    "facts_confirmed_at",
+    "lifecycle_status",
+    "supersedes",
     "created",
     "source",
     "source_module",
@@ -83,6 +96,10 @@ PLAIN_STRING_FIELDS = {
     "source",
     "source_module",
     "confidence",
+    "profile_id",
+    "facts_confirmed_at",
+    "lifecycle_status",
+    "supersedes",
 }
 PLAIN_STRING_PATTERN = re.compile(r"[A-Za-z0-9][A-Za-z0-9._/-]{0,127}\Z")
 SAFE_METADATA_KEY_PATTERN = re.compile(r"[A-Za-z_][A-Za-z0-9_.-]{0,127}\Z")
@@ -320,6 +337,224 @@ def _safe_source(raw_value: object, asset_type: str) -> str:
     ):
         raise MemorySaveError("source 必须是 1-128 个可打印字符")
     return source
+
+
+def _iter_existing_product_service_cards(
+    target_directory: Path,
+) -> list[tuple[Path, dict[str, Any]]]:
+    """Read canonical product-service cards without following filesystem links."""
+    try:
+        target_real = target_directory.resolve(strict=True)
+    except OSError as exc:
+        raise MemorySaveError("无法安全扫描产品与服务版本链") from exc
+
+    cards: list[tuple[Path, dict[str, Any]]] = []
+
+    def on_walk_error(exc: OSError) -> None:
+        raise MemorySaveError("产品与服务版本目录无法完整扫描") from exc
+
+    for current_raw, directory_names, file_names in os.walk(
+        target_directory,
+        topdown=True,
+        followlinks=False,
+        onerror=on_walk_error,
+    ):
+        current = Path(current_raw)
+        safe_directories: list[str] = []
+        for directory_name in directory_names:
+            candidate = current / directory_name
+            if directory_name.startswith(".") or candidate.is_symlink():
+                continue
+            try:
+                candidate_real = candidate.resolve(strict=True)
+            except OSError as exc:
+                raise MemorySaveError("产品与服务版本子目录无法安全解析") from exc
+            if _is_relative_to(candidate_real, target_real):
+                safe_directories.append(directory_name)
+        directory_names[:] = safe_directories
+
+        for file_name in file_names:
+            if (
+                file_name.startswith(".")
+                or file_name.casefold() == "index.md"
+                or not file_name.casefold().endswith(".md")
+            ):
+                continue
+            candidate = current / file_name
+            try:
+                metadata = os.lstat(candidate)
+            except OSError as exc:
+                raise MemorySaveError("现有产品与服务卡无法检查") from exc
+            if stat.S_ISLNK(metadata.st_mode) or not stat.S_ISREG(metadata.st_mode):
+                continue
+            try:
+                candidate_real = candidate.resolve(strict=True)
+            except OSError as exc:
+                raise MemorySaveError("现有产品与服务卡无法安全解析") from exc
+            if not _is_relative_to(candidate_real, target_real):
+                continue
+
+            frontmatter = read_frontmatter_metadata(candidate)
+            raw_metadata = frontmatter.get("metadata")
+            if frontmatter.get("status") != "ok" or not isinstance(
+                raw_metadata, dict
+            ):
+                continue
+            declared_type = raw_metadata.get("asset_type") or raw_metadata.get("type")
+            if declared_type != "product-service-card":
+                continue
+            try:
+                cards.append((candidate, load_asset(candidate)))
+            except Exception as exc:
+                raise MemorySaveError(
+                    "现有产品与服务卡无法回读，不能安全续写版本链"
+                ) from exc
+    return cards
+
+
+def _resolve_superseded_product_service_card(
+    project_root: Path,
+    target_directory: Path,
+    supersedes: str,
+) -> Path:
+    candidate = _absolute_lexical_path(project_root / supersedes)
+    target_lexical = _absolute_lexical_path(target_directory)
+    if not _is_relative_to(candidate, target_lexical):
+        raise MemorySaveError(
+            "supersedes 必须指向当前项目 eva-memory/product-service/ 内的旧卡"
+        )
+    if candidate.suffix.casefold() != ".md":
+        raise MemorySaveError("supersedes 必须指向 Markdown 卡片")
+    try:
+        metadata = os.lstat(candidate)
+    except FileNotFoundError as exc:
+        raise MemorySaveError("supersedes 指向的上一版卡片不存在") from exc
+    except OSError as exc:
+        raise MemorySaveError("supersedes 指向的上一版卡片无法读取") from exc
+    if stat.S_ISLNK(metadata.st_mode):
+        raise MemorySaveError("supersedes 不得指向符号链接")
+    if not stat.S_ISREG(metadata.st_mode):
+        raise MemorySaveError("supersedes 必须指向现存普通文件")
+    try:
+        target_real = target_directory.resolve(strict=True)
+        candidate_real = candidate.resolve(strict=True)
+    except OSError as exc:
+        raise MemorySaveError("无法安全解析 supersedes 上一版路径") from exc
+    if not _is_relative_to(candidate_real, target_real):
+        raise MemorySaveError("supersedes 通过父目录链接越出产品与服务目录")
+    return candidate
+
+
+def _validate_product_service_version_chain(
+    asset: dict[str, Any],
+    project_root: Path,
+    target_directory: Path,
+    schema: dict[str, Any],
+    base: Path,
+) -> None:
+    """Reject missing, discontinuous, duplicate or forked profile histories."""
+    if asset.get("asset_type") != "product-service-card":
+        return
+
+    profile_id = str(asset["profile_id"])
+    revision = int(asset["revision"])
+    supersedes = asset.get("supersedes")
+    superseded_path: Path | None = None
+    if revision > 1:
+        superseded_path = _resolve_superseded_product_service_card(
+            project_root,
+            target_directory,
+            str(supersedes),
+        )
+
+    entries: list[dict[str, Any]] = []
+    for path, existing_asset in _iter_existing_product_service_cards(
+        target_directory
+    ):
+        if existing_asset.get("profile_id") != profile_id:
+            continue
+        validation = validate_asset_payload(existing_asset, schema, base)
+        if not validation["ok"]:
+            raise MemorySaveError(
+                f"现有 profile_id={profile_id} 卡片校验失败，不能安全续写版本链"
+            )
+        existing_revision = existing_asset.get("revision")
+        if not isinstance(existing_revision, int) or isinstance(
+            existing_revision, bool
+        ):
+            raise MemorySaveError(
+                f"现有 profile_id={profile_id} 卡片缺少合法 revision"
+            )
+        entries.append(
+            {
+                "path": path,
+                "relative_path": path.relative_to(project_root).as_posix(),
+                "revision": existing_revision,
+                "supersedes": existing_asset.get("supersedes"),
+            }
+        )
+
+    by_revision: dict[int, list[dict[str, Any]]] = {}
+    for entry in entries:
+        by_revision.setdefault(int(entry["revision"]), []).append(entry)
+    duplicate_revisions = sorted(
+        item_revision
+        for item_revision, revision_entries in by_revision.items()
+        if len(revision_entries) > 1
+    )
+    if duplicate_revisions:
+        raise MemorySaveError(
+            f"profile_id={profile_id} 存在重复 revision: "
+            + ", ".join(str(item) for item in duplicate_revisions)
+        )
+
+    revisions = sorted(by_revision)
+    if revisions and revisions != list(range(1, revisions[-1] + 1)):
+        raise MemorySaveError(
+            f"profile_id={profile_id} 的历史 revision 不连续，已拒绝续写"
+        )
+    for existing_revision in revisions:
+        entry = by_revision[existing_revision][0]
+        if existing_revision == 1:
+            if entry.get("supersedes") not in (None, ""):
+                raise MemorySaveError(
+                    f"profile_id={profile_id} revision 1 不得声明 supersedes"
+                )
+            continue
+        expected_parent = by_revision[existing_revision - 1][0]["relative_path"]
+        if entry.get("supersedes") != expected_parent:
+            raise MemorySaveError(
+                f"profile_id={profile_id} revision {existing_revision} 形成版本分叉或断链"
+            )
+
+    if revision == 1:
+        if entries:
+            raise MemorySaveError(
+                f"profile_id={profile_id} 已存在，不能重复创建 revision 1"
+            )
+        return
+
+    if not revisions or revisions[-1] != revision - 1:
+        raise MemorySaveError(
+            f"profile_id={profile_id} 新版必须紧接当前最新 revision {revision - 1}"
+        )
+    previous_entry = by_revision[revision - 1][0]
+    if str(supersedes) != previous_entry["relative_path"]:
+        raise MemorySaveError(
+            f"profile_id={profile_id} revision {revision} 必须 supersede revision {revision - 1}"
+        )
+    if superseded_path != previous_entry["path"]:
+        raise MemorySaveError("supersedes 路径与版本链中的上一版不一致")
+
+    try:
+        previous_asset = load_asset(previous_entry["path"])
+    except Exception as exc:
+        raise MemorySaveError("supersedes 上一版卡片回读失败") from exc
+    if (
+        previous_asset.get("profile_id") != profile_id
+        or previous_asset.get("revision") != revision - 1
+    ):
+        raise MemorySaveError("supersedes 上一版的 profile_id 或 revision 不匹配")
 
 
 def _frontmatter_value(key: str, value: Any) -> str:
@@ -624,7 +859,9 @@ def save_memory_asset(
             False,
             "memory-save",
             "该资产类型不能保存到 Eva Memory",
-            ["only idea-card, persona-card and voice-card are supported"],
+            [
+                "only idea-card, persona-card, voice-card and product-service-card are supported"
+            ],
         )
 
     if _privacy_confirmation_required(asset) and not confirm_privacy:
@@ -690,6 +927,13 @@ def save_memory_asset(
     try:
         markdown = render_memory_markdown(final_asset, display_title)
         target_directory = _prepare_target_directory(project_root, str(asset_type))
+        _validate_product_service_version_chain(
+            final_asset,
+            project_root,
+            target_directory,
+            schema,
+            base,
+        )
     except MemorySaveError as exc:
         return result(False, "memory-save", "无法准备安全保存位置", [str(exc)])
     except Exception as exc:
@@ -701,10 +945,16 @@ def save_memory_asset(
         )
 
     filename_label = str(SUPPORTED_MEMORY_TYPES[str(asset_type)]["filename_label"])
-    base_filename = (
-        f"{created.replace('-', '')}_{_filename_slug(display_title, str(asset_type))}_"
-        f"{filename_label}.md"
-    )
+    if asset_type == "product-service-card":
+        base_filename = (
+            f"{created.replace('-', '')}_{_filename_slug(display_title, str(asset_type))}_"
+            f"{filename_label}_v{int(final_asset['revision']):02d}.md"
+        )
+    else:
+        base_filename = (
+            f"{created.replace('-', '')}_{_filename_slug(display_title, str(asset_type))}_"
+            f"{filename_label}.md"
+        )
 
     temp_path: Path | None = None
     final_path: Path | None = None
@@ -728,6 +978,13 @@ def save_memory_asset(
 
         _existing_directory_without_symlink(
             target_directory, "记忆卡类型目录"
+        )
+        _validate_product_service_version_chain(
+            final_asset,
+            project_root,
+            target_directory,
+            schema,
+            base,
         )
         final_path, collision_index, temp_consumed = _publish_without_overwrite(
             temp_path, target_directory, base_filename

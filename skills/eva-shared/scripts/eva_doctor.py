@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Check Eva Shared 2.2.8 local structure and dependencies."""
+"""Check Eva Shared 2.3.0 structure and dependencies."""
 
 from __future__ import annotations
 
@@ -67,6 +67,8 @@ REQUIRED_PEER_SKILLS = {
         "../eva-shared/references/shared/06_external-material-safety_外部材料安全边界.md",
         "../eva-shared/references/lens/00_eva-lens-discipline-divergence_学科发散.md",
         "../eva-shared/references/memory/03_eva-data-export_统一数据备份.md",
+        "../eva-shared/references/memory/04_eva-product-service_产品与服务采集.md",
+        "../eva-shared/references/shared/08_acquisition-objective-overlay_获客目标覆盖层.md",
     ],
     "eva-create": [
         "references/create/00_eva-create_创作主入口.md",
@@ -84,6 +86,8 @@ REQUIRED_PEER_SKILLS = {
         "../eva-shared/references/shared/02_low-confidence_低置信度授权协议.md",
         "../eva-shared/references/shared/03_commercial-constraint-card_商单约束卡真源.md",
         "../eva-shared/references/shared/06_external-material-safety_外部材料安全边界.md",
+        "../eva-shared/references/shared/08_acquisition-objective-overlay_获客目标覆盖层.md",
+        "../eva-shared/references/memory/04_eva-product-service_产品与服务采集.md",
     ],
     "eva-brief": [
         "../eva-shared/schemas/asset-types.json",
@@ -128,6 +132,7 @@ REQUIRED_PEER_SKILLS = {
         "../eva-shared/schemas/asset-types.json",
         "../eva-shared/references/asset/00_eva-asset_资产卡协议.md",
         "../eva-shared/references/shared/06_external-material-safety_外部材料安全边界.md",
+        "../eva-shared/references/shared/08_acquisition-objective-overlay_获客目标覆盖层.md",
     ],
     "eva-lens": [
         "references/lens/00_entry_入口与模式.md",
@@ -144,11 +149,16 @@ REQUIRED_PEER_SKILLS = {
         "references/preflight/03_eva-preflight-social_图文与一般社媒内容审核.md",
         "references/preflight/04_eva-preflight-expression-assets_表达资产增强.md",
         "references/preflight/05_eva-preflight-truth-source-call_真源只读调用.md",
+        "../eva-shared/references/shared/08_acquisition-objective-overlay_获客目标覆盖层.md",
+        "../eva-shared/references/memory/04_eva-product-service_产品与服务采集.md",
     ],
 }
 
 NAVIGATION_TRUTH_PATH = "references/shared/07_next-step-navigation_动态选路与下一步推荐.md"
 DATA_EXPORT_TRUTH_PATH = "references/memory/03_eva-data-export_统一数据备份.md"
+PRODUCT_SERVICE_TRUTH_PATH = (
+    "references/memory/04_eva-product-service_产品与服务采集.md"
+)
 
 NAVIGATION_TRUTH_MARKERS = (
     "跨模块导航真源",
@@ -176,6 +186,12 @@ DATA_EXPORT_TRUTH_MARKERS = (
     "不跟随文件或目录符号链接",
     "MANIFEST.json",
     "不联网、不上传、不删除",
+)
+
+PRODUCT_SERVICE_TRUTH_MARKERS = (
+    "产品与服务采集",
+    "/eva-product-service",
+    "product-service-card",
 )
 
 
@@ -216,6 +232,23 @@ def check_data_export_truth(base: Path) -> tuple[list[str], dict]:
     for marker in DATA_EXPORT_TRUTH_MARKERS:
         if marker not in text:
             errors.append(f"{DATA_EXPORT_TRUTH_PATH} missing data-export marker: {marker}")
+    return errors, data
+
+
+def check_product_service_truth(base: Path) -> tuple[list[str], dict]:
+    errors: list[str] = []
+    path = base / PRODUCT_SERVICE_TRUTH_PATH
+    data = {"product_service_truth": str(path) if path.exists() else None}
+    if not path.exists():
+        errors.append(f"missing {PRODUCT_SERVICE_TRUTH_PATH}")
+        return errors, data
+    text = path.read_text(encoding="utf-8")
+    for marker in PRODUCT_SERVICE_TRUTH_MARKERS:
+        if marker not in text:
+            errors.append(
+                f"{PRODUCT_SERVICE_TRUTH_PATH} missing product-service marker: "
+                f"{marker}"
+            )
     return errors, data
 
 
@@ -264,7 +297,7 @@ def check_asset_type_truth(base: Path) -> tuple[list[str], list[str], dict]:
     data["handoff_aliases"] = raw_aliases
     data["handoff_internal_stages"] = sorted(internal_stages)
 
-    expected_version = VERSION.rsplit("-", 1)[-1]
+    expected_version = VERSION.removeprefix("eva-shared-")
     registry_version = str(registry.get("version", ""))
     handoff_version = str(handoff_registry.get("version", ""))
     data["eva_common_version"] = VERSION
@@ -447,7 +480,7 @@ def check_peer_skills(base: Path) -> tuple[list[str], list[str], dict]:
     if schema_path.exists():
         version = str(read_json(schema_path).get("version", ""))
         data["eva_shared_asset_types_version"] = version
-        expected_version = VERSION.rsplit("-", 1)[-1]
+        expected_version = VERSION.removeprefix("eva-shared-")
         if version != expected_version:
             errors.append(
                 "schemas/asset-types.json version must match eva_common "
@@ -528,6 +561,10 @@ def main() -> None:
     errors.extend(export_errors)
     data.update(export_data)
 
+    product_service_errors, product_service_data = check_product_service_truth(base)
+    errors.extend(product_service_errors)
+    data.update(product_service_data)
+
     if args.link:
         data["links"] = [str(normalize_path(item)) for item in args.link]
         for raw in args.link:
@@ -540,9 +577,9 @@ def main() -> None:
         result(
             ok,
             "doctor",
-            f"Eva Shared {VERSION.rsplit('-', 1)[-1]}结构正常"
+            f"Eva Shared {VERSION.removeprefix('eva-shared-')}结构正常"
             if ok
-            else f"Eva Shared {VERSION.rsplit('-', 1)[-1]}结构异常",
+            else f"Eva Shared {VERSION.removeprefix('eva-shared-')}结构异常",
             errors,
             warnings,
             data,
