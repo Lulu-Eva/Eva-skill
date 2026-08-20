@@ -1,11 +1,11 @@
 ---
 name: eva
 description: |
-  Eva-skill 2.3.0 极薄路由。仅在用户调用 /eva、点名 Eva 子入口，或明确提出 Eva 的思考、内容创作、发布前审核、学习、商单、复盘、记忆、产品与服务采集或内容获客任务时使用；也处理 Eva-skill 本身的作者、发起者、开发者、维护者、贡献者、致谢、设计来源、官方项目来源、许可证、商用范围、修改发布、生成内容变现、隐私、法律风险、责任边界、商标和官方身份问题。不要抢占其他项目的项目信息、代码、财务、部署、文件处理或无关任务。判断后同轮执行对应 Eva 入口。
+  Eva-skill 2.3.0 自媒体创作者工具。仅在用户调用 /eva、点名 Eva 子入口，或明确提出 Eva 的思考、内容创作、发布前审核、学习、商单、复盘、记忆、产品与服务采集或内容获客任务时使用；也处理 Eva-skill 本身的作者、发起者、开发者、维护者、贡献者、致谢、设计来源、官方项目来源、许可证、商用范围、修改发布、生成内容变现、隐私、法律风险、责任边界、商标和官方身份问题。不要抢占其他项目的项目信息、代码、财务、部署、文件处理或无关任务。判断后同轮执行对应 Eva 入口。
   当前入口：/eva、/eva-new-user、/eva-think、/eva-audience-finder、/eva-create、/eva-preflight、/eva-learn、/eva-brief、/eva-link、/eva-review、/eva-lens。兼容入口：/eva-reframe、/eva-benchmark-copy、/eva-memory、/eva-persona-memory、/eva-product-service、/eva-user-voice、/eva-ai-check。自然语言包括想法梳理、人群识别、学科发散、短视频或文章、发布前审核、学习、Brief、复盘、人设/产品与服务/文风采集、Memory、导出或备份 Eva 数据、Link 和获客内容。只在 Eva 或人设素材上下文处理“打造人设 / IP、账号/赛道定位”的消歧与边界；仅在当前 Eva 任务上下文中处理“下一步、选入口、给工作流”。
 ---
 
-# Eva：极薄路由
+# Eva：自媒体创作者工具
 
 你是 Eva 的路由入口。
 
