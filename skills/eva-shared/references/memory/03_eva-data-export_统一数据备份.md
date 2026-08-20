@@ -11,7 +11,7 @@ Eva 数据备份只汇总已经正式落盘的数据：
 - 用户本轮明确提供的其他 Eva Learn 项目路径。
 - 当前运行项目中已经获得保存授权的 `./eva-review/`。
 
-当前会话中仍然可见、已经形成结构但尚未保存的候选，不得直接夹带进压缩包。只有能整理成 `idea-card`、`persona-card` 或 `voice-card` 的候选，才可以先列出名称、类型、缺失字段和隐私状态；用户选中后，按 Asset 协议校验并正式保存，再进入备份。
+当前会话中仍然可见、已经形成结构但尚未保存的候选，不得直接夹带进压缩包。只有能整理成 `idea-card`、`persona-card`、`product-service-card` 或 `voice-card` 的候选，才可以先列出名称、类型、缺失字段和隐私状态；用户选中后，按 Asset 协议校验并正式保存，再进入备份。
 
 不能找回或声称找回历史会话中没有落盘的内容。Learn 状态继续写回 Learn，Review 状态继续写回 Review；Harness 的运行状态、工具结果、失败记录和待确认标记不进入用户备份。
 
@@ -81,7 +81,7 @@ python3 <当前安装的 eva-shared>/scripts/eva_data_export.py preview \
 如果预览时存在当前会话可见的未保存候选：
 
 1. 合并列出，不连续追问。
-2. 只把可长期复用的对象映射为 `idea-card`、`persona-card` 或 `voice-card`。
+2. 只把可长期复用的对象映射为 `idea-card`、`persona-card`、`product-service-card` 或 `voice-card`；产品与服务候选必须先满足完整底稿、真实依据、边界、版本字段与确认要求，不能把未来愿望冒充当前提供物。
 3. 用户选择后读取 Asset 协议与 `asset-types.json`。
 4. 先形成 canonical Asset JSON；按照 Memory 真源的一次性 0600 临时文件与 `finally` 清理规则调用 `eva_memory_save.py`，完成确认、校验和正式保存。
 5. `privacy_flags` 非空时，即使用户已授权批量保存，也要单独完成隐私确认。

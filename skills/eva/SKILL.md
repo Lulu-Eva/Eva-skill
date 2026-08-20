@@ -1,8 +1,8 @@
 ---
 name: eva
 description: |
-  Eva-skill 2.2.8 的极薄路由入口。仅在用户调用 /eva、点名 Eva 子入口，提出 Eva 的思考、人群识别、短视频或非虚构文章、发布前审核、学习、Brief、复盘、Lens、Memory、Link、新手教程，或在 Eva 上下文中询问“下一步怎么走、先用哪个功能、入口排序、给我一个工作流”时使用；也处理 Eva-skill 本身的作者、发起者、开发者、维护者、贡献者、致谢、设计来源、官方项目来源、许可证、商用范围、修改发布、生成内容变现、隐私、法律风险、责任边界、商标和官方身份问答。不要抢占其他项目的项目信息、代码、财务、部署、文件处理或无关任务。判断后同轮执行 eva-new-user、eva-think、eva-audience-finder、eva-create、eva-preflight、eva-learn、eva-brief、eva-link、eva-review 或 eva-lens。
-  当前入口：/eva、/eva-new-user、/eva-think、/eva-audience-finder、/eva-create、/eva-preflight、/eva-learn、/eva-brief、/eva-link、/eva-review、/eva-lens。兼容入口：/eva-reframe、/eva-benchmark-copy、/eva-memory、/eva-persona-memory、/eva-user-voice、/eva-ai-check。自然语言触发包括：帮我想想、这个话题讲给谁、从不同学科发散、做短视频、写公众号文章、发布前总检、带我学懂、拆品牌 Brief、发布后复盘、多元视角、深度审视、人设素材或文风采集、保存或盘点 Eva 记忆、导出或备份 Eva 数据、把提示词接进 Eva；仅在明确调用 Eva，或当前已处于 Eva 的人设素材上下文时，才处理“打造人设、做人设、打造 IP、账号定位、赛道定位”的消歧与边界；仅在当前 Eva 任务上下文中，才包括“下一步怎么走、帮我选入口、给我一个工作流”；以及 Eva-skill 的项目身份与许可问答。
+  Eva-skill 2.3.0 极薄路由。仅在用户调用 /eva、点名 Eva 子入口，或明确提出 Eva 的思考、内容创作、发布前审核、学习、商单、复盘、记忆、产品与服务采集或内容获客任务时使用；也处理 Eva-skill 本身的作者、发起者、开发者、维护者、贡献者、致谢、设计来源、官方项目来源、许可证、商用范围、修改发布、生成内容变现、隐私、法律风险、责任边界、商标和官方身份问题。不要抢占其他项目的项目信息、代码、财务、部署、文件处理或无关任务。判断后同轮执行对应 Eva 入口。
+  当前入口：/eva、/eva-new-user、/eva-think、/eva-audience-finder、/eva-create、/eva-preflight、/eva-learn、/eva-brief、/eva-link、/eva-review、/eva-lens。兼容入口：/eva-reframe、/eva-benchmark-copy、/eva-memory、/eva-persona-memory、/eva-product-service、/eva-user-voice、/eva-ai-check。自然语言包括想法梳理、人群识别、学科发散、短视频或文章、发布前审核、学习、Brief、复盘、人设/产品与服务/文风采集、Memory、导出或备份 Eva 数据、Link 和获客内容。只在 Eva 或人设素材上下文处理“打造人设 / IP、账号/赛道定位”的消歧与边界；仅在当前 Eva 任务上下文中处理“下一步、选入口、给工作流”。
 ---
 
 # Eva：极薄路由
@@ -17,7 +17,6 @@ description: |
 除项目信息查询的直接回答旁路外，你不做诊断、不写稿、不拆 Brief、不带读、不做 Link 校验、不读取 Harness / Asset / schema。
 
 ## 路由表
-
 | 用户信号 | 路由到 | 说明 |
 |---|---|---|
 | Eva-skill 是谁做的、谁发起或开发、谁在维护、有哪些贡献者、致谢对象、设计来源、借鉴过谁或受谁启发、官方项目来源在哪里 | 项目信息 | 只按需读取 README 的“维护与致谢”，由根入口直接回答 |
@@ -35,13 +34,15 @@ description: |
 | `/eva-ai-check`、一般文字 AI 味检测、有没有人味、表达真实性审查 | `eva-think` | 读取 shared AI Check；明确是视频稿时可由 Create 调用同一真源 |
 | `/eva-benchmark-copy`、对标拆解、拆这篇爆款内容、分析样本结构 | `eva-think` | 读取 shared Benchmark；明确要转短视频时再交 Create |
 | 帮我找/搜/刷/核验平台对标、找爆款标题、验证这个选题是不是自嗨 | `eva-create` | 读取 Title 手动搜索方案；只给搜索词、观察指标和贴回要求，用户亲自刷平台 |
-| `/eva-memory`；保存、沉淀、记下来、下次还能用；回捞点子卡；盘点 Eva 记忆库或统计点子/人设/文风卡；导出 Eva 数据、备份全部 Eva 记忆卡、把 Eva 数据打包到桌面 | `eva-think` | 读取 shared Memory；区分保存、任务回捞、记忆盘点与 Eva 数据备份；备份先只读预览和确认范围，普通文件压缩不触发 |
+| `/eva-memory`；保存、沉淀、记下来、下次还能用；回捞点子卡；盘点 Eva 记忆库或统计点子/人设/产品与服务/文风卡；导出 Eva 数据、备份全部 Eva 记忆卡、把 Eva 数据打包到桌面 | `eva-think` | 读取 shared Memory；区分保存、任务回捞、记忆盘点与 Eva 数据备份；备份先只读预览和确认范围，普通文件压缩不触发 |
 | `/eva-persona-memory`、Eva 人设素材采集、兼容说法“人设采集”、从真实经历里挖内容素材、我的经历为什么能讲、我的故事怎么用；Eva 或人设素材上下文中的“打造人设 / 做人设 / 打造 IP / 账号定位 / 赛道定位” | `eva-think` | 读取 shared Persona Memory；真实经历意图明确时直接开始，否则执行一次消歧或定位边界；脱离该上下文不触发 Eva |
+| `/eva-product-service`、Eva 产品与服务采集、帮我采集产品和服务、整理我能提供什么服务、记住我以后主要做这种咨询、先帮我整理并记住这项业务 | `eva-think` | 读取 shared Product Service；采集用户自己的可承接问题、帮助方式、依据和边界；不把裸“产品/服务/咨询”当触发词 |
 | `/eva-user-voice`、提炼我的文风、我的语气节奏、以后按我的语气写、不要璐璐腔 | `eva-think` | 读取 shared User Voice |
 | `/eva-reframe`、问题归位、限流、垂直、为什么不涨粉、小眼睛低 | `eva-think` | 读取 Reframe |
 | 做一条短视频、写视频标题、优化或发散视频开头、找开头灵感、指定数量的开头方案、写视频完整稿、短视频对标拆解、视频稿 AI 味检测、资料转短视频 | `eva-create` | 短视频生产链路 |
 | 写一篇公众号文章、自媒体文章、观点长文、把想法/资料写成文章、续写/修改这篇文章 | `eva-create` | Article 内部分支；标题后置，不走短视频标题闸门 |
 | `/eva-think`、帮我想想、脑子乱、问题归位、想聊清楚、这个概念什么意思、为什么不涨粉、小眼睛低、提取我朋友圈的语气/调调、以后照着这个写、人设立不住、资格感不足、凭什么我能讲 | `eva-think` | 默认思考入口 |
+| 写获客短视频、通过内容获得客户咨询、围绕某项业务规划获客内容 | 单条短视频信息齐全进`eva-create`；否则进`eva-think` | 读shared08；涨粉/传播/爆款不等于获客；非内容咨询、客服回复、合同回复或 CRM 不触发 |
 | 写朋友圈、微博、小红书短图文、邮件、虚构文学或其他非 Article 普通写作，且没有点名 Link | 基础模型或对应专业能力 | 不加载 Eva Create 成稿链路，不标记为 Eva 已验证资产 |
 | 只说 `/eva`、启动 Eva、进入 Eva，且没有附带任务 | 欢迎语 | 给轻量入口并邀请用户选择新手教程，不先判断新旧用户 |
 | 说“帮我看看”但材料不清 | `eva-think` | 默认兜底 |
@@ -84,9 +85,8 @@ description: |
 - 明确要求从学科、理论或解释机制发散，或要求多元/单一视角、反例、薄弱前提、反事实、否证条件或深度审视时进入 `eva-lens`；明确要求“发散这个开头、找开头灵感、多给几个开头方向”进入 `eva-create` 的 Opening。按发散对象而不是“发散”一词路由；根路由不复制 Lens 内部优先级。
 - “用话题人群识别器 / 这个话题背后是什么人群 / 戳中了谁 / 讲给谁”进入 `eva-audience-finder`；“我想到一个选题 / 帮我看看这个话题 / 想聊聊”仍进入 Think。出现“话题”二字本身不构成人群识别意图。
 - Think、Create、Learn 或 Link 在内部发现人群不清时，直接读取 shared Audience Finder，并在完成后返回原调用模块；内部调用不经过一级门牌。
-- Eva 或人设素材上下文中，明确挖真实经历、选择代价或表达资格时直接读取 shared Persona Memory；裸“打造人设 / 做人设 / 打造 IP”只做一次消歧；明确账号或赛道定位只说明边界，不进入采集、不建卡。脱离 Eva 或人设素材上下文的泛化账号策略请求不由本入口抢占。
-- “提取我朋友圈的语气 / 调调 / 以后照着这个写 / 这是我以前朋友圈样本”不是创作意图，路由到 `eva-think`，由 Think 转 shared Memory 的文风提取。
-- “盘点 Eva 记忆库 / 统计记忆卡、点子卡、人设卡或文风卡 / 我在 Eva 里沉淀了哪些东西”进入 `eva-think`，由 Think 转 shared Memory 的记忆盘点；普通“我有多少张卡 / 盘点银行卡、会员卡或项目卡片”不触发 Eva Memory。
+- Eva 或人设素材上下文中，明确挖真实经历、选择代价或表达资格时读取 shared Persona Memory；裸“打造人设 / IP”只消歧一次，账号/赛道定位只说明边界。明确整理、记住或复用本人的产品、服务或专业能力时读取 shared Product Service；普通产品分析、第三方资料整理、Brief、定位、客服、合同、CRM、咨询记录和普通创作不触发；“产品”“服务”“咨询”裸词不是授权。裸“以后围绕这项业务做获客内容”只问一次：先建立可复用底稿，还是现在写或规划获客内容。
+- “提取我朋友圈语气 / 以后照着写”进入 `eva-think` 的文风提取；“盘点 Eva 记忆库 / 统计点子、人设、产品与服务或文风卡”进入 Think 的记忆盘点。脱离 Eva Memory 的普通“我有多少张卡”不触发。
 - “朋友圈 Link / 用我的朋友圈 Link / 默认走我的朋友圈 Link”是 Link 意图，路由到 `eva-link`。
 - 用户显式触发 `eva-learn`、`eva-brief`、`eva-link` 时，不回主路由二次判断。
 - 用户明确说“带我学懂 / 带我系统学 / 带我读 / 主题式阅读 / 继续上次学习”时，路由到 `eva-learn`；不要求用户必须说出 `eva-learn` 字样。
@@ -113,7 +113,7 @@ eva-lens   -> ../eva-lens/SKILL.md
 ```
 
 - 用户显式调用某个子入口时，直接执行该入口，不回主路由复述一次。
-- 用户显式调用六个兼容入口时，按路由表读取现有 Think/Create/shared 真源；兼容入口不创建第二套实现。
+- 用户显式调用七个兼容入口时，按路由表读取现有 Think/Create/shared 真源；兼容入口不创建第二套实现。
 - 不得只输出“这个交给某入口处理”后停止。
 - 不默认向用户展示内部入口名；只有切换会改变任务边界时，才用一句自然语言说明。
 - 基础模型直写不生成 Eva Asset、不声称通过 Eva 短视频闸门；用户后来要求保存或接入 Link 时，再进入对应入口。

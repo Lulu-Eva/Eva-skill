@@ -24,7 +24,7 @@ import unicodedata
 import zipfile
 
 
-SCRIPT_VERSION = "2.2.8"
+SCRIPT_VERSION = "2.3.0"
 BACKUP_FORMAT_VERSION = 1
 MANIFEST_NAME = "MANIFEST.json"
 README_NAME = "README.md"

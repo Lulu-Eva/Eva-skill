@@ -122,6 +122,51 @@ SHORTVIDEO_OPTIONAL_SCRIPT_SIGNAL_MARKERS = (
     "首要内容支点",
 )
 
+ACQUISITION_CONTEXT_MARKERS = (
+    "真实产品或服务",
+    "交付前后能够被用户观察到的真实差异",
+    "真实用户问题",
+    "信任判断",
+    "可信依据",
+    "适用边界",
+    "现实中真实可执行的下一步动作",
+)
+
+PRODUCT_SERVICE_REFERENCE_NAME = (
+    "04_eva-product-service_产品与服务采集.md"
+)
+
+PRODUCT_SERVICE_REFERENCE_ALLOWED = (
+    "../eva-shared/references/memory/04_eva-product-service_产品与服务采集.md",
+    "../eva-shared/references/memory/00_eva-memory_点子卡沉淀与回溯.md",
+    "../eva-shared/references/asset/00_eva-asset_资产卡协议.md",
+    "../eva-shared/references/shared/08_acquisition-objective-overlay_获客目标覆盖层.md",
+    "../eva-think/SKILL.md",
+    "../eva-create/SKILL.md",
+    "../eva-preflight/SKILL.md",
+)
+
+PRODUCT_SERVICE_ROUTER_REQUIRED_MARKERS = (
+    "/eva-product-service",
+    "产品与服务采集",
+    "帮我采集产品和服务",
+    "整理我能提供什么服务",
+    "记住我以后主要做这种咨询",
+    "先帮我整理并记住这项业务",
+    "先建立可复用底稿，还是现在写或规划获客内容",
+    "“产品”“服务”“咨询”裸词",
+    "普通产品分析",
+    "第三方资料整理",
+    "客服",
+    "CRM",
+)
+
+PRODUCT_SERVICE_SCOPED_ENTRY_PATHS = {
+    "../eva-think/SKILL.md": ("普通 Think", "普通任务", "普通创作"),
+    "../eva-create/SKILL.md": ("普通 Create", "普通创作"),
+    "../eva-preflight/SKILL.md": ("普通 Preflight", "普通审核"),
+}
+
 FRONTSTAGE_TEMPLATE_HEADINGS = (
     "## 默认启动",
     "## 输出格式",
@@ -228,6 +273,7 @@ SOURCE_OF_TRUTH_RULES = (
         "name": "asset card field table",
         "allowed": (
             "../eva-shared/references/asset/00_eva-asset_资产卡协议.md",
+            "../eva-shared/references/memory/04_eva-product-service_产品与服务采集.md",
             "references/link/03_eva-link-builder-templates_生成模板.md",
         ),
         "fields": ASSET_FIELD_MARKERS,
@@ -259,6 +305,14 @@ SOURCE_OF_TRUTH_RULES = (
         ),
         "fields": SHORTVIDEO_OPTIONAL_SCRIPT_SIGNAL_MARKERS,
         "min_hits": 2,
+    },
+    {
+        "name": "acquisition objective temporary context",
+        "allowed": (
+            "../eva-shared/references/shared/08_acquisition-objective-overlay_获客目标覆盖层.md",
+        ),
+        "fields": ACQUISITION_CONTEXT_MARKERS,
+        "min_hits": 5,
     },
 )
 
@@ -370,6 +424,14 @@ def lint(base: Path) -> dict:
         ):
             errors.append(f"{path_rel}: Preflight must not read Opening generation truth 02")
 
+        if has_positive_reference(text, PRODUCT_SERVICE_REFERENCE_NAME) and not in_allowed(
+            path, PRODUCT_SERVICE_REFERENCE_ALLOWED
+        ):
+            errors.append(
+                f"{path_rel}: product-service truth may only be loaded by its truth "
+                "source, acquisition overlay, Think, Create or Preflight"
+            )
+
         for rule in SEMANTIC_DUPLICATE_PATTERNS:
             patterns = rule["patterns"]
             match_mode = rule.get("match", "any")
@@ -409,10 +471,81 @@ def lint(base: Path) -> dict:
         ):
             if marker not in text:
                 errors.append(f"eva router missing dynamic-navigation trigger/reference: {marker}")
+        for marker in PRODUCT_SERVICE_ROUTER_REQUIRED_MARKERS:
+            if marker not in text:
+                errors.append(
+                    f"eva router missing precise product-service route marker: {marker}"
+                )
+        router_frontmatter = (
+            text.split("---", 2)[1]
+            if text.startswith("---") and len(text.split("---", 2)) == 3
+            else ""
+        )
+        if "或业务任务" in router_frontmatter:
+            errors.append(
+                "eva router frontmatter must not claim all generic business tasks"
+            )
+        for pattern in (
+            r"(?:自然语言触发|触发：)[^\n]*(?:^|[、，])(?:产品|服务|咨询)(?:[、，。]|$)",
+            r"\|\s*(?:产品|服务|咨询)\s*\|",
+        ):
+            if re.search(pattern, router_frontmatter):
+                errors.append(
+                    "eva router frontmatter must not expose bare 产品/服务/咨询 "
+                    "as product-service collection triggers"
+                )
+        if has_positive_reference(text, PRODUCT_SERVICE_REFERENCE_NAME):
+            errors.append(
+                "eva router must route product-service collection to eva-think "
+                "instead of loading the shared truth directly"
+            )
         default = extract_section(text, "## 默认启动")
         for forbidden in ("Link", "Synchro", "Asset", "Harness", "schema", "valid_next", "DoD", "failure-record"):
             if forbidden in default:
                 errors.append(f"SKILL.md: default startup exposes backstage/system term: {forbidden}")
+
+    for relative, ordinary_markers in PRODUCT_SERVICE_SCOPED_ENTRY_PATHS.items():
+        entry_path = (base / relative).resolve()
+        if not entry_path.exists():
+            continue
+        entry_text = entry_path.read_text(encoding="utf-8")
+        if not has_positive_reference(entry_text, PRODUCT_SERVICE_REFERENCE_NAME):
+            errors.append(
+                f"{relative}: must reference product-service truth on explicit demand"
+            )
+            continue
+        scoped_boundary = any(
+            any(
+                product_marker in line
+                for product_marker in (
+                    "product-service",
+                    "Product Service",
+                    "产品与服务底稿",
+                )
+            )
+            and (
+                (
+                    any(marker in line for marker in ordinary_markers)
+                    and any(
+                        negative in line
+                        for negative in (
+                            "不读取",
+                            "不扫描",
+                            "不加载",
+                            "不询问",
+                            "不得",
+                        )
+                    )
+                )
+                or ("只有" in line and "才" in line)
+            )
+            for line in entry_text.splitlines()
+        )
+        if not scoped_boundary:
+            errors.append(
+                f"{relative}: product-service loading must have an explicit "
+                "ordinary-task no-load boundary"
+            )
 
     navigation_path = base / "references/shared/07_next-step-navigation_动态选路与下一步推荐.md"
     if not navigation_path.exists():

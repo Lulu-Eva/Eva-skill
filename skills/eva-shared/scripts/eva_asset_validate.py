@@ -6,7 +6,9 @@ from __future__ import annotations
 import argparse
 import copy
 import json
-from pathlib import Path
+import re
+from datetime import date
+from pathlib import Path, PurePosixPath
 from typing import Any
 
 from eva_common import (
@@ -39,6 +41,199 @@ STRUCTURED_FRONTMATTER_FIELDS = {
     "facts",
     "privacy",
 }
+
+PRODUCT_SERVICE_ASSET_TYPE = "product-service-card"
+PRODUCT_SERVICE_CORE_FIELDS = (
+    "offering_form",
+    "can_help_with",
+    "fit_situations",
+    "help_method",
+    "responsible_outcome",
+    "boundaries",
+    "lifecycle_status",
+)
+PRODUCT_SERVICE_OFFERING_FORMS = {
+    "product",
+    "standardized_service",
+    "consulting",
+    "project_collaboration",
+    "professional_capability",
+}
+PRODUCT_SERVICE_LIFECYCLE_STATUSES = {"active", "paused", "retired"}
+PRODUCT_SERVICE_EVIDENCE_STATUSES = {
+    "user_confirmed",
+    "material_supported_inference",
+    "pending_validation",
+}
+PRODUCT_SERVICE_PROFILE_ID_PATTERN = re.compile(
+    r"[A-Za-z0-9][A-Za-z0-9._-]{0,127}\Z"
+)
+
+
+def _has_meaningful_product_service_value(value: object) -> bool:
+    if isinstance(value, str):
+        return bool(value.strip())
+    if isinstance(value, list):
+        return bool(value) and any(
+            _has_meaningful_product_service_value(item) for item in value
+        )
+    if isinstance(value, dict):
+        return bool(value) and any(
+            _has_meaningful_product_service_value(item) for item in value.values()
+        )
+    return value is not None and not isinstance(value, bool)
+
+
+def _safe_product_service_relative_path(value: object) -> bool:
+    if not isinstance(value, str) or not value.strip() or value != value.strip():
+        return False
+    if "\\" in value or "\x00" in value or re.match(r"^[A-Za-z]:", value):
+        return False
+    candidate = PurePosixPath(value)
+    return bool(
+        not candidate.is_absolute()
+        and candidate.as_posix() not in {"", "."}
+        and candidate.as_posix() == value
+        and ".." not in candidate.parts
+        and all(part not in {"", "."} for part in candidate.parts)
+    )
+
+
+def validate_product_service_asset(asset: dict[str, Any]) -> list[str]:
+    """Validate fields that apply only to product-service-card assets."""
+    if asset.get("asset_type") != PRODUCT_SERVICE_ASSET_TYPE:
+        return []
+
+    errors: list[str] = []
+    profile_id = asset.get("profile_id")
+    if not isinstance(profile_id, str) or not PRODUCT_SERVICE_PROFILE_ID_PATTERN.fullmatch(
+        profile_id
+    ):
+        errors.append(
+            "product-service-card profile_id must be 1-128 ASCII letters, digits, dots, underscores or hyphens and start with a letter or digit"
+        )
+
+    revision = asset.get("revision")
+    valid_revision = (
+        isinstance(revision, int) and not isinstance(revision, bool) and revision > 0
+    )
+    if not valid_revision:
+        errors.append("product-service-card revision must be a positive integer")
+
+    facts_confirmed_at = asset.get("facts_confirmed_at")
+    valid_facts_confirmed_at = False
+    if isinstance(facts_confirmed_at, str) and re.fullmatch(
+        r"\d{4}-\d{2}-\d{2}", facts_confirmed_at
+    ):
+        try:
+            date.fromisoformat(facts_confirmed_at)
+        except ValueError:
+            pass
+        else:
+            valid_facts_confirmed_at = True
+    if not valid_facts_confirmed_at:
+        errors.append(
+            "product-service-card facts_confirmed_at must be a valid YYYY-MM-DD calendar date"
+        )
+
+    lifecycle_status = asset.get("lifecycle_status")
+    if not isinstance(lifecycle_status, str) or (
+        lifecycle_status not in PRODUCT_SERVICE_LIFECYCLE_STATUSES
+    ):
+        errors.append(
+            "product-service-card lifecycle_status must be active, paused or retired"
+        )
+
+    core_content = asset.get("core_content")
+    if not isinstance(core_content, dict):
+        errors.append("product-service-card core_content must be an object")
+        core_content = {}
+    missing_core_fields = [
+        field
+        for field in PRODUCT_SERVICE_CORE_FIELDS
+        if field not in core_content
+        or not _has_meaningful_product_service_value(core_content.get(field))
+    ]
+    if missing_core_fields:
+        errors.append(
+            "product-service-card core_content missing non-blank field(s): "
+            + ", ".join(missing_core_fields)
+        )
+
+    offering_form = core_content.get("offering_form")
+    if not isinstance(offering_form, str) or (
+        offering_form not in PRODUCT_SERVICE_OFFERING_FORMS
+    ):
+        errors.append(
+            "product-service-card core_content.offering_form must be one of: "
+            + ", ".join(sorted(PRODUCT_SERVICE_OFFERING_FORMS))
+        )
+    core_lifecycle_status = core_content.get("lifecycle_status")
+    if not isinstance(core_lifecycle_status, str) or (
+        core_lifecycle_status not in PRODUCT_SERVICE_LIFECYCLE_STATUSES
+    ):
+        errors.append(
+            "product-service-card core_content.lifecycle_status must be active, paused or retired"
+        )
+    elif isinstance(lifecycle_status, str) and (
+        lifecycle_status in PRODUCT_SERVICE_LIFECYCLE_STATUSES
+    ) and (
+        core_lifecycle_status != lifecycle_status
+    ):
+        errors.append(
+            "product-service-card top-level lifecycle_status must equal core_content.lifecycle_status"
+        )
+
+    for field in PRODUCT_SERVICE_CORE_FIELDS:
+        if field in {"offering_form", "lifecycle_status"} or field not in core_content:
+            continue
+        value = core_content.get(field)
+        if not isinstance(value, (str, list, dict)):
+            errors.append(
+                f"product-service-card core_content.{field} must be a string, array or object"
+            )
+
+    evidence = asset.get("evidence")
+    if not isinstance(evidence, list) or not evidence:
+        errors.append("product-service-card evidence must be a non-empty array")
+    else:
+        for index, item in enumerate(evidence):
+            prefix = f"product-service-card evidence[{index}]"
+            if not isinstance(item, dict):
+                errors.append(f"{prefix} must be an object")
+                continue
+            content = item.get("content")
+            if not isinstance(content, str) or not content.strip():
+                errors.append(f"{prefix}.content must be a non-blank string")
+            status = item.get("status")
+            if not isinstance(status, str) or (
+                status not in PRODUCT_SERVICE_EVIDENCE_STATUSES
+            ):
+                errors.append(
+                    f"{prefix}.status must be one of: "
+                    + ", ".join(sorted(PRODUCT_SERVICE_EVIDENCE_STATUSES))
+                )
+            if "source" in item:
+                source = item.get("source")
+                if not isinstance(source, str) or not source.strip():
+                    errors.append(f"{prefix}.source must be a non-blank string when set")
+
+    supersedes = asset.get("supersedes")
+    declares_supersedes = "supersedes" in asset
+    has_supersedes = declares_supersedes and not is_blank_value(supersedes)
+    if declares_supersedes and not _safe_product_service_relative_path(supersedes):
+        errors.append(
+            "product-service-card supersedes must be a safe project-relative POSIX path without traversal"
+        )
+    if valid_revision:
+        if revision == 1 and declares_supersedes:
+            errors.append("product-service-card revision 1 must not declare supersedes")
+        elif revision > 1 and not has_supersedes:
+            errors.append("product-service-card revision greater than 1 requires supersedes")
+
+    return errors
+
+
 def source_allowed_for_asset(source_module: object, allowed_sources: list) -> bool:
     if source_module in allowed_sources:
         return True
@@ -120,6 +315,7 @@ def validate_asset_payload(
     normalized_asset = copy.deepcopy(asset)
 
     errors.extend(simple_schema_validate(asset, schema))
+    errors.extend(validate_product_service_asset(asset))
 
     asset_type = asset.get("asset_type")
     asset_type_config: dict[str, Any] = {}

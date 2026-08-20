@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Eva 2.2.8 structural checks and prompt scenario-contract validation."""
+"""Eva 2.3.0 structural and scenario checks."""
 
 from __future__ import annotations
 
@@ -156,6 +156,11 @@ REQUIRED_SCENARIO_CASES.update(
 
 LEGACY_227_CASE_COUNT = 219
 EXPECTED_SCENARIO_CASE_COUNT = 243
+EXPECTED_ACQUISITION_SCENARIO_CASE_COUNT = 28
+EXPECTED_PRODUCT_SERVICE_SCENARIO_CASE_COUNT = 46
+EXPECTED_ASSET_TYPE_COUNT = 18
+EXPECTED_HANDOFF_TARGET_COUNT = 19
+EXPECTED_PYTHON_SCRIPT_COUNT = 9
 LEGACY_227_CASES_SHA256 = "ff19d3d85cf46c80425303ab090e960a7826a14c457633fef9dc59444f9e015d"
 
 REQUIRED_ARTICLE_CASE_CONTRACTS = {
@@ -1413,6 +1418,7 @@ REQUIRED_228_CASE_CONTRACTS = {
 REQUIRED_SCENARIO_CASES.update(REQUIRED_228_CASE_CONTRACTS)
 
 REQUIRED_ROUTER_MARKERS = {
+    "仅在用户调用 /eva": "Router frontmatter must keep Eva activation explicitly scoped",
     "eva-new-user": "Router must expose the adaptive new-user tutorial",
     "eva-think": "Router must expose eva-think as the default light entry",
     "eva-audience-finder": "Router must expose the explicit audience-finder entry",
@@ -1431,6 +1437,14 @@ REQUIRED_ROUTER_MARKERS = {
     "人设立不住": "Router must expose persona credibility diagnosis through eva-think",
     "人设素材采集": "Router must expose the front-facing persona material collection name",
     "人设采集": "Router must preserve the legacy natural-language persona collection alias",
+    "/eva-product-service": "Router must expose the product-service compatibility entry",
+    "产品与服务采集": "Router must expose the named product-service collection capability",
+    "帮我采集产品和服务": "Router must expose a precise natural-language product-service trigger",
+    "先帮我整理并记住这项业务": "Router must keep collection tied to an explicit facts-preservation intent",
+    "围绕某项业务规划获客内容": "Router must route explicit acquisition planning without forcing collection",
+    "“产品”“服务”“咨询”裸词": "Router must reject bare commercial nouns as collection triggers",
+    "普通产品分析": "Router must not hijack ordinary product analysis",
+    "第三方资料整理": "Router must not hijack third-party product summaries",
     "打造人设": "Router must recognize the ambiguous persona-building intent",
     "账号定位": "Router must expose the account-positioning boundary through eva-think",
     "赛道定位": "Router must expose the track-positioning boundary through eva-think",
@@ -1482,6 +1496,11 @@ REQUIRED_ROUTER_MARKERS = {
     "导出或备份 Eva 数据": "Router frontmatter must expose explicit Eva data-export intents",
     "备份全部 Eva 记忆卡": "Router must route explicit Eva memory backup requests",
     "普通文件压缩不触发": "Router must not hijack ordinary archive tasks",
+    "获客内容": "Router must expose explicit acquisition-content intent through eva-think",
+    "通过内容获得客户咨询": "Router must scope customer-consultation intent to content acquisition",
+    "非内容咨询、客服回复、合同回复或 CRM 不触发": "Router must not hijack non-content customer-service or CRM tasks",
+    "shared08": "Router must delegate acquisition details instead of duplicating the overlay",
+    "涨粉/传播/爆款不等于获客": "Router must not conflate reach with customer acquisition",
 }
 
 REQUIRED_LICENSE_ROUTING_MARKERS = {
@@ -1560,10 +1579,12 @@ REQUIRED_ARCHITECTURE_PATHS = (
     "references/memory/01_eva-persona-memory_人设记忆采集.md",
     "references/memory/02_eva-user-voice_用户表达文风提取.md",
     "references/memory/03_eva-data-export_统一数据备份.md",
+    "references/memory/04_eva-product-service_产品与服务采集.md",
     "references/shared/04_light-interaction_轻交互协议.md",
     "references/shared/05_expression-asset-preload_表达资产轻量预加载协议.md",
     "references/shared/06_external-material-safety_外部材料安全边界.md",
     "references/shared/07_next-step-navigation_动态选路与下一步推荐.md",
+    "references/shared/08_acquisition-objective-overlay_获客目标覆盖层.md",
     "references/lens/00_eva-lens-discipline-divergence_学科发散.md",
     "references/harness/00_eva-harness_状态与交接校验.md",
     "scripts/eva_memory_save.py",
@@ -1597,6 +1618,19 @@ EXTERNAL_MATERIAL_SAFETY_REQUIRED_ENTRIES = (
     "../eva-link/SKILL.md",
     "../eva-review/SKILL.md",
     "../eva-lens/SKILL.md",
+    "../eva-preflight/SKILL.md",
+)
+
+ACQUISITION_OVERLAY_REQUIRED_ENTRIES = (
+    "../eva-think/SKILL.md",
+    "../eva-create/SKILL.md",
+    "../eva-preflight/SKILL.md",
+    "../eva-review/SKILL.md",
+)
+
+PRODUCT_SERVICE_REQUIRED_ENTRIES = (
+    "../eva-think/SKILL.md",
+    "../eva-create/SKILL.md",
     "../eva-preflight/SKILL.md",
 )
 
@@ -1751,6 +1785,21 @@ BODY_SECRET_VOICE
 """,
             ),
             write_card(
+                memory_root / "product-service" / "service-main.md",
+                """---
+type: product-service-card
+asset_type: product-service-card
+created: 2026-07-15
+keywords: [咨询, 服务]
+profile_id: career-transition
+revision: 1
+lifecycle_status: active
+---
+# 产品与服务正文
+BODY_SECRET_PRODUCT_SERVICE
+""",
+            ),
+            write_card(
                 memory_root / "persona" / "inferred.md",
                 """---
 created: 2026-06-10
@@ -1859,11 +1908,15 @@ MUST_NOT_BE_SCANNED_EITHER
         mixed_data = _inventory_data(mixed_payload)
         after_bytes = {path.relative_to(memory_root).as_posix(): path.read_bytes() for path in real_cards}
 
-        check(mixed_data.get("total_cards") == 9, "mixed fixture must count only nine real Markdown cards")
+        check(mixed_data.get("total_cards") == 10, "mixed fixture must count only ten real Markdown cards")
         type_counts = mixed_data.get("type_counts") or {}
         check(type_counts.get("idea-card") == 4, "mixed fixture idea-card count must be four")
         check(type_counts.get("persona-card") == 3, "mixed fixture persona-card count must include one directory-inferred card")
         check(type_counts.get("voice-card") == 1, "mixed fixture voice-card count must be one")
+        check(
+            type_counts.get("product-service-card") == 1,
+            "mixed fixture product-service-card count must be one",
+        )
         check(type_counts.get("unrecognized") == 1, "unclosed legacy card must remain unrecognized")
         check((mixed_data.get("declared_type_counts") or {}).get("persona-card") == 2, "declared persona count must stay separate from inferred cards")
         check((mixed_data.get("inferred_type_counts") or {}).get("persona-card") == 1, "missing type under persona/ must be marked as one inferred card")
@@ -1872,7 +1925,7 @@ MUST_NOT_BE_SCANNED_EITHER
         check("next_actions" not in mixed_data, "inventory must not return a multi-action menu")
         check((mixed_data.get("created") or {}).get("earliest") == "2026-06-01", "created range must use valid frontmatter dates")
         check((mixed_data.get("created") or {}).get("latest") == "2026-07-16", "created range latest date is incorrect")
-        check((mixed_data.get("created") or {}).get("recent_count") == 6, "recent 30-day count must ignore old and invalid dates")
+        check((mixed_data.get("created") or {}).get("recent_count") == 7, "recent 30-day count must ignore old and invalid dates")
         keywords = {item.get("keyword"): item.get("count") for item in mixed_data.get("top_keywords") or []}
         check(keywords.get("创作") == 2, "block and inline keyword lists must both be parsed")
         health = mixed_data.get("health") or {}
@@ -1894,6 +1947,10 @@ MUST_NOT_BE_SCANNED_EITHER
         markdown_inventory = memory_inventory.render_markdown(mixed_payload)
         check("## 正式声明类型" in markdown_inventory, "Markdown output must separate declared types")
         check("## 目录推断、待校验" in markdown_inventory, "Markdown output must expose inferred types as pending validation")
+        check(
+            "product-service-card：1" in markdown_inventory,
+            "Markdown inventory must list product-service-card separately",
+        )
         check("非普通文件跳过" in markdown_inventory, "Markdown output must report skipped non-regular files")
         check("BODY_SECRET" not in markdown_inventory, "Markdown inventory must not expose card bodies")
 
@@ -1989,6 +2046,32 @@ MUST_NOT_BE_SCANNED_EITHER
         check("persona/persona-main.md" in filtered_markdown, "filtered Markdown must include matching relative paths")
         check("idea-cards/idea-main.md" not in filtered_markdown, "filtered Markdown must not include nonmatching paths")
         check("BODY_SECRET" not in filtered_markdown, "filtered Markdown must not expose card bodies")
+
+        product_service_filtered = run_inventory(
+            project_root,
+            recent_days=30,
+            today=date(2026, 7, 17),
+            include_cards=True,
+            filter_type="product-service-card",
+        )
+        product_service_cards = (
+            _inventory_data(product_service_filtered).get("cards") or []
+        )
+        check(
+            len(product_service_cards) == 1,
+            "product-service-card drill-down must return its declared metadata row",
+        )
+        check(
+            all(
+                card.get("type") == "product-service-card"
+                for card in product_service_cards
+            ),
+            "product-service-card drill-down leaked another type",
+        )
+        check(
+            "BODY_SECRET" not in json.dumps(product_service_cards, ensure_ascii=False),
+            "product-service-card drill-down must not expose card bodies",
+        )
 
         cli_filtered = subprocess.run(
             [
@@ -2110,6 +2193,10 @@ def run_memory_save_selftests(errors: list[str], base: Path) -> None:
             "source_module": "eva-memory",
             "valid_next": ["eva-create", "eva-link"],
         },
+        "product-service-card": {
+            "source_module": "eva-memory",
+            "valid_next": ["eva-think", "eva-create", "eva-memory"],
+        },
     }
 
     with tempfile.TemporaryDirectory(prefix="eva-memory-save-selftest-") as temp_dir:
@@ -2117,6 +2204,8 @@ def run_memory_save_selftests(errors: list[str], base: Path) -> None:
         project = root / "creator-project"
         project.mkdir()
         saved_paths: list[Path] = []
+        product_service_first_relative: str | None = None
+        product_service_first_asset: dict | None = None
 
         legacy_path = root / "legacy-card.md"
         legacy_path.write_text(
@@ -2194,6 +2283,34 @@ def run_memory_save_selftests(errors: list[str], base: Path) -> None:
                 "keywords": ["回归测试", asset_type],
                 "title": f"{asset_type} roundtrip",
             }
+            if asset_type == "product-service-card":
+                asset.update(
+                    {
+                        "core_content": {
+                            "offering_form": "consulting",
+                            "can_help_with": ["梳理可迁移能力"],
+                            "fit_situations": ["转型卡住的三年经验从业者"],
+                            "help_method": ["访谈与材料分析"],
+                            "responsible_outcome": ["可迁移能力清单"],
+                            "boundaries": ["不保证转型成功"],
+                            "lifecycle_status": "active",
+                            "selftest_secret": secret,
+                        },
+                        "evidence": [
+                            {
+                                "content": "用户确认的内部辅导记录",
+                                "status": "user_confirmed",
+                            }
+                        ],
+                        "profile_id": "career-transition-selftest",
+                        "revision": 1,
+                        "facts_confirmed_at": "2026-07-23",
+                        "lifecycle_status": "active",
+                    }
+                )
+                product_service_first_asset = json.loads(
+                    json.dumps(asset, ensure_ascii=False)
+                )
             asset_path = root / f"{asset_type}.json"
             asset_path.write_text(
                 json.dumps(asset, ensure_ascii=False), encoding="utf-8"
@@ -2212,6 +2329,8 @@ def run_memory_save_selftests(errors: list[str], base: Path) -> None:
             check(isinstance(relative, str), f"{asset_type} result must return a relative path")
             if not isinstance(relative, str):
                 continue
+            if asset_type == "product-service-card":
+                product_service_first_relative = relative
             saved_path = project / relative
             saved_paths.append(saved_path)
             check(saved_path.is_file(), f"{asset_type} output file must exist")
@@ -2233,15 +2352,104 @@ def run_memory_save_selftests(errors: list[str], base: Path) -> None:
 
         inventory_payload = run_inventory(project, today=date(2026, 7, 23))
         inventory_data = _inventory_data(inventory_payload)
-        check(inventory_data.get("total_cards") == 3, "three saved cards must be inventory-visible")
+        check(inventory_data.get("total_cards") == 4, "four saved cards must be inventory-visible")
         check(
-            (inventory_data.get("classification_counts") or {}).get("declared_recognized") == 3,
+            (inventory_data.get("classification_counts") or {}).get("declared_recognized") == 4,
             "new cards must be formally declared, not directory-inferred",
+        )
+        check(
+            (inventory_data.get("type_counts") or {}).get(
+                "product-service-card"
+            )
+            == 1,
+            "saved product-service-card must be counted separately",
         )
         check(
             (inventory_data.get("health") or {}).get("conflicting_type_fields") == 0,
             "new cards must keep type and asset_type aligned",
         )
+
+        if (
+            product_service_first_asset is None
+            or product_service_first_relative is None
+        ):
+            errors.append(
+                "memory save runtime: product-service first revision was not available"
+            )
+        else:
+            first_product_service_path = project / product_service_first_relative
+            first_product_service_bytes = first_product_service_path.read_bytes()
+            revision_two_asset = json.loads(
+                json.dumps(product_service_first_asset, ensure_ascii=False)
+            )
+            revision_two_asset["revision"] = 2
+            revision_two_asset["facts_confirmed_at"] = "2026-07-24"
+            revision_two_asset["supersedes"] = product_service_first_relative
+            revision_two_asset["core_content"]["responsible_outcome"] = [
+                "可迁移能力清单",
+                "三个现实验证行动",
+            ]
+            revision_two_path = root / "product-service-card-revision-2.json"
+            revision_two_path.write_text(
+                json.dumps(revision_two_asset, ensure_ascii=False),
+                encoding="utf-8",
+            )
+            revision_two_payload = memory_save.save_memory_asset(
+                asset_path=revision_two_path,
+                project_root=project,
+                confirm_save=True,
+                confirm_privacy=False,
+                today=date(2026, 7, 24),
+            )
+            check(
+                bool(revision_two_payload.get("ok")),
+                "product-service revision 2 must save through a valid supersedes chain",
+            )
+            revision_two_relative = (
+                revision_two_payload.get("data") or {}
+            ).get("relative_path")
+            check(
+                first_product_service_path.read_bytes()
+                == first_product_service_bytes,
+                "product-service revision 2 must not overwrite revision 1",
+            )
+            check(
+                isinstance(revision_two_relative, str)
+                and (project / revision_two_relative).is_file(),
+                "product-service revision 2 must create a separate file",
+            )
+            if isinstance(revision_two_relative, str):
+                reloaded_revision_two = load_canonical_asset(
+                    project / revision_two_relative
+                )
+                check(
+                    reloaded_revision_two.get("revision") == 2
+                    and reloaded_revision_two.get("supersedes")
+                    == product_service_first_relative,
+                    "product-service revision metadata must survive roundtrip",
+                )
+
+            before_fork_files = set(
+                (project / "eva-memory" / "product-service").glob("*.md")
+            )
+            fork_payload = memory_save.save_memory_asset(
+                asset_path=revision_two_path,
+                project_root=project,
+                confirm_save=True,
+                confirm_privacy=False,
+                today=date(2026, 7, 24),
+            )
+            check(
+                not fork_payload.get("ok"),
+                "duplicate product-service revision must be rejected as a branch",
+            )
+            check(
+                set(
+                    (project / "eva-memory" / "product-service").glob("*.md")
+                )
+                == before_fork_files,
+                "rejected product-service branch must not write another file",
+            )
 
         collision_payload = memory_save.save_memory_asset(
             asset_path=root / "idea-card.json",
@@ -2587,6 +2795,18 @@ def run_data_export_selftests(errors: list[str]) -> None:
             project / "eva-memory" / "idea-cards" / "idea.md",
             "---\ntype: idea-card\ncreated: 2026-07-23\nkeywords: [backup]\n---\nsecret memory\n",
         )
+        product_service_memory_file = write_file(
+            project / "eva-memory" / "product-service" / "service.md",
+            "---\n"
+            "type: product-service-card\n"
+            "asset_type: product-service-card\n"
+            "created: 2026-07-23\n"
+            "keywords: [backup, service]\n"
+            "profile_id: backup-service\n"
+            "revision: 1\n"
+            "lifecycle_status: active\n"
+            "---\nsecret product service memory\n",
+        )
         write_file(project / "eva-memory" / ".hidden.md", "hidden")
         write_file(project / "eva-memory" / "scratch.tmp", "temporary")
         write_file(project / "eva-memory" / "debug.log", "log")
@@ -2637,7 +2857,7 @@ def run_data_export_selftests(errors: list[str]) -> None:
             plan_data = plan.get("data") or {}
             check(plan_data.get("will_write") is False, "preview must declare will_write=false")
             check(
-                (plan_data.get("memory") or {}).get("card_count") == 1,
+                (plan_data.get("memory") or {}).get("card_count") == 2,
                 "preview must count formal Memory cards separately",
             )
             check(
@@ -2666,6 +2886,7 @@ def run_data_export_selftests(errors: list[str]) -> None:
                 check(int(skipped.get("symlinks") or 0) >= 1, "preview must count symlink skips")
 
             source_before = memory_file.read_bytes()
+            product_service_source_before = product_service_memory_file.read_bytes()
             plan_id = str(plan_data.get("plan_id") or "")
             exported = data_export._export_plan(
                 plan,
@@ -2683,6 +2904,11 @@ def run_data_export_selftests(errors: list[str]) -> None:
                 "successful export must preserve the preview's user-data count and size",
             )
             check(memory_file.read_bytes() == source_before, "export must not modify sources")
+            check(
+                product_service_memory_file.read_bytes()
+                == product_service_source_before,
+                "export must not modify product-service-card sources",
+            )
             check(bool(export_data.get("archive_sha256")), "export must return ZIP SHA-256")
             check("skipped" in export_data, "export must return skipped summary")
             verified = data_export._validate_zip(archive_path)
@@ -2695,6 +2921,13 @@ def run_data_export_selftests(errors: list[str]) -> None:
                     check(
                         any("/eva-memory/" in name for name in names),
                         "complete ZIP must include Memory",
+                    )
+                    check(
+                        any(
+                            "/eva-memory/product-service/service.md" in name
+                            for name in names
+                        ),
+                        "complete ZIP must include product-service-card files",
                     )
                     check(
                         any("/eva-learn/" in name for name in names),
@@ -2742,6 +2975,64 @@ def run_data_export_selftests(errors: list[str]) -> None:
                 != export_data.get("archive_path"),
                 "second export must not overwrite the first snapshot",
             )
+
+            memory_only = data_export._build_plan(
+                project_root=project,
+                scope="memory",
+                custom_includes=[],
+                extra_learn_paths=[],
+                exclude_learn_sources=False,
+                proposed_output_dir=output,
+                max_files=1000,
+                max_bytes=10_000_000,
+            )
+            check(bool(memory_only.get("ok")), "memory-only preview must pass")
+            memory_only_data = memory_only.get("data") or {}
+            memory_only_files = memory_only_data.get("_files") or []
+            check(
+                any(
+                    item.archive_path.endswith(
+                        "eva-memory/product-service/service.md"
+                    )
+                    for item in memory_only_files
+                ),
+                "memory-only preview must include product-service-card files",
+            )
+            memory_only_export = data_export._export_plan(
+                memory_only,
+                output_dir=output,
+                expected_plan_id=str(memory_only_data.get("plan_id") or ""),
+            )
+            check(
+                bool(memory_only_export.get("ok")),
+                "memory-only export with product-service-card must pass",
+            )
+            memory_only_archive = Path(
+                str(
+                    (memory_only_export.get("data") or {}).get(
+                        "archive_path"
+                    )
+                    or ""
+                )
+            )
+            if memory_only_archive.is_file():
+                with zipfile.ZipFile(memory_only_archive, "r") as archive:
+                    memory_only_names = archive.namelist()
+                    check(
+                        any(
+                            "/eva-memory/product-service/service.md" in name
+                            for name in memory_only_names
+                        ),
+                        "memory-only ZIP must include product-service-card files",
+                    )
+                    check(
+                        all(
+                            "/eva-learn/" not in name
+                            and "/eva-review/" not in name
+                            for name in memory_only_names
+                        ),
+                        "memory-only ZIP must remain limited to Memory",
+                    )
 
             custom = data_export._build_plan(
                 project_root=project,
@@ -3143,6 +3434,100 @@ def main() -> None:
     if positive_errors:
         errors.append("positive asset example failed: " + "; ".join(positive_errors))
 
+    product_service_asset = {
+        "asset_type": "product-service-card",
+        "source_module": "eva-memory",
+        "core_content": {
+            "offering_form": "consulting",
+            "can_help_with": ["梳理可迁移能力"],
+            "fit_situations": ["有三年以上经验但转型卡住"],
+            "help_method": ["访谈", "材料分析", "行动建议"],
+            "responsible_outcome": ["可迁移能力清单"],
+            "boundaries": ["不保证转型成功"],
+            "lifecycle_status": "active",
+        },
+        "user_question": "别人遇到什么问题时，我能提供什么帮助？",
+        "evidence": [
+            {
+                "content": "用户确认已完成二十次内部辅导",
+                "status": "user_confirmed",
+            }
+        ],
+        "valid_next": ["eva-think", "eva-create", "eva-memory"],
+        "saved": False,
+        "confidence": "high",
+        "low_confidence_reason": [],
+        "missing_fields": [],
+        "privacy_flags": [],
+        "profile_id": "career-transition",
+        "revision": 1,
+        "facts_confirmed_at": "2026-08-19",
+        "lifecycle_status": "active",
+    }
+    product_service_validation = validate_asset_payload(
+        product_service_asset, schema, base
+    )
+    if not product_service_validation.get("ok"):
+        errors.append(
+            "valid product-service-card failed: "
+            + "; ".join(product_service_validation.get("errors") or [])
+        )
+
+    product_service_without_evidence = json.loads(
+        json.dumps(product_service_asset, ensure_ascii=False)
+    )
+    product_service_without_evidence["evidence"] = []
+    if validate_asset_payload(
+        product_service_without_evidence, schema, base
+    ).get("ok"):
+        errors.append(
+            "product-service-card without real evidence unexpectedly passed"
+        )
+
+    product_service_without_boundary = json.loads(
+        json.dumps(product_service_asset, ensure_ascii=False)
+    )
+    product_service_without_boundary["core_content"]["boundaries"] = []
+    if validate_asset_payload(
+        product_service_without_boundary, schema, base
+    ).get("ok"):
+        errors.append(
+            "product-service-card without a meaningful boundary unexpectedly passed"
+        )
+
+    product_service_lifecycle_mismatch = json.loads(
+        json.dumps(product_service_asset, ensure_ascii=False)
+    )
+    product_service_lifecycle_mismatch["lifecycle_status"] = "paused"
+    if validate_asset_payload(
+        product_service_lifecycle_mismatch, schema, base
+    ).get("ok"):
+        errors.append(
+            "product-service-card with mismatched lifecycle status unexpectedly passed"
+        )
+
+    product_service_revision_without_parent = json.loads(
+        json.dumps(product_service_asset, ensure_ascii=False)
+    )
+    product_service_revision_without_parent["revision"] = 2
+    if validate_asset_payload(
+        product_service_revision_without_parent, schema, base
+    ).get("ok"):
+        errors.append(
+            "product-service-card revision greater than one without supersedes unexpectedly passed"
+        )
+
+    product_service_revision_one_with_null_parent = json.loads(
+        json.dumps(product_service_asset, ensure_ascii=False)
+    )
+    product_service_revision_one_with_null_parent["supersedes"] = None
+    if validate_asset_payload(
+        product_service_revision_one_with_null_parent, schema, base
+    ).get("ok"):
+        errors.append(
+            "product-service-card revision one must omit supersedes instead of writing null"
+        )
+
     link_config = {
         "id": "local.selftest",
         "produces": ["content-asset-card"],
@@ -3339,7 +3724,7 @@ def main() -> None:
         errors.append("missing examples/prompt-regression-matrix.json")
     else:
         scenario_contract = read_json(scenario_contract_path)
-        expected_version = VERSION.rsplit("-", 1)[-1]
+        expected_version = VERSION.removeprefix("eva-shared-")
         if str(scenario_contract.get("version", "")) != expected_version:
             errors.append(
                 "prompt scenario contract version must match "
@@ -3616,6 +4001,8 @@ def main() -> None:
             "只读盘点脚本始终不负责写 INDEX",
             "03_eva-data-export_统一数据备份.md",
             "eva_memory_save.py",
+            "用户显式点名最新 `paused` 底稿",
+            "用户本轮主动、明确给出的价格、名额、开放状态、时限和行动入口",
         ):
             if marker not in memory_truth_text:
                 errors.append(f"Memory inventory source of truth missing stable marker: {marker}")
@@ -3634,7 +4021,7 @@ def main() -> None:
     if (base.parent / "eva-memory").exists():
         errors.append("Memory inventory must stay inside shared Memory and must not add a top-level skills/eva-memory")
 
-    expected_version = VERSION.rsplit("-", 1)[-1]
+    expected_version = VERSION.removeprefix("eva-shared-")
     repo_root = base.parent.parent
     version_path = repo_root / "VERSION"
     source_checkout = (repo_root / ".git").exists() or (repo_root / ".claude-plugin" / "marketplace.json").exists()
@@ -3645,6 +4032,312 @@ def main() -> None:
         layout = "skillhub-bundle"
     else:
         layout = "installed-skill-bundle"
+
+    acquisition_contract_checked = False
+    acquisition_case_ids: list[str] = []
+    acquisition_contract_path = repo_root / "testcases" / "acquisition-trust-overlay.json"
+    if source_checkout:
+        if not acquisition_contract_path.exists():
+            errors.append(f"missing acquisition scenario contract: {acquisition_contract_path}")
+        else:
+            acquisition_contract_checked = True
+            acquisition_contract = read_json(acquisition_contract_path)
+            if str(acquisition_contract.get("version", "")) != expected_version:
+                errors.append(
+                    "acquisition scenario contract version must match "
+                    f"{expected_version}, got {acquisition_contract.get('version', '<missing>')}"
+                )
+            if not isinstance(acquisition_contract.get("purpose"), str) or not acquisition_contract.get("purpose", "").strip():
+                errors.append("acquisition scenario contract purpose must be a non-empty string")
+            acquisition_cases = acquisition_contract.get("cases") or []
+            if not isinstance(acquisition_cases, list):
+                errors.append("acquisition scenario contract cases must be an array")
+                acquisition_cases = []
+            if len(acquisition_cases) != EXPECTED_ACQUISITION_SCENARIO_CASE_COUNT:
+                errors.append(
+                    "acquisition scenario contract must contain exactly "
+                    f"{EXPECTED_ACQUISITION_SCENARIO_CASE_COUNT} cases, got {len(acquisition_cases)}"
+                )
+            expected_acquisition_ids = [
+                f"AT-{index:03d}"
+                for index in range(1, EXPECTED_ACQUISITION_SCENARIO_CASE_COUNT + 1)
+            ]
+            acquisition_case_ids = [
+                str(case.get("id", "")) if isinstance(case, dict) else ""
+                for case in acquisition_cases
+            ]
+            if acquisition_case_ids != expected_acquisition_ids:
+                errors.append(
+                    "acquisition scenario contract IDs must remain unique and ordered AT-001..AT-028"
+                )
+            for index, case in enumerate(acquisition_cases, start=1):
+                if not isinstance(case, dict):
+                    errors.append(f"acquisition scenario case #{index} must be an object")
+                    continue
+                case_id = case.get("id", index)
+                for field in ("id", "input"):
+                    if not isinstance(case.get(field), str) or not case.get(field, "").strip():
+                        errors.append(f"acquisition scenario case {case_id!r} field {field} must be a non-empty string")
+                expected_items = case.get("expected")
+                if not isinstance(expected_items, list) or not expected_items:
+                    errors.append(f"acquisition scenario case {case_id!r} expected must be a non-empty array")
+                elif any(not isinstance(item, str) or not item.strip() for item in expected_items):
+                    errors.append(f"acquisition scenario case {case_id!r} expected items must be non-empty strings")
+                if "precondition" in case and (
+                    not isinstance(case["precondition"], str) or not case["precondition"].strip()
+                ):
+                    errors.append(f"acquisition scenario case {case_id!r} precondition must be a non-empty string")
+
+            acquisition_case_by_id = {
+                case.get("id"): case
+                for case in acquisition_cases
+                if isinstance(case, dict) and isinstance(case.get("id"), str)
+            }
+            required_acquisition_markers = {
+                "AT-018": {"进入Article", "不加载获客覆盖层", "沿用Article原生事实、证据、产品和CTA边界"},
+                "AT-025": {"不触发Eva获客覆盖层", "不因出现客户咨询而追问获客目标"},
+                "AT-026": {"不触发Eva获客覆盖层", "不把记录整理误判为获客内容创作"},
+                "AT-027": {"只执行第一个未完成阶段", "不自动连续跑完Think、Create、Preflight和Review"},
+                "AT-028": {"只完成当前规划并等待用户选择", "不自动写稿", "不提前进入Preflight"},
+            }
+            for case_id, markers in required_acquisition_markers.items():
+                actual = set(acquisition_case_by_id.get(case_id, {}).get("expected") or [])
+                missing_markers = sorted(markers - actual)
+                if missing_markers:
+                    errors.append(
+                        f"acquisition scenario case {case_id!r} missing expected marker(s): "
+                        + ", ".join(missing_markers)
+                    )
+
+    product_service_contract_checked = False
+    product_service_case_ids: list[str] = []
+    product_service_contract_path = (
+        repo_root / "testcases" / "product-service-collection.json"
+    )
+    if source_checkout:
+        if not product_service_contract_path.exists():
+            errors.append(
+                "missing product-service scenario contract: "
+                f"{product_service_contract_path}"
+            )
+        else:
+            product_service_contract_checked = True
+            product_service_contract = read_json(product_service_contract_path)
+            if str(product_service_contract.get("version", "")) != expected_version:
+                errors.append(
+                    "product-service scenario contract version must match "
+                    f"{expected_version}, got "
+                    f"{product_service_contract.get('version', '<missing>')}"
+                )
+            purpose = product_service_contract.get("purpose")
+            if not isinstance(purpose, str) or not purpose.strip():
+                errors.append(
+                    "product-service scenario contract purpose must be a non-empty string"
+                )
+            product_service_cases = product_service_contract.get("cases") or []
+            if not isinstance(product_service_cases, list):
+                errors.append(
+                    "product-service scenario contract cases must be an array"
+                )
+                product_service_cases = []
+            if (
+                len(product_service_cases)
+                != EXPECTED_PRODUCT_SERVICE_SCENARIO_CASE_COUNT
+            ):
+                errors.append(
+                    "product-service scenario contract must contain exactly "
+                    f"{EXPECTED_PRODUCT_SERVICE_SCENARIO_CASE_COUNT} cases, got "
+                    f"{len(product_service_cases)}"
+                )
+            expected_product_service_ids = [
+                f"PS-{index:03d}"
+                for index in range(
+                    1, EXPECTED_PRODUCT_SERVICE_SCENARIO_CASE_COUNT + 1
+                )
+            ]
+            product_service_case_ids = [
+                str(case.get("id", "")) if isinstance(case, dict) else ""
+                for case in product_service_cases
+            ]
+            if product_service_case_ids != expected_product_service_ids:
+                errors.append(
+                    "product-service scenario contract IDs must remain unique and "
+                    "ordered PS-001.."
+                    f"PS-{EXPECTED_PRODUCT_SERVICE_SCENARIO_CASE_COUNT:03d}"
+                )
+            for index, case in enumerate(product_service_cases, start=1):
+                if not isinstance(case, dict):
+                    errors.append(
+                        f"product-service scenario case #{index} must be an object"
+                    )
+                    continue
+                case_id = case.get("id", index)
+                for field in ("id", "input"):
+                    if (
+                        not isinstance(case.get(field), str)
+                        or not case.get(field, "").strip()
+                    ):
+                        errors.append(
+                            f"product-service scenario case {case_id!r} field "
+                            f"{field} must be a non-empty string"
+                        )
+                expected_items = case.get("expected")
+                if not isinstance(expected_items, list) or not expected_items:
+                    errors.append(
+                        f"product-service scenario case {case_id!r} expected "
+                        "must be a non-empty array"
+                    )
+                elif any(
+                    not isinstance(item, str) or not item.strip()
+                    for item in expected_items
+                ):
+                    errors.append(
+                        f"product-service scenario case {case_id!r} expected "
+                        "items must be non-empty strings"
+                    )
+                if "precondition" in case and (
+                    not isinstance(case["precondition"], str)
+                    or not case["precondition"].strip()
+                ):
+                    errors.append(
+                        f"product-service scenario case {case_id!r} precondition "
+                        "must be a non-empty string"
+                    )
+
+            product_service_case_by_id = {
+                case.get("id"): case
+                for case in product_service_cases
+                if isinstance(case, dict) and isinstance(case.get("id"), str)
+            }
+            required_product_service_markers = {
+                "PS-001": {"offering_form=product"},
+                "PS-002": {"offering_form=standardized_service"},
+                "PS-003": {"offering_form=consulting"},
+                "PS-004": {"offering_form=project_collaboration"},
+                "PS-005": {"offering_form=professional_capability"},
+                "PS-006": {
+                    "可形成合法 product-service-card",
+                    "产品名称、价格、套餐和 CTA 不是保存门槛",
+                },
+                "PS-007": {"仅有愿望时不得保存为有效底稿"},
+                "PS-008": {"每轮最多问一个决定性问题"},
+                "PS-010": {
+                    "分成两个独立 profile_id",
+                    "生成两张 product-service-card",
+                },
+                "PS-014": {
+                    "revision=3",
+                    "不覆盖或删除旧文件",
+                },
+                "PS-015": {
+                    "新建 lifecycle_status=paused 版本",
+                    "paused 底稿不得自动参与获客创作",
+                },
+                "PS-016": {
+                    "新建 lifecycle_status=retired 版本",
+                    "retired 底稿不得自动回捞到获客创作",
+                },
+                "PS-021": {
+                    "不触发产品与服务采集",
+                    "不扫描 product-service-card",
+                },
+                "PS-023": {"没有底稿不阻塞获客创作"},
+                "PS-024": {"卡片存在不等于必须植入产品"},
+                "PS-025": {
+                    "没有产品名或 CTA 不得成为不通过理由",
+                    "底稿未记录某事实不得直接推断该事实不存在",
+                },
+                "PS-026": {
+                    "拦截不可控结果保证",
+                    "不得虚构客户案例、收益或成交结果",
+                },
+                "PS-027": {"盘点单列 product-service-card"},
+                "PS-028": {
+                    "Memory-only 备份包含 eva-memory/product-service/",
+                    "完整数据备份包含 eva-memory/product-service/",
+                },
+                "PS-029": {"保存前必须单独二次确认隐私"},
+                "PS-030": {
+                    "旧 idea-card 保存、盘点和回捞保持兼容",
+                    "旧 persona-card 保存、盘点和回捞保持兼容",
+                    "旧 voice-card 保存、盘点和回捞保持兼容",
+                },
+                "PS-034": {
+                    "进入 Eva Think 的产品与服务采集",
+                    "不新增一级 Skill 或 handoff target",
+                },
+                "PS-035": {
+                    "本轮恢复承接已经明确，不重复确认开放状态",
+                    "价格和名额尚未确定时不得写入正文",
+                    "后续新会话仅从历史卡读取时重新确认时效事实",
+                },
+                "PS-036": {
+                    "core_content 包含 offering_form、can_help_with、fit_situations、help_method、responsible_outcome、boundaries、lifecycle_status",
+                    "revision=1 的 canonical 新卡省略 supersedes 且不写 null",
+                    "revision>1 必须写入 supersedes",
+                    "lifecycle_status 仅可为 active|paused|retired",
+                },
+                "PS-037": {
+                    "不把这句话直接解释为采集或保存授权",
+                    "只问一次是先建立可复用底稿还是现在写或规划获客内容",
+                    "用户选择后再进入 Product Service、Create 或 Think",
+                },
+                "PS-038": {
+                    "privacy_flags 标记的信息默认只供后台理解",
+                    "保存授权不等于公开使用授权",
+                    "正文引用未公开价格、联系方式、客户姓名或内部过程前必须另行取得明确授权",
+                },
+                "PS-039": {
+                    "当前任务以本轮 paused 事实为准",
+                    "明确说明记忆库尚未同步",
+                    "只提醒一次后续新会话仍可能把旧 active 版本当作当前状态",
+                },
+                "PS-040": {
+                    "作为待验证 idea-card 候选处理",
+                    "不强制进入 Product Service",
+                    "不得保存或伪装成有效 product-service-card",
+                },
+                "PS-041": {
+                    "进入 Product Service 采集",
+                    "当前不自动写稿或规划矩阵",
+                },
+                "PS-042": {
+                    "进入 Think 并读取获客覆盖层",
+                    "不强制先进入 Product Service 采集",
+                    "不得混入企业内训的能力、案例或边界",
+                },
+                "PS-043": {
+                    "可以只读使用 paused 底稿中仍有效的能力、方法、依据和边界",
+                    "必须保留暂停状态",
+                    "不得回退旧 active 版本或生成承接入口",
+                },
+                "PS-044": {
+                    "本轮主动明确给出的时效性事实视为已经完成本轮确认",
+                    "不重复追问价格和名额",
+                    "只有事实来自历史卡、推断或含糊材料时才重新确认",
+                },
+                "PS-045": {
+                    "不得把未保存的 product-service-card 候选直接夹带进 ZIP",
+                    "用户确认后完成 Asset 校验与正式保存",
+                    "保存成功后再纳入备份",
+                },
+                "PS-046": {
+                    "retired 底稿只能作为历史材料",
+                    "不得声称当前仍在提供",
+                    "只有本轮重新确认的现实事实才能建立当前提供关系",
+                },
+            }
+            for case_id, markers in required_product_service_markers.items():
+                actual = set(
+                    product_service_case_by_id.get(case_id, {}).get("expected")
+                    or []
+                )
+                missing_markers = sorted(markers - actual)
+                if missing_markers:
+                    errors.append(
+                        f"product-service scenario case {case_id!r} missing "
+                        "expected marker(s): " + ", ".join(missing_markers)
+                    )
     if (source_checkout or skillhub_bundle) and version_path.exists():
         actual_version = version_path.read_text(encoding="utf-8").strip()
         if actual_version != expected_version:
@@ -3801,7 +4494,7 @@ def main() -> None:
     asset_state_path = (base / asset_state_relative).resolve()
     if asset_state_path.exists():
         asset_state_text = asset_state_path.read_text(encoding="utf-8")
-        for marker in ("预加载与主动回捞优先级", "不能替代检查点本身", "复用该命中结果", "重新扫描", "覆盖预加载状态", "更靠近当前产物阶段"):
+        for marker in ("预加载与主动回捞优先级", "不能替代检查点本身", "复用该命中结果", "重新扫描", "覆盖预加载状态", "更靠近当前产物阶段", "点名回捞-暂停只读", "点名回捞-退役历史"):
             if marker not in asset_state_text:
                 errors.append(f"asset state protocol missing preload priority marker: {marker}")
 
@@ -3826,6 +4519,126 @@ def main() -> None:
         entry_text = entry_path.read_text(encoding="utf-8")
         if "06_external-material-safety_外部材料安全边界.md" not in entry_text:
             errors.append(f"{relative} must reference external material safety protocol")
+
+    acquisition_overlay_relative = "references/shared/08_acquisition-objective-overlay_获客目标覆盖层.md"
+    acquisition_overlay_path = (base / acquisition_overlay_relative).resolve()
+    if not acquisition_overlay_path.exists():
+        errors.append("missing acquisition objective overlay source of truth")
+    else:
+        acquisition_overlay_text = acquisition_overlay_path.read_text(encoding="utf-8")
+        for marker in (
+            "只在用户明确",
+            "涨粉、扩大受众、做爆款",
+            "Article 生产不得加载",
+            "你这次更希望扩大内容受众，还是获得对产品真正有需求的客户咨询？",
+            "真实产品或服务",
+            "交付前后能够被用户观察到的真实差异",
+            "用户明确确认",
+            "传播人群不等于可承接客户",
+            "一题一证，逐条守诺，发布后求证",
+            "一条内容只推进一个尚未完成的信任判断",
+            "六个名称只用于后台归类",
+            "具体处境中的具体人群",
+            "目前仍不确定的一件具体事情",
+            "CTA 是可选项",
+            "每条只回答一个问题、增加一个新的可信依据",
+            "不套固定配比",
+            "不自动生成定位卡、获客卡、客户卡、信任卡或长期商业档案",
+            "不维护第二套导航",
+            "Create 的 Article 生产不读取本文件",
+            "Preflight 四重一致性",
+            "Review 发布后求证",
+            "不进入评论区线索识别、私信回复、线索评分、谈单、成交、CRM 或私域运营",
+            "不新增一级 Skill 或 handoff target",
+            "只有用户明确进入产品与服务采集",
+        ):
+            if marker not in acquisition_overlay_text:
+                errors.append(f"acquisition overlay missing stable marker: {marker}")
+
+    for relative in ACQUISITION_OVERLAY_REQUIRED_ENTRIES:
+        entry_path = (base / relative).resolve()
+        if not entry_path.exists():
+            continue
+        entry_text = entry_path.read_text(encoding="utf-8")
+        if not has_positive_reference(entry_text, "08_acquisition-objective-overlay_获客目标覆盖层.md"):
+            errors.append(f"{relative} must reference acquisition objective overlay on demand")
+
+    product_service_relative = (
+        "references/memory/04_eva-product-service_产品与服务采集.md"
+    )
+    product_service_path = (base / product_service_relative).resolve()
+    if not product_service_path.exists():
+        errors.append("missing product-service collection source of truth")
+    else:
+        product_service_text = product_service_path.read_text(encoding="utf-8")
+        for marker in (
+            "产品与服务采集",
+            "/eva-product-service",
+            "仅出现“产品”“服务”“咨询”等裸词不足以触发",
+            "每轮最多问一个决定性问题",
+            "不固定从第一层开始，不展示问卷",
+            "`product`",
+            "`standardized_service`",
+            "`consulting`",
+            "`project_collaboration`",
+            "`professional_capability`",
+            "只有愿望，没有实际做法、能力依据和边界",
+            "用户只是要记住尚未落地的产品构想",
+            "## 你现在真实能够提供的帮助",
+            "产品或服务名称、套餐、价格",
+            "这份产品与服务事实已经可以沉淀",
+            "本轮不得再次邀请",
+            "`privacy_flags`",
+            "保存底稿只代表授权写入记忆库",
+            "`privacy_flags` 标记的信息默认只供后台理解",
+            "必须另行取得明确的公开使用授权",
+            "`product-service-card` canonical 协议",
+            "`offering_form`",
+            "can_help_with",
+            "fit_situations",
+            "help_method",
+            "responsible_outcome",
+            "boundaries",
+            "`user_confirmed`",
+            "`material_supported_inference`",
+            "`pending_validation`",
+            "`profile_id`",
+            "`revision`",
+            "`facts_confirmed_at`",
+            "`supersedes`",
+            "更新时不覆盖旧文件",
+            "出现版本分叉",
+            "最新 `paused` 或 `retired` 版本",
+            "用户显式点名最新 `paused` 底稿",
+            "用户显式点名最新 `retired` 底稿",
+            "后续新会话仍可能把旧 `active` 版本当作当前状态",
+            "不是获客创作的强制前置",
+            "没有可用卡时沿用当前会话的最小商业上下文",
+            "普通 Think、普通 Create、Article、Learn、Lens 和普通 Preflight 不扫描",
+            "本轮新事实覆盖历史底稿",
+            "价格、名额、开放状态、时限和行动入口",
+            "用户在本轮主动、明确给出的价格、名额、开放状态、时限和行动入口",
+            "不替代 Audience Finder",
+            "不要求内容必须出现产品名、价格或 CTA",
+            "禁止编造用户的产品、服务、能力",
+            "产品定位、商业模式、销售话术、私域、谈单或 CRM 系统",
+        ):
+            if marker not in product_service_text:
+                errors.append(
+                    f"product-service collection truth missing stable marker: {marker}"
+                )
+
+    for relative in PRODUCT_SERVICE_REQUIRED_ENTRIES:
+        entry_path = (base / relative).resolve()
+        if not entry_path.exists():
+            continue
+        entry_text = entry_path.read_text(encoding="utf-8")
+        if not has_positive_reference(
+            entry_text, "04_eva-product-service_产品与服务采集.md"
+        ):
+            errors.append(
+                f"{relative} must reference product-service truth on explicit demand"
+            )
 
     for relative in RUNTIME_VERSION_FREE_PATHS:
         entry_path = (base / relative).resolve()
@@ -4068,6 +4881,10 @@ def main() -> None:
                 errors.append(description)
         frontmatter_parts = router_text.split("---", 2)
         router_frontmatter = frontmatter_parts[1] if len(frontmatter_parts) == 3 else ""
+        if "或业务任务" in router_frontmatter:
+            errors.append("eva router frontmatter must not claim all generic business tasks")
+        if "、客户咨询、" in router_frontmatter:
+            errors.append("eva router frontmatter must not expose bare 客户咨询 as an acquisition trigger")
         for marker in (
             "Eva-skill 本身",
             "作者",
@@ -4307,17 +5124,47 @@ def main() -> None:
     handoff_registry = read_json(base / "schemas" / "handoff-targets.json")
     registered_handoff_targets = set(handoff_registry.get("targets") or [])
     if len(CORE_ENTRIES) != 12:
-        errors.append(f"2.2.8 must keep exactly 12 Eva core entries, got {len(CORE_ENTRIES)}")
-    if len(registered_assets) != 17:
-        errors.append(f"2.2.8 must keep exactly 17 shared asset types, got {len(registered_assets)}")
-    if len(registered_handoff_targets) != 19:
+        errors.append(f"2.3.0 must keep exactly 12 Eva core entries, got {len(CORE_ENTRIES)}")
+    if len(registered_assets) != EXPECTED_ASSET_TYPE_COUNT:
         errors.append(
-            "2.2.8 must keep exactly 19 shared handoff targets, "
+            "2.3.0 must expose exactly "
+            f"{EXPECTED_ASSET_TYPE_COUNT} shared asset types, got "
+            f"{len(registered_assets)}"
+        )
+    if len(registered_handoff_targets) != EXPECTED_HANDOFF_TARGET_COUNT:
+        errors.append(
+            "2.3.0 must keep exactly "
+            f"{EXPECTED_HANDOFF_TARGET_COUNT} shared handoff targets, "
             f"got {len(registered_handoff_targets)}"
         )
     python_script_count = len(list((base / "scripts").glob("*.py")))
-    if python_script_count != 9:
-        errors.append(f"2.2.8 must keep exactly 9 shared Python scripts, got {python_script_count}")
+    if python_script_count != EXPECTED_PYTHON_SCRIPT_COUNT:
+        errors.append(
+            "2.3.0 must keep exactly "
+            f"{EXPECTED_PYTHON_SCRIPT_COUNT} shared Python scripts, got "
+            f"{python_script_count}"
+        )
+    product_service_config = (
+        asset_registry.get("assets") or {}
+    ).get("product-service-card") or {}
+    if set(product_service_config.get("produced_by") or []) != {"eva-memory"}:
+        errors.append("product-service-card must be produced only by eva-memory")
+    if set(product_service_config.get("valid_next") or []) != {
+        "eva-think",
+        "eva-create",
+        "eva-memory",
+    }:
+        errors.append(
+            "product-service-card valid_next must be eva-think, eva-create and eva-memory"
+        )
+    if product_service_config.get("visibility") != "bridge":
+        errors.append("product-service-card visibility must remain bridge")
+    if "eva-product-service" in CORE_ENTRIES:
+        errors.append("product-service collection must remain inside eva-think")
+    if "eva-product-service" in registered_handoff_targets:
+        errors.append("product-service collection must not add a handoff target")
+    if (repo_root / "skills" / "eva-product-service").exists():
+        errors.append("product-service collection must not add a top-level Skill")
     if "eva-article" in set(handoff_registry.get("targets") or []):
         errors.append("Article must remain an internal eva-create branch; eva-article handoff target is forbidden")
 
@@ -4590,6 +5437,7 @@ def main() -> None:
         data_export_text = data_export_path.read_text(encoding="utf-8")
         for marker in (
             "当前会话中仍然可见",
+            "`product-service-card`",
             "历史会话中没有落盘",
             "只导出全部记忆卡",
             "导出完整 Eva 数据包",
@@ -4676,6 +5524,9 @@ def main() -> None:
             "Review 先形成一个待验证变量",
             "用户要求从多元视角补复盘结论的盲区时可转 Lens",
             "Lens 只审视当前结论，不重新做数据归因",
+            "获客短视频不新增入口",
+            "本文件只决定当前站",
+            "不自动连续执行完整获客链",
             "不保存用户的默认工作流偏好",
             "不新增导航资产、状态字段、schema 或 handoff target",
         ):
@@ -5005,6 +5856,28 @@ def main() -> None:
                 "positive_example": "examples/asset-card.example.json",
                 "prompt_scenario_contract": "examples/prompt-regression-matrix.json",
                 "required_scenario_cases": sorted(REQUIRED_SCENARIO_CASES),
+                "acquisition_scenario_contract": (
+                    "testcases/acquisition-trust-overlay.json"
+                    if acquisition_contract_checked
+                    else None
+                ),
+                "required_acquisition_cases": acquisition_case_ids,
+                "product_service_scenario_contract": (
+                    "testcases/product-service-collection.json"
+                    if product_service_contract_checked
+                    else None
+                ),
+                "required_product_service_cases": product_service_case_ids,
+                "contract_counts": {
+                    "general": EXPECTED_SCENARIO_CASE_COUNT,
+                    "acquisition": EXPECTED_ACQUISITION_SCENARIO_CASE_COUNT,
+                    "product_service": EXPECTED_PRODUCT_SERVICE_SCENARIO_CASE_COUNT,
+                },
+                "architecture_counts": {
+                    "asset_types": EXPECTED_ASSET_TYPE_COUNT,
+                    "handoff_targets": EXPECTED_HANDOFF_TARGET_COUNT,
+                    "python_scripts": EXPECTED_PYTHON_SCRIPT_COUNT,
+                },
                 "required_architecture_paths": list(REQUIRED_ARCHITECTURE_PATHS),
                 "chain": [f"{left}->{right}" for left, right in chain],
             },

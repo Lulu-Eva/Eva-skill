@@ -1,5 +1,5 @@
 {
-  "version": "2.2.8",
+  "version": "2.3.0",
   "purpose": "Scenario contract inventory for same-turn routing, staged loading, hard gates, and user-facing lightness. Structural selftest validates this inventory but does not execute model behavior.",
   "cases": [
     {

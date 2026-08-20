@@ -99,6 +99,7 @@ internal：辅助模块或系统内部件，默认不向用户展示字段。
 | content-asset-card | Create / Link | surface |
 | review-card | Eva Review | bridge |
 | persona-card | Memory | bridge |
+| product-service-card | Memory | bridge |
 | voice-card | Memory | bridge |
 
 上表只做人读说明，不维护 `valid_next`、`required_fields` 或完整 produced_by。下游识别资产类型，不识别模块来源；每类资产的具体下游和最低字段必须读取 `schemas/asset-types.json`，合法下游目标集合必须读取 `schemas/handoff-targets.json`。
@@ -141,6 +142,26 @@ evidence：验证线索、对标来源、用户原始素材或 Brief
 商单资产字段以 `../eva-shared/references/shared/03_commercial-constraint-card_商单约束卡真源.md` 为准。没有正式商单约束卡，不进入高置信度标题或正文。
 
 `commercial-constraint-card` 的 `valid_next` 可以包含 `eva-brief`，但只表示字段缺失、低置信度待确认、稿件身份不明或需要对照 Brief 检查时回补。字段完整且用户目标是标题、开头、脚本或成稿时，不回流 Brief，应交给 Eva 主创作链的 Title、Opening 或 Script 上游分支。
+
+### Memory 产品与服务输出
+
+```text
+asset_type：product-service-card
+source_module：eva-memory
+core_content：offering_form、can_help_with、fit_situations、help_method、responsible_outcome、boundaries、lifecycle_status
+user_question：别人遇到什么问题时，我能提供什么帮助
+evidence：至少一项真实能力依据，带 user_confirmed / material_supported_inference / pending_validation 之一
+valid_next：eva-think、eva-create、eva-memory
+profile_id：首次保存时由 Eva 生成的内部稳定标识
+revision：正整数，首版为 1
+facts_confirmed_at：事实最后确认日期
+lifecycle_status：active / paused / retired
+supersedes：仅 revision > 1 时必填，指向上一版的安全项目相对路径
+```
+
+`offering_form` 只能是 `product`、`standardized_service`、`consulting`、`project_collaboration` 或 `professional_capability`。顶层和 `core_content` 内的 `lifecycle_status` 必须一致。首版完全省略 `supersedes`；后续版本沿用 `profile_id`、递增 `revision`，不覆盖旧文件。`profile_id` 是后台字段，不要求用户填写或默认外显。
+
+仅用户明确进入产品与服务采集，完整底稿已经成立，并且用户明确确认保存时，才能生成这类正式资产。产品名、价格、套餐和 CTA 不是必填字段；只有愿望、没有实际做法、能力依据和边界时，不得保存为有效卡。正式采集、版本和按需回捞协议见 `../eva-shared/references/memory/04_eva-product-service_产品与服务采集.md`。
 
 ### Review 跨模块交接输出
 
