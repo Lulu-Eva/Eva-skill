@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Prompt-level lint checks for Eva 2.2 source-of-truth boundaries."""
+"""Prompt-level lint checks for Eva 2.4.2 source-of-truth boundaries."""
 
 from __future__ import annotations
 
@@ -312,6 +312,65 @@ POSITIONING_BRIDGE_REQUIRED_MARKERS = {
         "获客是经营目标，定位实验是验证方式，均不新增为功能角色",
     ),
 }
+
+POSITIONING_242_REQUIRED_MARKERS = {
+    "../eva-positioning/SKILL.md": (
+        "裸定位请求只问一次快速／深度二选一",
+        "这一问不计入后续澄清轮次",
+        "快速定位最多连续两轮只澄清不交付",
+        "最多两个“个人材料方向”",
+        "快速定位可以合法停在可执行的工作定位",
+        "主页三件套是用户明确要求时才生成的表达层",
+    ),
+    "../eva-positioning/references/positioning/00_entry_账号阶段性定位主控.md": (
+        "分诊真实问题\n→ 提取个人材料方向\n→ 用户提供平台现实证据",
+        "这次模式选择不计入后续澄清轮次",
+        "不把切换前尚未交付的纯澄清轮次清零",
+        "最多连续两轮只澄清而没有交付",
+        "不得拆成并列任务",
+        "第三次响应必须交付一个合法结果",
+        "每连续两轮至少交付一次当前判断、候选或候选变化",
+        "没有平台证据时，交付的只能是个人材料方向，不是定位候选",
+    ),
+    "../eva-positioning/references/positioning/01_evidence-ledger_证据与候选账本.md": (
+        "个人材料方向不是定位候选",
+        "只有内部事实与最低限度的合格平台证据同时存在，才进入定位候选账本",
+        "平台搜索材料",
+        "自有账号发布材料",
+    ),
+    "../eva-positioning/references/positioning/02_platform-search_平台现实取证.md": (
+        "用户自己账号已发布的内容、可见数据和真实反馈",
+        "不得建立 L1 定位候选",
+        "不为了形式完整要求用户重复搜索",
+    ),
+    "../eva-positioning/references/positioning/03_stage-output_阶段结论与主页三件套.md": (
+        "L0 未形成定位",
+        "L1 候选定位",
+        "L2 工作定位",
+        "它是快速定位的合法完成结果",
+        "L3 深度阶段定位",
+        "不以主页三件套为必选产物",
+        "当前可用主页方案 v0",
+        "L3 可交付成熟主页方案",
+    ),
+    "../eva-positioning/references/positioning/04_persistence_暂停恢复与隐私.md": (
+        "stage: material-direction",
+        "恢复 `eva_version: 2.4.1` 的 L1 时",
+        "没有时，保留原始事实、反证和公开边界，但把运行权限降回 L0",
+        "不覆盖或回写旧档案",
+    ),
+    "../eva-positioning/references/positioning/05_ai-creator_AI博主专项.md": (
+        "最高只能成为“值得调查的个人材料方向”",
+        "不能直接进入定位候选",
+        "已有材料足够时不重复取证",
+    ),
+}
+
+POSITIONING_242_STALE_MARKERS = (
+    "用户未回传必要平台证据时，最高只能交付候选定位",
+    "最高只能交付 L1 候选定位",
+    "账号定位完成必须落到同一套可执行的头像",
+)
 
 POSITIONING_AUDIENCE_DIRECT_CALLERS = (
     "../eva-positioning/SKILL.md",
@@ -660,6 +719,12 @@ def lint(base: Path) -> dict:
                 errors.append(f"{path_rel}: contains removed internal-pending marker: {pattern}")
 
         normalized_path = path.as_posix()
+        if "/eva-positioning/" in normalized_path:
+            for stale_marker in POSITIONING_242_STALE_MARKERS:
+                if stale_marker in text:
+                    errors.append(
+                        f"{path_rel}: keeps pre-2.4.2 Positioning rule: {stale_marker}"
+                    )
         if "/eva-create/references/create/article/" in normalized_path:
             for coupling in ARTICLE_FORBIDDEN_SHORTVIDEO_COUPLINGS:
                 if coupling in text:
@@ -755,7 +820,7 @@ def lint(base: Path) -> dict:
             "按发散对象而不是“发散”一词路由",
             "指定数量的开头方案",
             "内容候选数量不是入口排序",
-            "围绕当前账号定位或账号阶段判断选题适配、先后或发布验证",
+            "围绕当前阶段判断选题",
             "为本人自媒体账号做定位/赛道定位/定位复盘",
             "自然语言包括想法梳理、话题人群识别、学科发散",
             "Positioning 仅在账号选题经营桥梁已命中且人群三项不清时调用",
@@ -809,6 +874,18 @@ def lint(base: Path) -> dict:
             if marker not in bridge_text:
                 errors.append(
                     f"{relative}: missing narrow Positioning account-topic bridge marker: {marker}"
+                )
+
+    for relative, markers in POSITIONING_242_REQUIRED_MARKERS.items():
+        positioning_path = (base / relative).resolve()
+        if not positioning_path.exists():
+            errors.append(f"missing Eva 2.4.2 Positioning owner: {relative}")
+            continue
+        positioning_text = positioning_path.read_text(encoding="utf-8")
+        for marker in markers:
+            if marker not in positioning_text:
+                errors.append(
+                    f"{relative}: missing Eva 2.4.2 Positioning marker: {marker}"
                 )
 
     audience_alignment_path = (

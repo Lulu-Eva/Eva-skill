@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Eva 2.4.1 structural and scenario checks."""
+"""Eva 2.4.2 structural and scenario checks."""
 
 from __future__ import annotations
 
@@ -418,7 +418,7 @@ REQUIRED_241_CONSERVATIVE_BEAT_CASE_CONTRACTS = {
 }
 
 LEGACY_227_CASE_COUNT = 219
-EXPECTED_SCENARIO_CASE_COUNT = 373
+EXPECTED_SCENARIO_CASE_COUNT = 377
 REQUIRED_USABILITY_CASE_IDS = {
     "usability-opening-placeholder-without-title-confirmation",
     "usability-no-persistent-cards-complete-draft",
@@ -432,7 +432,7 @@ REQUIRED_USABILITY_CASE_IDS = {
 }
 EXPECTED_ACQUISITION_SCENARIO_CASE_COUNT = 28
 EXPECTED_PRODUCT_SERVICE_SCENARIO_CASE_COUNT = 46
-EXPECTED_POSITIONING_SCENARIO_CASE_COUNT = 68
+EXPECTED_POSITIONING_SCENARIO_CASE_COUNT = 88
 EXPECTED_ASSET_TYPE_COUNT = 18
 EXPECTED_HANDOFF_TARGET_COUNT = 19
 EXPECTED_PYTHON_SCRIPT_COUNT = 9
@@ -563,14 +563,19 @@ INTENTIONAL_240_LEGACY_ROUTE_MIGRATIONS = {
             "persona-material-collection-boundary",
             "handoff-to-eva-positioning",
             "stage-positioning-not-persona-card",
+            "one-quick-or-deep-choice",
+            "speed-choice-before-fact-clarification",
+            "speed-choice-not-counted-as-fact-clarification",
         ],
         "forbid": [
             "enter-shared-persona-seven-step",
             "create-persona-card",
             "save-persona-card",
             "create-permanent-positioning",
+            "default-quick-without-user-choice",
+            "start-positioning-fact-interview-before-speed-choice",
         ],
-        "expected_terminal": "eva-positioning-current-stage-next-action",
+        "expected_terminal": "await-positioning-speed-choice",
     },
     "persona-track-positioning-boundary": {
         "id": "persona-track-positioning-boundary",
@@ -579,15 +584,19 @@ INTENTIONAL_240_LEGACY_ROUTE_MIGRATIONS = {
         "must_include": [
             "stage-track-hypothesis",
             "evidence-ledger",
-            "one-question-or-action",
+            "one-quick-or-deep-choice",
+            "speed-choice-before-fact-clarification",
+            "speed-choice-not-counted-as-fact-clarification",
         ],
         "forbid": [
             "enter-shared-persona-seven-step",
             "create-persona-card",
             "save-persona-card",
             "promise-permanent-best-monetization-track",
+            "default-quick-without-user-choice",
+            "create-positioning-candidate-before-platform-evidence",
         ],
-        "expected_terminal": "eva-positioning-current-stage-next-action",
+        "expected_terminal": "await-positioning-speed-choice",
     },
     "persona-positioning-no-save-invitation": {
         "id": "persona-positioning-no-save-invitation",
@@ -1473,37 +1482,107 @@ REQUIRED_225_CASE_CONTRACTS = {
     },
     "persona-account-positioning-boundary": {
         "expected_route": "eva-positioning-after-persona-boundary",
-        "expected_terminal": "eva-positioning-current-stage-next-action",
+        "expected_terminal": "await-positioning-speed-choice",
         "forbid": {
             "enter-shared-persona-seven-step",
             "create-persona-card",
             "save-persona-card",
             "create-permanent-positioning",
+            "default-quick-without-user-choice",
+            "start-positioning-fact-interview-before-speed-choice",
         },
         "must_include": {
             "persona-material-collection-boundary",
             "handoff-to-eva-positioning",
             "stage-positioning-not-persona-card",
+            "one-quick-or-deep-choice",
+            "speed-choice-before-fact-clarification",
+            "speed-choice-not-counted-as-fact-clarification",
         },
     },
     "persona-track-positioning-boundary": {
         "expected_route": "eva-positioning-stage-track-hypothesis",
-        "expected_terminal": "eva-positioning-current-stage-next-action",
+        "expected_terminal": "await-positioning-speed-choice",
         "forbid": {
             "enter-shared-persona-seven-step",
             "create-persona-card",
             "save-persona-card",
             "promise-permanent-best-monetization-track",
+            "default-quick-without-user-choice",
+            "create-positioning-candidate-before-platform-evidence",
         },
         "must_include": {
             "stage-track-hypothesis",
             "evidence-ledger",
-            "one-question-or-action",
+            "one-quick-or-deep-choice",
+            "speed-choice-before-fact-clarification",
+            "speed-choice-not-counted-as-fact-clarification",
         },
     },
 }
 
 REQUIRED_SCENARIO_CASES.update(REQUIRED_225_CASE_CONTRACTS)
+
+REQUIRED_242_POSITIONING_MODE_CASE_CONTRACTS = {
+    "positioning-bare-request-asks-speed-once": {
+        "expected_route": "eva-positioning-speed-choice",
+        "expected_terminal": "await-positioning-speed-choice",
+        "forbid": {
+            "default-quick-without-user-choice",
+            "ask-new-or-old-account-in-same-turn",
+            "positioning-questionnaire",
+        },
+        "must_include": {
+            "one-quick-or-deep-choice",
+            "speed-choice-before-fact-clarification",
+            "speed-choice-not-counted-as-fact-clarification",
+        },
+    },
+    "positioning-explicit-quick-skips-speed-choice": {
+        "expected_route": "eva-positioning-quick",
+        "expected_terminal": "quick-positioning-current-result-or-one-fact-theme",
+        "forbid": {
+            "ask-quick-or-deep-again",
+            "default-homepage-package",
+            "positioning-questionnaire",
+        },
+        "must_include": {
+            "quick-mode-direct",
+            "reuse-current-material",
+            "at-most-two-pure-clarification-turns",
+        },
+    },
+    "positioning-explicit-deep-skips-speed-choice": {
+        "expected_route": "eva-positioning-deep",
+        "expected_terminal": "deep-positioning-stage-result-or-one-decisive-conflict",
+        "forbid": {
+            "ask-quick-or-deep-again",
+            "homepage-required-for-deep-completion",
+            "positioning-questionnaire",
+        },
+        "must_include": {
+            "deep-mode-direct",
+            "reuse-current-material",
+            "stage-judgment-at-least-every-two-question-turns",
+        },
+    },
+    "positioning-speed-choice-not-fact-turn": {
+        "expected_route": "eva-positioning-quick-first-fact-turn",
+        "expected_terminal": "first-fact-clarification-or-direct-quick-result",
+        "forbid": {
+            "count-speed-choice-as-first-fact-turn",
+            "only-one-fact-turn-remaining",
+            "repeat-speed-choice",
+        },
+        "must_include": {
+            "speed-choice-not-counted-as-fact-clarification",
+            "fact-clarification-budget-starts-at-zero",
+            "one-decision-theme",
+        },
+    },
+}
+
+REQUIRED_SCENARIO_CASES.update(REQUIRED_242_POSITIONING_MODE_CASE_CONTRACTS)
 
 REQUIRED_227_CASE_CONTRACTS = {
     "persona-complete-invite-save-once": {
@@ -2438,8 +2517,8 @@ REQUIRED_ROUTER_MARKERS = {
     "eva-new-user": "Router must expose the adaptive new-user tutorial",
     "/eva-positioning": "Router must expose the account-stage-positioning entry",
     "eva-positioning": "Router must route explicit account positioning to its own entry",
-    "主页头像昵称简介": "Router must expose executable profile-trio intent",
-    "围绕当前账号定位或账号阶段判断选题适配、先后或发布验证": "Router must keep the narrow account-topic bridge explicit",
+    "整理主页三件套": "Router must expose optional profile-trio intent",
+    "围绕当前阶段判断选题": "Router must keep the narrow account-topic bridge explicit",
     "本人自媒体账号做定位/赛道定位/定位复盘": "Router must scope Positioning to the user's own self-media account task",
     "自然语言包括想法梳理、话题人群识别、学科发散": "Router frontmatter must preserve SkillHub natural-language activation anchors",
     "eva-think": "Router must expose eva-think as the default light entry",
@@ -5518,6 +5597,23 @@ def main() -> None:
                         + ", ".join(missing_markers)
                     )
 
+        for case_id, contract in REQUIRED_242_POSITIONING_MODE_CASE_CONTRACTS.items():
+            case = case_by_id.get(case_id) or {}
+            for scalar_field in ("expected_route", "expected_terminal"):
+                if case.get(scalar_field) != contract[scalar_field]:
+                    errors.append(
+                        f"prompt scenario case {case_id!r} {scalar_field} must be "
+                        f"{contract[scalar_field]!r}"
+                    )
+            for list_field in ("forbid", "must_include"):
+                actual = set(case.get(list_field) or [])
+                missing_markers = sorted(contract[list_field] - actual)
+                if missing_markers:
+                    errors.append(
+                        f"prompt scenario case {case_id!r} missing {list_field} marker(s): "
+                        + ", ".join(missing_markers)
+                    )
+
         for case_id, contract in REQUIRED_227_CASE_CONTRACTS.items():
             case = case_by_id.get(case_id) or {}
             for scalar_field in ("expected_route", "expected_terminal"):
@@ -6152,11 +6248,11 @@ def main() -> None:
                 "AP-007": {"进入eva-think-persona-memory", "不进入eva-positioning"},
                 "AP-009": {"沿用2.3.0获客链路", "不强制先做账号定位"},
                 "AP-013": {"不联网代搜", "输出定制人工搜索任务"},
-                "AP-014": {"最高停在L1候选定位", "不交付完整主页三件套"},
-                "AP-018": {"将经历记为内部事实", "将同类账号记为平台证据", "将咨询记为发布反馈"},
-                "AP-025": {"可正式输出L0暂不定位", "只给一个恢复动作"},
+                "AP-014": {"不生成定位候选", "已有真实材料时只给个人材料方向与一次定制搜索任务", "不交付主页三件套"},
+                "AP-018": {"将经历记为内部事实", "将‘同类账号很多’记为待核实的平台印象，不冒充贴回证据", "将案例视频与咨询分别记为自有账号发布材料和发布反馈"},
+                "AP-025": {"可正式输出暂不定位但前台不显示L0", "拒绝搜索不能换来定位候选", "只给一个恢复动作"},
                 "AP-027": {"不创建新Asset类型"},
-                "AP-036": {"交付头像、唯一主昵称和简介", "三者服务同一阶段定位"},
+                "AP-036": {"用户明确要主页且已是L3时交付成熟主页方案", "L3本身不以主页三件套为成立条件"},
                 "AP-037": {"产品不是定位强制前置", "不伪造服务、价格或CTA"},
                 "AP-039": {"原始请求明确授权创作时可同轮进入eva-create", "至少先形成可用L2工作定位"},
                 "AP-040": {"不自动进入eva-create", "不自动生成产品植入或CTA"},
@@ -6186,8 +6282,28 @@ def main() -> None:
                 "AP-064": {"不输出候选题功能角色队列", "不伪造月度执行顺序", "只给形成可用L2所需的一个上游现实动作", "不逐题打分也不设置固定比例"},
                 "AP-065": {"将同一会话的Review快照视为临时发布反馈摘要", "不把Review快照当成定位结论", "根据用户目标、可用L2和现实约束选择一个首要角色或发布实验", "不新建Asset或handoff target"},
                 "AP-066": {"只问一个决定性目标问题", "在目标澄清前不直接选择内容角色", "不把未覆盖方向解释为应该增加", "由Positioning而非Review决定下一阶段"},
-                "AP-067": {"Review快照只是发布反馈摘要而非定位证明", "不将L0/L1越级为L2", "不因某方向出现最多就决定账号主线", "只给形成可用L2所需的一个上游现实动作"},
+                "AP-067": {"Review快照只是账号发布反馈而非定位结论", "可以回答一部分平台侧现实但单独不能升级为L2", "不因某方向出现最多就决定账号主线"},
                 "AP-068": {"Review到Positioning只单向接力一次", "Positioning不返回Review重做观察", "只使用同一会话的最近有效结论", "不新建review-card到eva-positioning链路", "不新增handoff target"},
+                "AP-069": {"只问一次快速定位还是深度定位", "不默认代选快速定位"},
+                "AP-070": {"直接进入快速定位", "不重复询问快速还是深度"},
+                "AP-071": {"直接进入深度定位", "不因深度定位自动强制主页三件套"},
+                "AP-072": {"模式选择不计入事实澄清轮次", "快速定位事实澄清从第一轮开始"},
+                "AP-073": {"不出现第三轮连续纯澄清", "必须交付当前阶段定位、最多两个候选、个人材料方向加搜索、非定位分诊或正式暂停之一"},
+                "AP-074": {"本轮先交付当前判断或候选变化", "不让这个两轮周期变成连续纯采访"},
+                "AP-075": {"最多交付两个个人材料方向", "明确它们不是定位候选", "只给一次定制平台观察任务"},
+                "AP-076": {"不伪造个人材料方向", "只给一个能找到真实行动或作品的回忆任务"},
+                "AP-077": {"自有已发内容、数据和真实反馈可满足平台侧现实门槛", "不强制用户重新搜索"},
+                "AP-078": {"当前且可比的用户贴回材料可满足相关平台证据", "证据已足够时不重复布置搜索"},
+                "AP-079": {"传闻、过时材料、不可读链接和明显不可比大号不能单独满足平台证据", "不形成定位候选"},
+                "AP-080": {"内部事实与相关平台证据同时存在时可形成定位候选", "公开边界仍会改变选择时不升为L2"},
+                "AP-081": {"信息充分时零追问直接交付L2当前阶段定位", "L2是快速定位的合法完成结果"},
+                "AP-082": {"交付当前可用主页方案v0", "不把L2主页v0称为成熟定稿"},
+                "AP-083": {"L3深度定位可以正常完成", "L3不以主页三件套为成立条件"},
+                "AP-084": {"只交付成熟版简介，不重做头像和昵称", "核对新简介与保留的头像昵称是否一致"},
+                "AP-085": {"复用已有个人事实、平台证据、反证和公开边界", "不从头采访", "切换模式本身不计入澄清轮次，但不清零切换前尚未交付的纯澄清"},
+                "AP-086": {"保留旧材料但前台按L0个人材料方向处理", "不覆盖或批量改写旧文件"},
+                "AP-087": {"按2.4.2证据门槛重新检查后可继续作为定位候选", "不机械降级", "不覆盖旧文件"},
+                "AP-088": {"文科背景和真实学习过程只能成为个人材料方向", "不包装成AI博主定位候选"},
             }
             for case_id, markers in required_positioning_markers.items():
                 actual = set(positioning_case_by_id.get(case_id, {}).get("expected") or [])
@@ -6197,7 +6313,7 @@ def main() -> None:
                         f"positioning scenario case {case_id!r} missing expected marker(s): "
                         + ", ".join(missing_markers)
                     )
-            required_l2_preconditions = {"AP-049", "AP-050", "AP-051", "AP-053", "AP-054", "AP-055", "AP-057", "AP-058", "AP-059", "AP-060", "AP-061", "AP-063", "AP-065"}
+            required_l2_preconditions = {"AP-049", "AP-050", "AP-051", "AP-053", "AP-054", "AP-055", "AP-057", "AP-058", "AP-059", "AP-060", "AP-061", "AP-063", "AP-065", "AP-082"}
             for case_id in required_l2_preconditions:
                 precondition = positioning_case_by_id.get(case_id, {}).get("precondition") or ""
                 if "可用L2工作定位" not in precondition:
@@ -6360,11 +6476,13 @@ def main() -> None:
         for marker in (
             "name: eva-positioning",
             "/eva-positioning",
+            "裸定位请求只问一次快速／深度二选一",
             "每轮先吸收用户已经提供的材料",
             "内部事实、平台证据和发布反馈必须分开",
-            "用户未回传必要平台证据时，最高只能交付候选定位",
+            "没有最低限度的合格平台证据时，只能从真实经历中交付最多两个“个人材料方向”",
             "暂不定位",
-            "账号定位完成必须落到同一套可执行的头像、唯一主昵称和可直接上线的简介",
+            "快速定位可以合法停在可执行的工作定位",
+            "主页三件套是用户明确要求时才生成的表达层",
             "默认不保存定位进度",
             "不使用网页搜索、浏览器、外部 Search Skill、平台 API 或模型记忆",
             "只有用户明确把候选题放进“当前账号定位或账号阶段先做什么”的经营问题",
@@ -6385,7 +6503,11 @@ def main() -> None:
     positioning_reference_markers = {
         "00_entry_账号阶段性定位主控.md": (
             "## 每轮判断循环",
-            "平台证据未回",
+            "没有平台证据时，交付的只能是个人材料方向，不是定位候选",
+            "这次模式选择不计入后续澄清轮次",
+            "不把切换前尚未交付的纯澄清轮次清零",
+            "最多连续两轮只澄清而没有交付",
+            "不得拆成并列任务",
             "暂不定位",
             "## 账号选题经营桥梁",
             "不建立全局选题前置",
@@ -6407,15 +6529,21 @@ def main() -> None:
         ),
         "02_platform-search_平台现实取证.md": (
             "平台搜索与观察必须由用户在本次定位的目标平台亲自完成",
-            "最高只能交付 L1 候选定位",
+            "不得建立 L1 定位候选",
+            "用户自己账号已发布的内容、可见数据和真实反馈",
+            "不为了形式完整要求用户重复搜索",
             "不得继续模拟搜索结果",
         ),
         "03_stage-output_阶段结论与主页三件套.md": (
-            "L0 暂不定位",
+            "L0 未形成定位",
             "L1 候选定位",
             "L2 工作定位",
-            "L3 完成态阶段定位包",
+            "它是快速定位的合法完成结果",
+            "L3 深度阶段定位",
+            "不以主页三件套为必选产物",
             "主页三件套固定指：头像、昵称、简介",
+            "当前可用主页方案 v0",
+            "L3 可交付成熟主页方案",
             "## 账号选题经营桥梁输出",
             "预期吸引谁",
             "本题不能证明",
@@ -6435,10 +6563,14 @@ def main() -> None:
             "作为 Positioning 独立数据域纳入 Eva 统一数据备份",
             "新生成的包使用备份格式 v2",
             "不自动解压或恢复",
+            "恢复 `eva_version: 2.4.1` 的 L1 时",
+            "不覆盖或回写旧档案",
         ),
         "05_ai-creator_AI博主专项.md": (
             "AI 领域信号 + 账号经营意图",
             "不构成 AI 博主定位",
+            "最高只能成为“值得调查的个人材料方向”",
+            "已有材料足够时不重复取证",
             "主线验证、人设证据、流量入口、商业桥梁或辅助",
             "获客是经营目标，定位实验是验证方式，均不新增为功能角色",
         ),
@@ -7173,29 +7305,29 @@ def main() -> None:
     handoff_registry = read_json(base / "schemas" / "handoff-targets.json")
     registered_handoff_targets = set(handoff_registry.get("targets") or [])
     if len(CORE_ENTRIES) != 13:
-        errors.append(f"2.4.1 must expose exactly 13 Eva core entries, got {len(CORE_ENTRIES)}")
+        errors.append(f"2.4.2 must expose exactly 13 Eva core entries, got {len(CORE_ENTRIES)}")
     if "eva-positioning" not in CORE_ENTRIES:
-        errors.append("2.4.1 must keep eva-positioning as a top-level core entry")
+        errors.append("2.4.2 must keep eva-positioning as a top-level core entry")
     if "eva-positioning" in registered_handoff_targets:
         errors.append("eva-positioning is an entry, not an asset handoff target")
     if any("position" in asset_name for asset_name in registered_assets):
-        errors.append("2.4.1 must not add a positioning asset type")
+        errors.append("2.4.2 must not add a positioning asset type")
     if len(registered_assets) != EXPECTED_ASSET_TYPE_COUNT:
         errors.append(
-            "2.4.1 must expose exactly "
+            "2.4.2 must expose exactly "
             f"{EXPECTED_ASSET_TYPE_COUNT} shared asset types, got "
             f"{len(registered_assets)}"
         )
     if len(registered_handoff_targets) != EXPECTED_HANDOFF_TARGET_COUNT:
         errors.append(
-            "2.4.1 must keep exactly "
+            "2.4.2 must keep exactly "
             f"{EXPECTED_HANDOFF_TARGET_COUNT} shared handoff targets, "
             f"got {len(registered_handoff_targets)}"
         )
     python_script_count = len(list((base / "scripts").glob("*.py")))
     if python_script_count != EXPECTED_PYTHON_SCRIPT_COUNT:
         errors.append(
-            "2.4.1 must keep exactly "
+            "2.4.2 must keep exactly "
             f"{EXPECTED_PYTHON_SCRIPT_COUNT} shared Python scripts, got "
             f"{python_script_count}"
         )

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Common helpers for Eva Shared 2.4.1 scripts."""
+"""Common helpers for Eva Shared 2.4.2 scripts."""
 
 from __future__ import annotations
 
@@ -45,7 +45,7 @@ VALID_LOW_CONFIDENCE_REASONS = {
     "unverified-causality",
 }
 
-VERSION = "eva-shared-2.4.1"
+VERSION = "eva-shared-2.4.2"
 
 FRONTMATTER_MAX_BYTES = 64 * 1024
 FRONTMATTER_MAX_KEY_CHARS = 128

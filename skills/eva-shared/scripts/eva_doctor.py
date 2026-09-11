@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Check Eva Shared 2.4.1 structure and dependencies."""
+"""Check Eva Shared 2.4.2 structure and dependencies."""
 
 from __future__ import annotations
 
