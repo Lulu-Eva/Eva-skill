@@ -64,6 +64,7 @@
 |---|---|---|
 | 只有想法、话题、点子、商单约束卡，或标题没有验证线索 | `references/create/shortvideo/title/01_eva-title-search-plan_爆款标题搜索方案.md` | 搜索方案，不接正文 |
 | 用户贴回 3-5 个爆款标题、搜索结果、对标标题或候选标题 | `references/create/shortvideo/title/02_eva-title-candidate-check_爆款标题候选判断.md` | 候选判断；成立才输出标题交接卡 |
+| 当前标题位置的候选均不能一字不改使用，但仍有可迁移要素，且真实素材能够兑现 | 先由候选判断确认条件，再按需读取 `references/create/shortvideo/title/05_eva-title-recombination_原标题优先与兜底重组.md` | 最多 3 个受约束方案；无验证或无素材时不得进入 |
 | 用户只有封面标题，正文标题弱，或明确想补正文标题 | `references/create/shortvideo/title/03_eva-title-body-heading_正文标题补强.md` | 搜索正文标题；一字不改优先 |
 | 用户给出基本成形、尚未发布的完整稿，要求判断整篇能不能发或做发布前总检 | `eva-preflight` | 返回一级 Preflight 做综合审核；不把总检缩成标题检查 |
 | 用户同时给标题和完整内容稿/原稿，只要求检查标题承诺是否被正文兑现 | `references/create/shortvideo/title/04_eva-title-promise-check_标题承诺与原稿检查.md` | 标题兑现检查；不直接润色 |
@@ -138,7 +139,7 @@
 
 - 搜索方案输出后，等待用户贴回候选爆款标题；不接 `/eva-script`。
 - 候选标题一字不改可用，且内容承诺能兑现 -> 输出标题交接卡。
-- 候选标题不能一字不改，但结构可迁移 -> 必须说明原爆款结构、点击机制和替换词，再输出标题交接卡。
+- 当前标题位置没有一条候选能一字不改使用，但仍有可迁移要素，且真实素材能兑现 -> 按需读取 `references/create/shortvideo/title/05_eva-title-recombination_原标题优先与兜底重组.md`；只处理缺失位置，已有可用原标题保持不动。新标题未单独验证，输出方案后停在标题链路，不直接进入正文。
 - 候选标题违反 Brief、依赖原作者经历、夸大承诺或抢走主线 -> 放弃，不进入正文。
 - 正文标题补强完成后，不自动进入 `/eva-script`。必须回到标题四问，确认封面标题验证线索、主谜面、用户疑问和内容承诺。
 - 商单内容交给 `/eva-script` 前，还必须按 `../eva-shared/references/shared/03_commercial-constraint-card_商单约束卡真源.md` 补齐“商单内容任务卡”。缺任一最低字段，回 `/eva-brief` 补齐，不直接成稿。

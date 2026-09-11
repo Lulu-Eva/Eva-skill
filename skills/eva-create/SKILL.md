@@ -1,7 +1,7 @@
 ---
 name: eva-create
 description: |
-  Eva Create 2.3.0 内容生产入口。处理两条独立分支：短视频、口播稿、视频标题/开头/正文；非虚构自媒体文章、公众号文章、观点长文的新写、续写和修改。用户明确要通过短视频获得客户咨询、为产品建立购买信任或推动潜在客户行动时，按需加载 Eva 信任累积型获客覆盖层，但不建立第二套创作链路。不处理朋友圈、微博、小红书短图文、虚构文学、学术论文或专业文书。触发：/eva-create、/eva-shortvideo、/eva-title、/eva-script、做一条短视频、优化视频开头、写完整视频稿、写一篇公众号文章、把想法或资料写成文章。
+  Eva Create 2.4.1 内容生产入口。处理两条独立分支：短视频、口播稿、视频标题/开头/正文；非虚构自媒体文章、公众号文章、观点长文的新写、续写和修改。用户明确要通过短视频获得客户咨询、为产品建立购买信任或推动潜在客户行动时，按需加载 Eva 信任累积型获客覆盖层，但不建立第二套创作链路。不处理朋友圈、微博、小红书短图文、虚构文学、学术论文或专业文书。触发：/eva-create、/eva-shortvideo、/eva-title、/eva-script、做一条短视频、优化视频开头、写完整视频稿、看一下短视频节拍、短视频稿为什么水/哪里没有推进、写一篇公众号文章、把想法或资料写成文章。
 ---
 
 # Eva Create
@@ -26,11 +26,13 @@ references/create/article/02_eva-article-writing_文章撰写与长度调节.md
 ../eva-shared/references/benchmark/00_eva-benchmark-copy_对标文案拆解.md
 ../eva-shared/references/quality/00_eva-ai-check_表达真实性审查.md
 references/create/shortvideo/00_eva-shortvideo_主入口.md
+references/create/shortvideo/01_eva-beats_短视频节拍与心智推进.md
 references/create/shortvideo/title/00_eva-title_标题即选题.md
 references/create/shortvideo/opening/00_eva-opening_开头针对性优化.md
 references/create/shortvideo/opening/01_eva-opening-diagnosis_开头承接与兑现诊断.md
 references/create/shortvideo/opening/02_eva-opening-generation_开头方案生成与推荐.md
 references/create/shortvideo/script/00_eva-script_思维流爆款内容创作.md
+references/create/shortvideo/script/06_eva-script-beat-diagnosis_短视频节拍诊断.md
 references/create/shortvideo/script/03_eva-script-runtime_普通正文简版路线.md
 ../eva-shared/references/commerce/00_eva-commerce_商单主入口.md
 ../eva-shared/references/shared/00_handoff-cards_交接卡字段真源.md
@@ -61,10 +63,12 @@ references/create/shortvideo/script/03_eva-script-runtime_普通正文简版路�
 - CTA 不是必选项。存在 `product-service-card` 不等于必须在内容中植入产品，保存卡片也不等于授权 CTA。真实行动入口不存在或用户未授权时不补造私信、加微信、领资料或购买动作；用户未明确要求内容矩阵时不得扩展成多条规划。Article 不读取 shared 08 或产品与服务底稿，沿用原生事实、证据、产品和 CTA 边界。
 - 在依赖封面或标题点击的链路里，用户第一次要求“先写一版 / 直接写稿”，但标题没有验证线索时，仍进入标题搜索方案，不因信息齐全绕过标题硬闸门。
 - 用户明确做抖音、视频号等没有封面点击的完整口播时，不强制搜索平台标题；按第一句话链路形成内容入口，再进入简版路线或完整路线。用户同时要求封面标题、正文标题或标题优化时，才进入标题链路。
-- 只有 Eva 已经明确要求先搜索标题，用户随后第二次明确表示“知道标题还没验证，仍要先看草案 / 先试结构”时，才视为接受未验证草案边界。此时输出低置信度草案，不再重复阻塞；草案不能包装成可直接发布的终稿。商单禁区、虚构经历、虚构数据和安全边界不能通过反复要求绕过。
+- 未验证草案按 shared 02 判断：仅标题前置链路需要先提醒搜索，再由用户第二次明确接受未验证边界；第一句话链路按入口、结构和真实素材判断，不追加标题确认。草案不能包装成可直接发布的终稿，商单禁区、事实和安全边界不能通过反复要求绕过。
 - 短视频标题链路没有验证线索，不进入高置信度正文；Article 标题后置，不继承这条闸门。
 - 短视频商单先拆 Brief 或 Commerce 约束，再进入标题或第一句话链路。正式品牌赞助文章首版只做 Brief/约束交接，不直接进入 Article 成稿。
 - 只做 AI 味检测时，不顺手改完整稿。
+- 用户提供短视频稿并明确要求“看节拍 / 为什么水 / 哪里没有推进”时，留在 Create 的 Script 诊断分支，读取节拍真源和按需诊断适配器；默认用白话交付一个问题、一处证据和实际影响，不展开完整节拍链。用户只要诊断时到此停止；问调整才给一个原则，明确要求修改才进入 Writing。完整发布总检仍交 `eva-preflight`。Title 与 Article 不加载短视频节拍真源。
+- 短视频同时出现“AI 味”与“水 / 没推进”时：用户明确说“只看节拍”则进 Script 节拍诊断；否则由表达真实性审查统筹，若最上游问题恰是短视频推进，再按需读取节拍真源命名问题。两条分支都只返回当前模式允许的一个最高优先级问题，不叠加两份报告，也不未经授权追加调整动作。
 - 对标拆解只能迁移结构，不能照搬。
 - 为短视频选题或标题找平台对标时，只输出手动搜索词、搜索路径、观察指标和贴回要求；不得调用网页搜索、外部搜索 Skill、浏览器或平台 API 替用户刷对标。Article 中对关键时效事实的公开来源核验不属于“代刷平台对标”。
 - 不预测下一条内容的播放、点赞、完播或转化区间。可以整理账号历史参考范围、评价验证证据强弱，并指定发布后观察指标，但不得把历史范围包装成预测。

@@ -79,7 +79,7 @@ module.md 要求的能力是否超出 permissions
 
 ### 3. 资产交接
 
-检查 `produces` 是否是 Eva Asset 已知资产类型。  
+检查 `produces` 是否是 Eva Asset 已知资产类型。
 如果 Link 输出 `content-asset-card`，至少要能交给：
 
 ```text

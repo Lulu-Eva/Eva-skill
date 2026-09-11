@@ -267,7 +267,7 @@ confidence: low / medium / high
 
 ## 检索关键词
 
-- 
+-
 ```
 
 如果来自 `../eva-shared/references/memory/01_eva-persona-memory_人设记忆采集.md`，允许保存 `type: persona-card`。不要强行改成普通点子卡。

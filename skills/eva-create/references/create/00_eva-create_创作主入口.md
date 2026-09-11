@@ -27,6 +27,8 @@ Eva Create 只做一层内容形式分流：短视频进入 shortvideo，非虚�
 | 短视频对标文案、爆款笔记、口播稿拆解 | `../eva-shared/references/benchmark/00_eva-benchmark-copy_对标文案拆解.md` |
 | 品牌 Brief、商单需求、合作口径、产品卖点、商单原稿、同产品样本 | `../eva-shared/references/commerce/00_eva-commerce_商单主入口.md` |
 | 视频稿 AI 味、太机械、表达真实性审查 | `../eva-shared/references/quality/00_eva-ai-check_表达真实性审查.md` |
+| 同时要查短视频的 AI 味与水分 / 推进 | 明确“只看节拍”时走 Script 节拍诊断并读取按需诊断适配器；否则由表达真实性审查统筹，最上游问题是推进时才按需读节拍真源，不叠加两份报告 |
+| 已提供短视频或口播稿，明确要看节拍、水分或哪里没推进 | `references/create/shortvideo/00_eva-shortvideo_主入口.md`；再按需读取节拍真源和 Script 诊断适配器。只诊断时停止，问建议才给一个原则，明确要求修改才进入 Writing |
 | 做一条短视频，但还没判断标题/开头/正文入口 | `references/create/shortvideo/00_eva-shortvideo_主入口.md` |
 | 搜标题、判断标题、正文标题、标题兑现 | `references/create/shortvideo/title/00_eva-title_标题即选题.md` |
 | 标题交接卡或第一句话交接卡已成立，准备写正文 | `references/create/shortvideo/script/00_eva-script_思维流爆款内容创作.md` |

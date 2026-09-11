@@ -1,0 +1,4 @@
+interface:
+  display_name: "Eva Positioning｜账号阶段性定位"
+  short_description: "用真实证据建立可验证、可调整的阶段性账号定位"
+  default_prompt: "使用 $eva-positioning 帮我梳理当前账号最值得验证的阶段性定位；每轮只推进一个关键判断。"

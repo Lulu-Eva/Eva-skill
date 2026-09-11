@@ -1,5 +1,5 @@
 {
-  "version": "2.3.0",
+  "version": "2.4.1",
   "purpose": "Scenario contract inventory for same-turn routing, staged loading, hard gates, and user-facing lightness. Structural selftest validates this inventory but does not execute model behavior.",
   "cases": [
     {
@@ -299,18 +299,18 @@
     {
       "id": "persona-account-positioning-boundary",
       "input": "/eva 帮我做账号定位，再打造一个适合涨粉的账号人设。",
-      "expected_route": "eva-think-persona-account-positioning-boundary",
-      "forbid": ["enter-shared-persona-seven-step", "create-persona-card", "save-persona-card", "promise-full-account-positioning"],
-      "must_include": ["persona-material-collection-boundary", "not-account-positioning", "recommend-think-or-reframe-light-reorientation-only"],
-      "expected_terminal": "explain-boundary-and-offer-light-think-or-reframe-only"
+      "expected_route": "eva-positioning-after-persona-boundary",
+      "forbid": ["enter-shared-persona-seven-step", "create-persona-card", "save-persona-card", "create-permanent-positioning"],
+      "must_include": ["persona-material-collection-boundary", "handoff-to-eva-positioning", "stage-positioning-not-persona-card"],
+      "expected_terminal": "eva-positioning-current-stage-next-action"
     },
     {
       "id": "persona-track-positioning-boundary",
       "input": "用 Eva 帮我定一下赛道，选一个最好变现的方向。",
-      "expected_route": "eva-think-persona-track-positioning-boundary",
-      "forbid": ["enter-shared-persona-seven-step", "create-persona-card", "save-persona-card", "promise-full-track-positioning"],
-      "must_include": ["persona-material-collection-boundary", "not-track-positioning", "recommend-think-or-reframe-light-reorientation-only"],
-      "expected_terminal": "explain-boundary-and-offer-light-think-or-reframe-only"
+      "expected_route": "eva-positioning-stage-track-hypothesis",
+      "forbid": ["enter-shared-persona-seven-step", "create-persona-card", "save-persona-card", "promise-permanent-best-monetization-track"],
+      "must_include": ["stage-track-hypothesis", "evidence-ledger", "one-question-or-action"],
+      "expected_terminal": "eva-positioning-current-stage-next-action"
     },
     {
       "id": "explicit-save",
@@ -1580,10 +1580,10 @@
     {
       "id": "persona-positioning-no-save-invitation",
       "input": "/eva-persona-memory 帮我确定账号定位和赛道，不是挖经历。",
-      "expected_route": "eva-think-persona-account-positioning-boundary",
+      "expected_route": "eva-positioning-after-persona-boundary",
       "forbid": ["enter-persona-collection", "save-invitation", "create-persona-card"],
-      "must_include": ["persona-material-collection-boundary", "not-account-positioning"],
-      "expected_terminal": "positioning-boundary-without-collection-or-save-invitation"
+      "must_include": ["persona-material-collection-boundary", "handoff-to-eva-positioning"],
+      "expected_terminal": "continue-in-positioning-without-persona-save"
     },
     {
       "id": "memory-multiple-candidates-one-save-question",
@@ -1606,14 +1606,14 @@
       "input": "/eva-memory 把我的 Eva 数据打包到桌面。",
       "expected_route": "eva-think-to-shared-memory-data-export-preview",
       "forbid": ["create-zip-before-confirmation", "scan-entire-computer", "show-file-bodies"],
-      "must_include": ["memory-learn-review-preview", "three-scope-options", "unencrypted-local-zip-warning"],
+      "must_include": ["memory-learn-review-positioning-preview", "three-scope-options", "unencrypted-local-zip-warning"],
       "expected_terminal": "readonly-source-preview-then-one-scope-choice"
     },
     {
       "id": "eva-data-export-memory-only",
       "input": "我看过预览了，这次只导出全部 Eva 记忆卡，确认生成。",
       "expected_route": "eva-think-to-shared-memory-data-export",
-      "forbid": ["include-eva-learn", "include-eva-review", "overwrite-existing-backup", "modify-source"],
+      "forbid": ["include-eva-learn", "include-eva-review", "include-eva-positioning", "overwrite-existing-backup", "modify-source"],
       "must_include": ["memory-only-scope", "fresh-final-scope-preview", "crc-and-sha256-verification", "immutable-snapshot"],
       "expected_terminal": "verified-memory-only-zip"
     },
@@ -1622,15 +1622,15 @@
       "input": "预览没问题，确认导出完整 Eva 数据包，学习原始资料也一起备份。",
       "expected_route": "eva-think-to-shared-memory-data-export",
       "forbid": ["omit-learn-original-sources-silently", "scan-entire-computer", "include-absolute-source-path"],
-      "must_include": ["memory", "all-known-learn-projects", "learn-original-sources", "current-authorized-review", "fresh-final-scope-preview"],
+      "must_include": ["memory", "all-known-learn-projects", "learn-original-sources", "current-authorized-review", "current-project-positioning", "fresh-final-scope-preview"],
       "expected_terminal": "verified-complete-eva-data-zip"
     },
     {
       "id": "eva-data-export-custom-exclude-learn-sources",
-      "input": "自定义导出 Memory 和 Eva Learn，但不要带 sources/原始资料。",
+      "input": "自定义导出 Memory、Eva Learn 和 Positioning，但不要带 sources/原始资料。",
       "expected_route": "eva-think-to-shared-memory-data-export",
       "forbid": ["include-learn-original-sources", "expand-beyond-selected-scope"],
-      "must_include": ["custom-scope", "explicit-original-source-exclusion", "fresh-final-scope-preview"],
+      "must_include": ["custom-scope", "explicit-original-source-exclusion", "current-project-positioning", "fresh-final-scope-preview"],
       "expected_terminal": "verified-custom-eva-data-zip-without-learn-original-sources"
     },
     {
@@ -1872,6 +1872,1055 @@
       "must_include": ["primary-support-is-optional", "no-soft-signal-blocker", "no-fabrication", "normal-route-continues"],
       "forbid": ["invent-case", "invent-data", "ask-for-strongest-anchor", "block-solely-for-missing-primary-support", "create-primary-support-field"],
       "expected_terminal": "supported-opinion-draft-with-empty-primary-support-signal"
+    },
+    {
+      "id": "title-original-usable-no-recombination",
+      "input": "我按 Eva 的搜索词贴回了 5 个有真实互动线索的小红书标题。第 2 个的人群、用户问题和承诺都与我的真实经历完全一致，正文也能兑现。请判断并优先使用原标题，不要为了显得新而改字。",
+      "expected_route": "eva-title-candidate-original-first",
+      "must_include": ["judge-each-title-position-separately", "adopt-original-verbatim", "original-title-priority"],
+      "forbid": ["read-title-recombination", "rewrite-usable-original", "show-recombination-options", "free-generate-new-titles"],
+      "expected_terminal": "adopt-usable-original-without-recombination"
+    },
+    {
+      "id": "title-judge-only-stops-before-recombination",
+      "input": "我贴回了 5 个有真实验证线索的小红书标题。你只帮我判断哪些能原样用、哪些只能借结构、哪些要放弃，不要生成、改写或重组新标题。",
+      "expected_route": "eva-title-candidate-judgment-only",
+      "must_include": [
+        "candidate-classification",
+        "judgment-reasons",
+        "respect-no-generation-scope"
+      ],
+      "forbid": [
+        "read-title-recombination",
+        "generate-recombined-title",
+        "rewrite-candidate-title",
+        "continue-to-script"
+      ],
+      "expected_terminal": "candidate-classification-only-without-new-title"
+    },
+    {
+      "id": "title-cover-usable-body-only-recombination",
+      "input": "我贴回 5 个已有验证线索的标题。其中一条封面标题已经完全适合我的人群和真实案例，可以一字不改；但所有正文标题都不能直接用，只有部分结构能迁移。保留封面原标题，只给我补正文标题。",
+      "expected_route": "eva-title-cover-original-body-recombination",
+      "must_include": ["preserve-cover-original-verbatim", "recombine-body-position-only", "body-second-ad-slot", "trace-source-elements"],
+      "forbid": ["rewrite-usable-cover-title", "generate-new-cover-title", "more-than-three-options", "claim-recombined-title-independently-validated"],
+      "expected_terminal": "cover-original-preserved-and-up-to-three-body-title-options"
+    },
+    {
+      "id": "title-body-usable-cover-only-recombination",
+      "input": "我带回了 5 个真实小红书标题和验证线索。其中一条正文标题和我的经历完全匹配，可以一字不改；封面候选都不能直接用，但有可迁移的搜索词和表达结构。保留正文原标题，只补封面。",
+      "expected_route": "eva-title-body-original-cover-recombination",
+      "must_include": ["preserve-body-original-verbatim", "recombine-cover-position-only", "cover-first-click-entry", "trace-source-elements"],
+      "forbid": ["rewrite-usable-body-title", "generate-new-body-title", "more-than-three-options", "claim-recombined-title-independently-validated"],
+      "expected_terminal": "body-original-preserved-and-up-to-three-cover-title-options"
+    },
+    {
+      "id": "title-all-unusable-constrained-recombination",
+      "input": "这 5 个小红书标题都有真实搜索和互动线索，但因为人群、作者身份或承诺不同，没有一条能原样用。我的真实材料已经足够兑现新承诺。请只提取可迁移的搜索锚点、人群词和结构，最多给 3 组可追溯的封面＋正文标题。",
+      "expected_route": "eva-title-constrained-recombination",
+      "must_include": ["all-current-position-originals-unusable", "transferable-elements-exist", "real-material-can-fulfill", "source-traceability", "up-to-three-options", "recombined-full-title-not-independently-validated", "stop-before-script-until-verified-or-low-confidence-authorized"],
+      "forbid": ["random-word-mixing", "more-than-three-options", "copy-third-party-identity-or-case", "claim-recombined-title-independently-validated", "invent-promise", "high-confidence-title-handoff", "continue-to-script-without-new-title-validation"],
+      "expected_terminal": "up-to-three-traceable-fulfillable-title-pairs"
+    },
+    {
+      "id": "title-recombination-no-validation-returns-search",
+      "input": "我在别处记了 5 句像标题的话，不知道是不是真实平台标题，也没有搜索或互动线索。先把它们拆词重组几个小红书标题吧。",
+      "expected_route": "eva-title-manual-search-first",
+      "must_include": ["tailored-search-terms", "observation-criteria", "candidate-pasteback-request"],
+      "forbid": ["read-title-recombination", "generate-recombined-title", "pretend-candidate-validated", "free-generate-new-titles"],
+      "expected_terminal": "tailored-manual-title-search-plan-without-recombination"
+    },
+    {
+      "id": "title-recombination-material-gap",
+      "input": "我贴回的 5 个标题都有验证线索，但都不能原样用。它们都在承诺真实案例和具体结果，而我目前只有一个观点，没有经历、案例或数据。帮我直接重组成更炸的标题。",
+      "expected_route": "eva-title-recombination-material-gap",
+      "must_include": ["one-decisive-material-question", "title-promise-fulfillment-gap", "no-generation-before-real-support"],
+      "forbid": ["generate-recombined-title", "invent-body-proof", "invent-result", "multiple-questions"],
+      "expected_terminal": "one-material-gap-before-any-recombination"
+    },
+    {
+      "id": "title-default-three-to-five-stays-light",
+      "input": "我按你上一轮的搜索词找了 3 个真实标题，带回了点赞和评论线索。帮我判断哪个能直接用。",
+      "expected_route": "eva-title-candidate-check",
+      "must_include": ["three-to-five-real-title-default", "candidate-judgment-first", "usable-original-stops-recombination"],
+      "forbid": ["require-ten-to-twenty-titles", "build-heavy-title-library", "default-to-recombination", "free-generate-new-titles"],
+      "expected_terminal": "candidate-judgment-or-title-handoff-with-three-to-five-default"
+    },
+    {
+      "id": "title-xhs-first-unverified-no-recombination-bypass",
+      "input": "我自己写了 5 个小红书标题，但还没有去平台搜索。这是第一次直接要稿，你先把这些标题重组一下，然后直接写完整稿。",
+      "expected_route": "eva-title-manual-search-first",
+      "must_include": ["tailored-search-terms", "observation-criteria", "candidate-pasteback-request", "first-unverified-request-boundary"],
+      "forbid": ["read-title-recombination", "generate-recombined-title", "direct-draft-on-first-request", "claim-title-validated"],
+      "expected_terminal": "tailored-manual-title-search-plan-before-recombination-or-draft"
+    },
+    {
+      "id": "title-xhs-second-informed-boundary-unchanged",
+      "input": "你上一轮已经给过标题搜索方案。我知道标题和任何重组方案都还没有被平台验证，这版不能直接发布，但现在仍想先看完整结构稿。",
+      "expected_route": "eva-create-second-request-low-confidence-draft",
+      "must_include": ["【未验证结构草案｜不可直接发布】", "current-missing-evidence", "one-upgrade-action", "second-informed-request-only"],
+      "forbid": ["claim-publishable", "claim-title-validated", "hide-low-confidence-boundary", "use-recombination-as-validation"],
+      "expected_terminal": "prominently-labeled-unverified-draft-after-informed-second-request"
+    },
+    {
+      "id": "title-douyin-no-title-no-recombination",
+      "input": "这是抖音无封面点击的口播，不需要标题。我给了人群、真实经历和核心判断，帮我优化第一句话。即使我前面提过几个标题，也不要进入标题重组。",
+      "expected_route": "eva-create-opening-no-title-default-convergence",
+      "must_include": ["first-line-content-entry", "no-title-platform-boundary", "return-to-opening-chain"],
+      "forbid": ["read-title-recombination", "force-title-validation", "ask-for-cover-title", "generate-cover-body-title-pair"],
+      "expected_terminal": "three-no-title-first-line-options-and-one-recommendation"
+    },
+    {
+      "id": "title-shipinhao-no-title-no-recombination",
+      "input": "我做的是视频号无封面点击口播，人群、第一句话想回答的问题和真实案例都有。只帮我出 3 个第一句话，不要搜标题或重组标题。",
+      "expected_route": "eva-create-opening-no-title-default-convergence",
+      "must_include": ["first-line-content-entry", "no-title-platform-boundary", "return-to-opening-chain"],
+      "forbid": ["read-title-recombination", "force-title-validation", "ask-for-cover-title", "generate-cover-body-title-pair"],
+      "expected_terminal": "three-no-title-first-line-options-and-one-recommendation"
+    },
+    {
+      "id": "title-article-no-recombination",
+      "input": "这是一篇已经写完的公众号观点文章。请只重拟文章标题，不要套小红书封面＋正文标题或短视频标题重组规则。",
+      "expected_route": "eva-create-article-title-local-edit",
+      "must_include": ["article-final-form-wins", "article-title-rules-remain-independent"],
+      "forbid": ["read-title-recombination", "short-video-title-gate", "generate-cover-body-title-pair", "force-platform-search"],
+      "expected_terminal": "article-title-edit-without-shortvideo-title-recombination"
+    },
+    {
+      "id": "title-body-light-edit-must-enter-recombination",
+      "input": "这条正文标题有真实验证线索，但必须把其中一个身份词换成我的真实身份才可用。请帮我轻微改一个词，然后直接接着写正文。",
+      "expected_route": "eva-title-body-recombination-after-light-edit-request",
+      "must_include": ["treat-any-character-change-as-new-title", "read-title-recombination", "new-title-not-independently-validated", "stop-before-script"],
+      "forbid": ["light-edit-in-body-heading", "inherit-original-validated-status", "generate-outside-title-recombination", "continue-to-script-without-new-title-validation"],
+      "expected_terminal": "new-body-title-unverified-and-stopped-in-title"
+    },
+    {
+      "id": "title-promise-rewrite-must-enter-recombination",
+      "input": "这是完整短视频原稿和一组有真实验证线索的标题。正文能兑现，但没有任何标题可以一字不改使用。请保留原稿、重写标题。",
+      "expected_route": "eva-title-promise-check-to-candidate-and-recombination",
+      "must_include": ["promise-check-does-not-generate-title", "candidate-condition-check", "title-recombination-is-only-generator", "new-title-not-independently-validated"],
+      "forbid": ["rewrite-title-inside-promise-check", "inherit-source-title-validation", "high-confidence-title-handoff", "continue-to-script-without-new-title-validation"],
+      "expected_terminal": "up-to-three-new-title-options-unverified-and-stopped-in-title"
+    },
+    {
+      "id": "title-positioning-no-recombination",
+      "input": "我现在明确要做账号阶段性定位，不是写标题。这 5 条过去数据较好的标题只是定位证据，请根据它们和账号数据判断当前阶段，不要重组标题。",
+      "expected_route": "eva-positioning-stage-diagnosis",
+      "must_include": ["explicit-positioning-intent-wins", "titles-as-positioning-evidence-only", "positioning-does-not-load-title-recombination"],
+      "forbid": ["read-title-recombination", "generate-recombined-title", "eva-create-title", "treat-positioning-evidence-as-title-candidates"],
+      "expected_terminal": "positioning-evidence-review-without-title-production"
+    },
+    {
+      "id": "viewing-grounded-opening-tiebreak",
+      "input": "这个小红书标题已经完成真实搜索验证，正文能兑现。我给了一个真实动作和一处可观察变化，请默认给 3 个机制不同的开头并推荐 1 个。",
+      "expected_route": "eva-create-opening-default-convergence",
+      "must_include": ["existing-perceptible-anchor-preferred-on-tie", "six-opening-mechanisms-unchanged", "three-options-and-one-recommendation", "title-and-fulfillment-first"],
+      "forbid": ["invent-scene", "add-seventh-opening-mechanism", "force-all-options-scene-based", "bypass-title-validation"],
+      "expected_terminal": "three-grounded-distinct-opening-options-and-one-recommendation"
+    },
+    {
+      "id": "viewing-abstract-opening-no-invention",
+      "input": "这是抖音无标题口播。人群、问题和核心判断已经清楚，但我没有故事、对话、案例或结果，只想优化第一句话。",
+      "expected_route": "eva-create-opening-no-title-default-convergence",
+      "must_include": ["compress-abstract-expression", "no-title-platform-boundary", "no-blocking-for-missing-scene", "three-options-and-one-recommendation"],
+      "forbid": ["invent-scene", "invent-dialogue", "invent-result", "extra-material-question", "force-emotional-turn"],
+      "expected_terminal": "concise-no-title-opening-options-without-invented-anchor"
+    },
+    {
+      "id": "viewing-tutorial-opening-action-anchor",
+      "input": "这是视频号教程口播。我已经给了第一步具体动作和完成判断，请用它优化开头，不要硬编故事或情绪转折。",
+      "expected_route": "eva-create-opening-no-title-default-convergence",
+      "must_include": ["specific-action-can-be-perceptible-anchor", "observable-completion-can-be-anchor", "no-title-platform-boundary"],
+      "forbid": ["force-story", "force-emotion", "force-turning-point", "invent-benefit"],
+      "expected_terminal": "tutorial-opening-grounded-in-real-action-without-forced-story"
+    },
+    {
+      "id": "viewing-script-uses-existing-anchor",
+      "input": "抖音口播的人群、第一句话、核心判断和路线都已经成立。我给了一个真实动作、一段经历和一处结果变化，请直接写完整稿。",
+      "expected_route": "eva-create-direct-complete-draft",
+      "must_include": ["existing-real-anchor-grounds-abstract-claim", "paragraph-functions-progress", "ordinary-direct-draft"],
+      "forbid": ["invent-scene", "default-self-check-table", "writing-process-explanation", "force-new-user-question"],
+      "expected_terminal": "complete-draft-with-grounded-claims-and-silent-check"
+    },
+    {
+      "id": "viewing-thin-material-conservative-short-draft",
+      "input": "这条口播只解释一个已经成立的判断，材料能讲清但没有案例、对话和数据。请按当前材料能承载的长度写，不要为了有画面补故事。",
+      "expected_route": "eva-create-conservative-short-draft",
+      "must_include": ["compress-abstract-expression", "shortest-complete-draft-supported-by-material", "stop-when-clear"],
+      "forbid": ["invent-case", "invent-dialogue", "invent-data", "pad-length", "force-scene-question"],
+      "expected_terminal": "short-complete-draft-without-fabricated-detail"
+    },
+    {
+      "id": "viewing-rhythm-homogeneity-silent-repair",
+      "input": "材料都齐了，请直接写完整短视频稿。不要给我看写稿判断或检查表，但别让每一段都用同一种‘观点加解释’匀速推进。",
+      "expected_route": "eva-create-direct-complete-draft",
+      "must_include": ["paragraph-function-and-density-progress", "silent-backstage-repair", "ordinary-direct-draft"],
+      "forbid": ["default-self-check-table", "mechanical-short-long-alternation", "forced-emotional-arc", "fixed-next-step-block"],
+      "expected_terminal": "direct-complete-draft-after-silent-rhythm-repair"
+    },
+    {
+      "id": "viewing-voice-card-precedes-rhythm-optimization",
+      "input": "这是我的有效 voice-card 和本人原稿。我习惯克制、均匀、少用强转折，请在保留这种节奏的前提下写完整稿。",
+      "expected_route": "eva-create-direct-complete-draft-with-voice",
+      "must_include": ["voice-card-precedes-soft-viewing-optimization", "preserve-user-rhythm", "ordinary-direct-draft"],
+      "forbid": ["uniform-marketing-short-sentences", "force-strong-emotion", "force-story-turn", "treat-calm-style-as-rhythm-failure"],
+      "expected_terminal": "complete-draft-preserving-confirmed-user-voice"
+    },
+    {
+      "id": "viewing-preflight-severe-abstraction-one-fix",
+      "input": "这是尚未发布的短视频成稿。开头连续在说‘提升认知、建立体系、持续优化’，读完仍不知道具体在讲什么；但后文已经有我的真实经历：连续收藏课程、改简历却没有投递，投出三份简历后才得到岗位反馈。帮我做发布前审核，不要改稿。",
+      "expected_route": "eva-preflight-shortvideo",
+      "must_include": ["abstractness-causes-core-content-failure", "existing-root-cause-severity", "one-highest-priority-fix", "read-only-review"],
+      "forbid": ["rewrite-draft", "generate-opening-options", "multiple-fix-list", "abstractness-alone-means-do-not-publish"],
+      "expected_terminal": "modify-one-critical-core-content-problem-before-publishing"
+    },
+    {
+      "id": "viewing-preflight-flat-rhythm-remains-soft",
+      "input": "这条待发口播事实清楚、标题承诺已兑现、逻辑也成立，只是整体节奏比较平。请做发布前审核，不要替我改稿。",
+      "expected_route": "eva-preflight-shortvideo",
+      "must_include": ["flat-rhythm-is-soft-suggestion", "can-publish-not-downgraded", "read-only-review"],
+      "forbid": ["temporarily-do-not-publish-for-rhythm-alone", "rewrite-draft", "generate-opening-options", "force-emotional-variation"],
+      "expected_terminal": "can-publish-with-optional-rhythm-suggestion"
+    },
+    {
+      "id": "viewing-article-keeps-independent-writing-rules",
+      "input": "这是一篇公众号观点文章，不是短视频。请按 Article 的论证和篇幅规则修改，不要套短视频前三句、开头候选池或节奏补光规则。",
+      "expected_route": "eva-create-article",
+      "must_include": ["article-writing-rules-remain-independent", "article-argument-and-length-protocol"],
+      "forbid": ["shortvideo-opening-three-lines-gate", "shortvideo-opening-candidate-pool", "shortvideo-script-viewing-overlay", "force-title-search"],
+      "expected_terminal": "article-revision-without-shortvideo-viewing-rules"
+    },
+    {
+      "id": "positioning-topic-current-stage-bridge",
+      "input": "我已经形成可用的工作定位。这个题适不适合我现在的账号定位？只判断它在当前阶段的作用。",
+      "expected_route": "eva-positioning-account-topic-bridge",
+      "must_include": ["explicit-current-account-stage-and-topic-fit", "usable-l2-before-account-role", "external-value-three-fields", "one-primary-account-role", "what-this-topic-cannot-prove", "one-falsifiable-publish-experiment"],
+      "forbid": ["global-positioning-prerequisite", "full-audience-output", "topic-scorecard", "automatic-create-without-original-authorization"],
+      "expected_terminal": "one-account-role-and-one-publish-experiment"
+    },
+    {
+      "id": "positioning-topic-candidates-one-experiment",
+      "input": "我的工作定位已经形成。职场转型、心理成长、AI 学习这三个题，我当前账号阶段先验证哪个？",
+      "expected_route": "eva-positioning-account-topic-priority-bridge",
+      "must_include": ["usable-l2-before-account-role", "choose-one-highest-information-gain-topic", "one-primary-account-role", "one-falsifiable-publish-experiment", "no-fixed-content-ratio"],
+      "forbid": ["full-audience-seven-step-per-topic", "topic-scorecard", "fixed-content-ratio", "parallel-primary-roles"],
+      "expected_terminal": "one-priority-topic-role-and-publish-experiment"
+    },
+    {
+      "id": "positioning-topic-monthly-adjustable-queue",
+      "input": "我的工作定位已经形成。请把这五个候选题安排成下个月的执行顺序，但不要假装能精确打分。",
+      "expected_route": "eva-positioning-account-topic-execution-queue",
+      "must_include": ["usable-l2-before-account-role", "explicit-period-execution-schedule", "adjustable-priority-queue", "one-head-topic-with-one-positioning-experiment", "reorder-after-real-feedback", "no-score-or-fixed-ratio"],
+      "forbid": ["topic-scorecard", "fixed-content-ratio", "parallel-positioning-experiments", "invent-publishing-cadence", "persist-new-queue-state"],
+      "expected_terminal": "adjustable-topic-queue-with-one-head-experiment"
+    },
+    {
+      "id": "generic-content-calendar-stays-think",
+      "input": "帮我安排一下下个月发什么内容。",
+      "expected_route": "eva-think-content-planning-clarification",
+      "must_include": ["generic-calendar-without-current-positioning-stays-think", "no-account-positioning-assumption"],
+      "forbid": ["eva-positioning", "account-role-queue", "positioning-experiment", "fixed-content-ratio"],
+      "expected_terminal": "think-lightweight-content-planning"
+    },
+    {
+      "id": "bare-topic-priority-stays-think-without-positioning-context",
+      "input": "这三个题我先做哪个？",
+      "expected_route": "eva-think-topic-priority-clarification",
+      "must_include": ["no-current-positioning-context-stays-think", "no-account-stage-assumption"],
+      "forbid": ["eva-positioning", "account-role-mapping", "positioning-experiment", "adjustable-priority-queue"],
+      "expected_terminal": "think-lightweight-topic-priority"
+    },
+    {
+      "id": "audience-topic-only-no-positioning",
+      "input": "这个选题讲给谁、谁会在意？只分析人群。",
+      "expected_route": "eva-audience-finder-analysis-only",
+      "must_include": ["specific-audience", "cognitive-gap", "user-question", "analysis-only-stop"],
+      "forbid": ["ask-account-stage", "eva-positioning", "account-role-mapping", "publish-experiment"],
+      "expected_terminal": "audience-analysis-then-stop"
+    },
+    {
+      "id": "ambiguous-topic-stays-think-no-positioning",
+      "input": "我想到一个选题，帮我看看。",
+      "expected_route": "eva-think-default",
+      "must_include": ["ambiguous-topic-remains-think", "no-account-stage-assumption"],
+      "forbid": ["eva-positioning", "account-role-mapping", "publish-experiment", "global-positioning-prerequisite"],
+      "expected_terminal": "think-lightweight-topic-clarification"
+    },
+    {
+      "id": "direct-topic-draft-no-positioning",
+      "input": "把这个题直接写成一条抖音口播。",
+      "expected_route": "eva-create-shortvideo",
+      "must_include": ["direct-production-intent-wins", "create-gates-remain-owned-by-create"],
+      "forbid": ["eva-positioning", "account-stage-question", "create-to-positioning-loop", "global-positioning-prerequisite"],
+      "expected_terminal": "continue-in-create-without-positioning-prerequisite"
+    },
+    {
+      "id": "l1-context-direct-draft-without-fit-check-stays-create",
+      "input": "我目前只有候选定位，但先别判断定位适配，直接把这个题写成抖音口播。",
+      "expected_route": "eva-create-shortvideo",
+      "must_include": ["explicit-direct-production-intent-wins", "l1-is-not-a-global-create-prerequisite", "create-gates-remain-owned-by-create"],
+      "forbid": ["eva-positioning", "require-l2-before-ordinary-create", "account-role-mapping", "create-to-positioning-loop"],
+      "expected_terminal": "continue-in-create-without-positioning-fit-check"
+    },
+    {
+      "id": "acquisition-matrix-stays-think-overlay",
+      "input": "围绕我的职业咨询服务规划一组获客内容。",
+      "expected_route": "eva-think-acquisition-matrix-with-shared08",
+      "must_include": ["explicit-acquisition-matrix", "read-shared08", "acquisition-route-unchanged"],
+      "forbid": ["eva-positioning", "account-topic-bridge", "fixed-content-ratio", "global-positioning-prerequisite"],
+      "expected_terminal": "acquisition-matrix-in-think-without-positioning"
+    },
+    {
+      "id": "positioning-topic-to-create-one-way",
+      "input": "先判断这个题是否适合当前定位，适合的话再写成抖音口播。",
+      "expected_route": "eva-positioning-account-topic-bridge-to-eva-create",
+      "must_include": ["original-request-authorizes-creation", "usable-l2-before-create", "positioning-decision-allows-production", "one-fit-reason", "one-publish-observation", "one-way-positioning-to-create", "create-gates-remain-owned-by-create"],
+      "forbid": ["full-positioning-bridge-template-before-draft", "duplicate-navigation-explanation", "create-to-positioning-loop", "audience-to-positioning-loop", "automatic-create-without-original-authorization", "bypass-create-gates"],
+      "expected_terminal": "light-positioning-handoff-then-create"
+    },
+    {
+      "id": "positioning-topic-conditional-create-stops-when-not-fit",
+      "input": "先判断这个题是否适合当前定位，适合的话再写；不适合就不要写。",
+      "expected_route": "eva-positioning-account-topic-conditional-create",
+      "must_include": ["conditional-creation-requires-priority-validation", "necessary-not-fit-reason", "one-alternative-action"],
+      "forbid": ["eva-create", "draft-after-temporarily-defer", "draft-after-auxiliary-only", "force-positive-fit"],
+      "expected_terminal": "positioning-not-fit-stop-with-one-alternative"
+    },
+    {
+      "id": "positioning-topic-create-l1-blocks-before-draft",
+      "input": "我现在只有候选定位。这个题适合就直接写成口播。",
+      "expected_route": "eva-positioning-account-topic-bridge",
+      "must_include": ["l1-cannot-assign-account-role", "one-upstream-action-to-reach-l2", "no-fabricated-fit-conclusion"],
+      "forbid": ["eva-create", "account-role-mapping", "light-fit-handoff", "complete-draft"],
+      "expected_terminal": "one-upstream-positioning-action-before-create"
+    },
+    {
+      "id": "positioning-topic-create-detailed-explanation-on-request",
+      "input": "先详细解释这个题为什么适合当前定位，再写成抖音口播。",
+      "expected_route": "eva-positioning-account-topic-bridge-to-eva-create",
+      "must_include": ["explicit-detail-request-keeps-relevant-positioning-explanation", "positioning-decision-allows-production", "one-way-positioning-to-create", "create-gates-remain-owned-by-create"],
+      "forbid": ["forced-two-line-positioning-summary", "create-to-positioning-loop", "bypass-create-gates"],
+      "expected_terminal": "detailed-positioning-explanation-then-create"
+    },
+    {
+      "id": "positioning-internal-audience-narrow-return",
+      "input": "我已经形成可用的工作定位，这个候选题的外部价值还不清，帮我完成本轮发布实验。",
+      "expected_route": "eva-positioning-direct-shared-audience-return",
+      "must_include": ["direct-read-shared-audience", "specific-audience", "cognitive-gap", "user-question", "return-to-eva-positioning", "usable-l2-before-account-role", "one-primary-account-role", "one-falsifiable-publish-experiment"],
+      "forbid": ["eva-audience-finder-signboard", "title-search-direction", "opening-line", "create-action", "audience-to-positioning-loop", "new-asset-or-schema"],
+      "expected_terminal": "narrow-audience-three-fields-return-to-one-positioning-experiment"
+    },
+    {
+      "id": "review-composition-explicit-published-batch",
+      "input": "这是我最近已发布的 8 条内容，帮我看看这段时间主要在讲什么，内容方向怎么分布。",
+      "expected_route": "eva-review-batch-stage-content-composition",
+      "must_include": ["published-batch-and-explicit-composition-intent", "observation-scope", "main-content-directions", "direction-occurrence", "continuity-or-jumps", "what-current-sample-cannot-show"],
+      "forbid": ["single-review", "fixed-content-ratio", "automatic-positioning", "recommend-add-missing-direction"],
+      "expected_terminal": "stage-content-composition-snapshot"
+    },
+    {
+      "id": "review-composition-single-stays-single",
+      "input": "这条小红书已经发布 24 小时，帮我复盘一下。",
+      "expected_route": "eva-review-single",
+      "must_include": ["single-published-review-unchanged", "one-hypothesis-one-variable-one-metric-one-window-one-falsifier"],
+      "forbid": ["stage-content-composition-snapshot", "content-direction-distribution", "eva-positioning"],
+      "expected_terminal": "single-review-without-composition-observation"
+    },
+    {
+      "id": "review-composition-ordinary-batch-no-extra-snapshot",
+      "input": "这是我近期已发布内容的数据表，帮我找找表现上有什么候选现象。",
+      "expected_route": "eva-review-batch-pattern",
+      "must_include": ["ordinary-batch-pattern-protocol-unchanged", "candidate-phenomena-with-counterexamples", "one-variable-next-test"],
+      "forbid": ["default-stage-content-composition-snapshot", "automatic-direction-classification", "eva-positioning"],
+      "expected_terminal": "batch-pattern-without-unrequested-composition-snapshot"
+    },
+    {
+      "id": "review-composition-unpublished-stays-positioning",
+      "input": "这是我下个月还没发的候选题，帮我看看内容组合和方向怎么安排。",
+      "expected_route": "eva-think-unpublished-content-planning",
+      "must_include": ["unpublished-combination-does-not-enter-review", "no-current-account-positioning-signal", "generic-content-planning-stays-think"],
+      "forbid": ["eva-review", "eva-positioning", "review-record", "stage-content-composition-snapshot", "claim-real-feedback"],
+      "expected_terminal": "think-planning-without-review-or-positioning"
+    },
+    {
+      "id": "review-composition-under-ten-snapshot-only",
+      "input": "这 6 条是我近期已发布的可比内容，看看我最近一直在讲什么。",
+      "expected_route": "eva-review-batch-stage-content-composition",
+      "must_include": ["fewer-than-ten-comparable-records", "stage-snapshot-only", "not-account-pattern"],
+      "forbid": ["stable-account-pattern", "mainline-conclusion", "fixed-content-ratio", "recommend-direction-change"],
+      "expected_terminal": "descriptive-stage-snapshot-with-sample-limit"
+    },
+    {
+      "id": "review-composition-ten-plus-keeps-caveats",
+      "input": "这 15 条是同一账号、同一平台和同一内容形式的已发布内容，帮我回看阶段内容组合。",
+      "expected_route": "eva-review-batch-stage-content-composition",
+      "must_include": ["at-least-ten-comparable-records", "counterexamples", "competing-explanations", "repeat-validation-still-required"],
+      "forbid": ["count-alone-proves-account-pattern", "causal-claim-from-cooccurrence", "automatic-mainline-change"],
+      "expected_terminal": "composition-observation-with-counterexamples-and-alternatives"
+    },
+    {
+      "id": "review-composition-cross-platform-separate-metrics",
+      "input": "这里有小红书、抖音和视频号的已发布内容，帮我看内容方向分布和表现差异。",
+      "expected_route": "eva-review-batch-stage-content-composition",
+      "must_include": ["directions-may-be-described-by-platform", "platform-and-format-labelled-separately", "only-comparable-feedback-differences"],
+      "forbid": ["cross-platform-metric-pooling", "merge-incomparable-performance", "single-account-pattern-from-mixed-platforms"],
+      "expected_terminal": "separated-platform-composition-observation"
+    },
+    {
+      "id": "review-composition-no-performance-data-descriptive-only",
+      "input": "我只有最近已发布内容的标题和正文，没有后台数据。帮我看看这批内容合起来呈现了什么。",
+      "expected_route": "eva-review-batch-stage-content-composition",
+      "must_include": ["content-directions-from-title-text-or-existing-summary", "direction-description-without-performance-claim", "missing-feedback-explicitly-limited"],
+      "forbid": ["infer-effectiveness-without-data", "claim-user-perception-without-feedback", "reverse-infer-topic-from-metrics"],
+      "expected_terminal": "descriptive-composition-without-effect-judgment"
+    },
+    {
+      "id": "review-composition-uncovered-is-not-prescription",
+      "input": "这批已发内容一条生活类都没有，是不是下一阶段就应该多加生活内容？先只做过去内容观察。",
+      "expected_route": "eva-review-batch-stage-content-composition",
+      "must_include": ["sample-not-covered-only", "counts-are-current-state-not-target-ratio", "observation-only-stop"],
+      "forbid": ["recommend-add-lifestyle-content", "fixed-content-ratio", "decide-future-direction", "eva-positioning"],
+      "expected_terminal": "snapshot-stops-without-prescription"
+    },
+    {
+      "id": "review-composition-no-positioning-role-mapping",
+      "input": "只帮我回看这批已发内容最近都在讲什么，我还没有确定下一阶段目标。",
+      "expected_route": "eva-review-batch-stage-content-composition",
+      "must_include": ["review-does-not-scan-positioning-state", "direction-observation-only", "no-goal-no-role-mapping"],
+      "forbid": ["mainline-validation", "traffic-entry", "persona-evidence", "commercial-bridge", "auxiliary-role", "automatic-positioning"],
+      "expected_terminal": "composition-snapshot-without-account-role"
+    },
+    {
+      "id": "review-composition-observation-only-stops",
+      "input": "请只输出这批已发内容的阶段内容组合观察，不要帮我规划下一步。",
+      "expected_route": "eva-review-batch-stage-content-composition",
+      "must_include": ["observation-only-stop", "no-fixed-next-step", "no-account-strategy-question", "no-data-supplement-action", "no-first-record-store-invitation"],
+      "forbid": ["eva-positioning", "recommend-next-direction", "content-allocation-plan", "automatic-navigation", "ask-for-more-records", "record-store-invitation"],
+      "expected_terminal": "snapshot-and-stop"
+    },
+    {
+      "id": "review-composition-future-direction-to-positioning",
+      "input": "看完这批已发内容后，我想知道下一阶段主要讲什么；请把这份快照交给账号阶段性定位继续判断。",
+      "expected_route": "eva-review-stage-composition-to-eva-positioning",
+      "must_include": ["explicit-future-direction-request", "same-conversation-latest-review-snapshot", "user-authorized-one-way-positioning-handoff", "positioning-owns-future-decision"],
+      "forbid": ["review-decides-mainline", "new-review-card-positioning-handoff", "new-handoff-target", "positioning-back-to-review-loop"],
+      "expected_terminal": "one-way-positioning-decision-or-one-goal-question"
+    },
+    {
+      "id": "audience-alignment-write-first-topic",
+      "input": "/eva-audience-finder 帮我看看‘普通人不敢转行’这个话题准备替谁说话，我还没有写稿。",
+      "expected_route": "eva-audience-finder-write-first-identification",
+      "must_include": ["write-first-mode", "specific-audience", "cognitive-gap", "user-question"],
+      "forbid": ["write-after-alignment-status", "pretend-draft-exists", "preflight-verdict", "write-full-script"],
+      "expected_terminal": "write-first-audience-result"
+    },
+    {
+      "id": "audience-alignment-explicit-finished-draft",
+      "input": "这是我已经写完的口播稿。先不做完整发布审核，只帮我看看最后在替谁说话，有没有写偏人群。",
+      "expected_route": "eva-audience-finder-write-after-alignment",
+      "must_include": ["write-after-mode", "actual-specific-situation", "what-reader-can-receive", "text-evidence", "one-largest-deviation-or-aligned"],
+      "forbid": ["full-preflight-three-tier-verdict", "rewrite-draft", "predict-performance", "create-new-audience-positioning"],
+      "expected_terminal": "write-after-alignment-result-and-stop"
+    },
+    {
+      "id": "audience-alignment-command-with-draft-no-repeat-question",
+      "input": "/eva-audience-finder 这是一篇完整成稿：【标题、开头和正文】",
+      "expected_route": "eva-audience-finder-write-after-alignment",
+      "must_include": ["explicit-command-with-draft-defaults-to-write-after", "no-extra-mode-question", "temporary-alignment-status"],
+      "forbid": ["ask-write-first-or-write-after", "audience-questionnaire", "automatic-preflight", "automatic-rewrite"],
+      "expected_terminal": "direct-write-after-alignment-without-clarification"
+    },
+    {
+      "id": "audience-alignment-full-publish-audit-stays-preflight",
+      "input": "这是尚未发布的完整成稿，请帮我做整篇发布前综合总检，也留意人群有没有写偏。",
+      "expected_route": "eva-preflight-with-explicit-audience-alignment",
+      "must_include": ["overall-audit-intent-wins", "three-tier-publish-verdict", "explicit-alignment-reference-read", "one-highest-priority-problem"],
+      "forbid": ["stop-at-audience-alignment-only", "audience-signboard-takes-over-preflight", "automatic-full-rewrite", "new-alignment-verdict-system"],
+      "expected_terminal": "preflight-verdict-with-visible-alignment-when-requested"
+    },
+    {
+      "id": "audience-alignment-neighbor-routes-unchanged",
+      "input": "路由回归：第三方样本‘为什么有效’、已发内容‘为什么表现好’、模糊选题‘我想聊聊’，分别保持原有路由。",
+      "expected_route": "existing-benchmark-review-and-think-routes",
+      "must_include": ["third-party-mechanism-analysis-stays-benchmark", "published-performance-attribution-stays-review", "ambiguous-topic-discussion-stays-think"],
+      "forbid": ["audience-alignment-hijacks-third-party-analysis", "audience-alignment-hijacks-published-review", "audience-alignment-hijacks-generic-topic", "new-routing-loop"],
+      "expected_terminal": "neighboring-routes-preserved-without-alignment-takeover"
+    },
+    {
+      "id": "audience-alignment-sincere-experience-valid",
+      "input": "这是一篇温和的真实经历分享，写我第一次独自带父母看病后才理解的事。没有强冲突，但处境、感受和意义都已经说清。请检查人群对位。",
+      "expected_route": "eva-audience-finder-write-after-alignment",
+      "must_include": ["sincere-experience-is-valid-form", "specific-situation", "understandable-meaning", "aligned-without-strong-emotion"],
+      "forbid": ["require-conflict", "require-enemy", "manufacture-anger", "downgrade-for-gentle-tone", "predict-virality"],
+      "expected_terminal": "alignment-established-for-sincere-experience"
+    },
+    {
+      "id": "audience-alignment-tutorial-information-no-forced-story",
+      "input": "这是一条信息型教程，讲给第一次申请护照的人，步骤、材料和办完标准都很清楚。检查人群对位，不要强加故事。",
+      "expected_route": "eva-audience-finder-write-after-alignment",
+      "must_include": ["tutorial-or-information-valid-form", "clear-user-problem", "action-or-observable-result", "no-story-required"],
+      "forbid": ["force-personal-story", "force-emotional-conflict", "require-identity-anxiety", "downgrade-for-information-style"],
+      "expected_terminal": "alignment-based-on-clear-instructional-value"
+    },
+    {
+      "id": "audience-alignment-opinion-no-enemy-required",
+      "input": "这篇观点稿讲‘不是每次转行都要彻底否定过去’，对象和依据都清楚，但我不想树立一个敌人。帮我看有没有写偏。",
+      "expected_route": "eva-audience-finder-write-after-alignment",
+      "must_include": ["evidence-based-opinion", "clear-speaking-object", "enemy-not-required", "conflict-not-required"],
+      "forbid": ["invent-opponent", "force-anti-position", "manufacture-victimhood", "treat-gentleness-as-misalignment"],
+      "expected_terminal": "opinion-aligned-without-manufactured-opposition"
+    },
+    {
+      "id": "audience-alignment-newbie-title-expert-body-critical",
+      "input": "标题是‘零基础第一次用 AI 写稿’，开头也对新手说；正文却默认读者熟悉 RAG、embedding 和 agent loop，也没有解释。请检查人群对位。",
+      "expected_route": "eva-audience-finder-write-after-alignment",
+      "must_include": ["target-object-changes-from-newbie-to-expert", "text-evidence", "critical-loss-of-focus", "one-largest-deviation"],
+      "forbid": ["aligned", "light-drift-only", "performance-prediction", "invent-reader-psychology"],
+      "expected_terminal": "critical-audience-loss-of-focus"
+    },
+    {
+      "id": "audience-alignment-opening-body-question-drift",
+      "input": "开头问‘工作太累怎么恢复精力’，正文却全在解释如何谈加薪，没有回答恢复精力。帮我做写后人群对位。",
+      "expected_route": "eva-audience-finder-write-after-alignment",
+      "must_include": ["opening-and-body-answer-different-user-questions", "question-drift", "text-evidence", "critical-loss-of-focus"],
+      "forbid": ["claim-promise-fulfilled", "light-drift-only", "rewrite-full-draft", "predict-completion-rate"],
+      "expected_terminal": "critical-user-question-drift"
+    },
+    {
+      "id": "audience-alignment-no-preset-audience-describes-actual",
+      "input": "我写完了一篇照顾阿尔兹海默症家人的真实经历，写之前没设定目标人群。原文里写：‘她第三次问我今天是星期几时，我突然明白，照顾的难不只是重复回答，而是一遍遍告别只有你记得的过去。’帮我看最后谁可能接住这篇内容。",
+      "expected_route": "eva-audience-finder-write-after-alignment",
+      "must_include": ["describe-actual-reachable-situation-from-text", "no-preset-comparison", "evidence-boundary", "do-not-fabricate-positioning"],
+      "forbid": ["invent-original-audience", "create-account-positioning", "invent-cognitive-gap", "claim-market-demand"],
+      "expected_terminal": "actual-audience-description-without-fabricated-original-goal"
+    },
+    {
+      "id": "audience-alignment-insufficient-material-unable",
+      "input": "我只写了一句‘成长是一辈子的事’，帮我判断这篇内容最后替谁说话。",
+      "expected_route": "eva-audience-finder-write-after-alignment",
+      "must_include": ["insufficient-text-evidence", "unable-to-determine", "one-highest-priority-missing-material"],
+      "forbid": ["invent-specific-audience", "invent-hidden-emotion", "invent-sharing-motive", "claim-aligned", "predict-virality"],
+      "expected_terminal": "unable-to-determine-with-one-material-gap"
+    },
+    {
+      "id": "preflight-alignment-pass-remains-silent",
+      "input": "这是我的待发口播稿，标题、开头和正文都在回答第一次转行的人如何做作品集，事实和方法都清楚。做一次普通发布前审核。",
+      "expected_route": "eva-preflight-shortvideo",
+      "must_include": ["silent-visible-text-alignment-scan", "alignment-pass-does-not-add-section", "three-tier-publish-verdict"],
+      "forbid": ["load-full-audience-by-default", "show-alignment-checklist", "extra-question", "downgrade-for-lack-of-conflict"],
+      "expected_terminal": "can-publish-with-alignment-scan-silent"
+    },
+    {
+      "id": "preflight-alignment-light-drift-no-downgrade",
+      "input": "这篇待发文章的对象和用户问题清楚，中间有一小段稍微偏离，但不影响标题承诺、理解和整体回答。帮我做发布前审核。",
+      "expected_route": "eva-preflight-article",
+      "must_include": ["light-drift-is-optional-advice", "can-publish-not-downgraded", "ordinary-alignment-scan-no-extra-section"],
+      "forbid": ["modify-one-critical-problem-for-light-drift", "temporarily-do-not-publish-for-light-drift", "full-audience-analysis", "automatic-rewrite"],
+      "expected_terminal": "can-publish-with-at-most-soft-alignment-advice"
+    },
+    {
+      "id": "preflight-alignment-critical-maps-existing-root",
+      "input": "这篇待发稿的标题承诺帮宝妈复工前判断岗位，正文却只在讲管理者怎么招人，已经回答了另一群人的问题。请只做发布前审核。",
+      "expected_route": "eva-preflight-shortvideo",
+      "must_include": ["critical-audience-loss-causes-promise-break", "map-to-existing-promise-or-core-content-root", "one-highest-priority-fix", "read-only-review"],
+      "forbid": ["new-independent-alignment-severity-system", "temporarily-do-not-publish-for-alignment-label-alone", "multiple-fix-list", "automatic-rewrite"],
+      "expected_terminal": "modify-one-existing-promise-or-core-content-problem-before-publishing"
+    },
+    {
+      "id": "preflight-alignment-explicit-visible-result",
+      "input": "这是尚未发布的完整稿。做综合总检，并且明确告诉我这篇最后在替谁说话、人群有没有写偏。",
+      "expected_route": "eva-preflight-with-explicit-audience-alignment",
+      "must_include": ["explicit-request-loads-write-after-reference", "visible-brief-alignment-result", "temporary-status", "three-tier-publish-verdict"],
+      "forbid": ["silent-omit-explicit-result", "generate-new-audience-plan", "jump-to-title-opening-or-create", "save-alignment-status"],
+      "expected_terminal": "preflight-verdict-plus-requested-brief-alignment-result"
+    },
+    {
+      "id": "audience-alignment-format-specific-purpose",
+      "input": "用同一套写后人群对位原则，分别检查一条短视频、一篇非虚构文章和一条一般社媒内容，但要按各自的表达目的判断。",
+      "expected_route": "eva-audience-finder-write-after-alignment-by-content-purpose",
+      "must_include": ["shortvideo-purpose-respected", "article-reader-task-respected", "social-content-purpose-respected", "same-core-alignment-principle"],
+      "forbid": ["one-emotion-template-for-all-formats", "force-shortvideo-title-gate-on-article", "force-create-boundary-on-social", "uniform-conflict-requirement"],
+      "expected_terminal": "format-sensitive-alignment-results"
+    },
+    {
+      "id": "audience-alignment-no-performance-prediction",
+      "input": "帮我检查这篇成稿最后让谁接住了。我也想知道是不是对位了就一定会有人转发、有完播和转化。",
+      "expected_route": "eva-audience-finder-write-after-alignment",
+      "must_include": ["alignment-result-grounded-in-text", "performance-boundary", "no-causal-performance-claim"],
+      "forbid": ["predict-first-sharers", "predict-sharing-motive", "predict-virality", "predict-traffic", "predict-completion-rate", "predict-conversion"],
+      "expected_terminal": "alignment-result-with-explicit-no-performance-prediction-boundary"
+    },
+    {
+      "id": "beat-viewpoint-effective-progression",
+      "input": "这是一条温和的观点短视频：我不想靠喊口号，请按真实处境和依据写成完整稿。",
+      "expected_route": "eva-create-shortvideo-script",
+      "must_include": ["viewpoint-beat-chain", "situation-or-evidence-supports-understanding-change", "silent-beat-repair"],
+      "forbid": ["synonym-judgment-stacking", "forced-conflict", "visible-beat-checklist"],
+      "expected_terminal": "complete-shortvideo-draft-with-effective-viewpoint-progression"
+    },
+    {
+      "id": "beat-tutorial-action-progression",
+      "input": "写一条教程短视频，讲清楚怎么把一段经历整理成选题；不要讲故事，直接给方法。",
+      "expected_route": "eva-create-shortvideo-script",
+      "must_include": ["tutorial-beat-chain", "action-result-completion-judgment", "method-granularity-preserved"],
+      "forbid": ["forced-story", "fixed-three-step-template", "invented-tool-or-result"],
+      "expected_terminal": "complete-actionable-tutorial-without-forced-story"
+    },
+    {
+      "id": "beat-story-support-retained",
+      "input": "把这段真实经历写成短视频。场景、动作和结果是完整过程，不要因为它们没有句句出观点就删掉。",
+      "expected_route": "eva-create-shortvideo-script",
+      "must_include": ["story-beat-chain", "necessary-scene-action-result-retained", "multi-sentence-beat-allowed"],
+      "forbid": ["one-sentence-one-beat", "delete-support-as-water", "invented-turning-point"],
+      "expected_terminal": "complete-story-draft-with-necessary-support"
+    },
+    {
+      "id": "beat-information-context-progression",
+      "input": "写一条信息解释短视频，说明为什么同一项新规对自由职业者和公司员工影响不同。",
+      "expected_route": "eva-create-shortvideo-script",
+      "must_include": ["information-beat-chain", "fact-context-meaning-progression", "content-purpose-respected"],
+      "forbid": ["forced-emotion", "forced-enemy", "unsupported-causal-claim"],
+      "expected_terminal": "complete-information-draft-with-clear-understanding-change"
+    },
+    {
+      "id": "beat-stop-silent-repair",
+      "input": "这条短视频已经写完，但中间说了很多字，理解一直没往前走。帮我优化后直接给稿。",
+      "expected_route": "eva-create-shortvideo-script-writing",
+      "must_include": ["silent-stop-beat-repair", "compress-nonmoving-text", "direct-draft-output"],
+      "forbid": ["visible-beat-chain", "beat-score", "extra-question-when-material-sufficient"],
+      "expected_terminal": "revised-draft-with-stopped-beat-removed"
+    },
+    {
+      "id": "beat-repeat-silent-repair",
+      "input": "这篇稿子同一个判断换了好几种说法。直接帮我合并重复并给完整稿。",
+      "expected_route": "eva-create-shortvideo-script-writing",
+      "must_include": ["silent-repeat-beat-repair", "merge-same-understanding-change", "direct-draft-output"],
+      "forbid": ["retain-synonym-repetition", "show-internal-diagnosis", "fixed-beat-count"],
+      "expected_terminal": "revised-draft-with-repeat-beat-merged"
+    },
+    {
+      "id": "beat-jump-existing-evidence-repair",
+      "input": "正文从结论直接跳到建议，但我给的材料里有一段能解释原因的真实证据。请直接修好。",
+      "expected_route": "eva-create-shortvideo-script-writing",
+      "must_include": ["silent-jump-beat-repair", "use-existing-evidence-as-bridge", "fact-boundary-preserved"],
+      "forbid": ["invent-new-evidence", "delete-necessary-premise", "visible-multi-problem-list"],
+      "expected_terminal": "revised-draft-with-existing-evidence-bridge"
+    },
+    {
+      "id": "beat-jump-missing-evidence-no-invention",
+      "input": "我只给了结论，没有原因和证据，但想让你写成一条能站得住的完整短视频。",
+      "expected_route": "eva-create-shortvideo-script-blocked",
+      "must_include": ["jump-beat-upstream-gap", "one-highest-priority-missing-support", "no-invention"],
+      "forbid": ["fabricated-evidence", "fabricated-cause", "multiple-questionnaire"],
+      "expected_terminal": "one-upstream-gap-and-one-unlock-action"
+    },
+    {
+      "id": "beat-crowding-rebalance",
+      "input": "这一段同时塞了原因、案例、反转和方法，读者一下接不住。优化后直接给稿。",
+      "expected_route": "eva-create-shortvideo-script-writing",
+      "must_include": ["silent-crowded-beat-repair", "split-or-reorder-independent-changes", "necessary-facts-retained"],
+      "forbid": ["delete-facts-for-speed", "one-paragraph-multiple-unresolved-shifts", "beat-density-kpi"],
+      "expected_terminal": "revised-draft-with-crowded-beat-rebalanced"
+    },
+    {
+      "id": "beat-support-not-misclassified-as-water",
+      "input": "检查这条短视频时，保留服务当前判断的证据、例子、解释、边界、自然停顿和转场。",
+      "expected_route": "eva-create-shortvideo-script-writing",
+      "must_include": ["necessary-support-retained", "support-may-span-multiple-sentences", "compress-only-nonbeat-nonsupport-text"],
+      "forbid": ["delete-evidence-as-water", "delete-boundary-as-water", "remove-natural-pause-mechanically"],
+      "expected_terminal": "complete-draft-with-essential-support-preserved"
+    },
+    {
+      "id": "beat-no-fixed-count-or-density-score",
+      "input": "同一个选题分别写30秒和90秒版本，按内容需要安排推进；可以保留相同的必要理解步骤，90秒版加深证据、解释或边界，不要套固定节拍数。",
+      "expected_route": "eva-create-shortvideo-script-writing",
+      "must_include": ["duration-sensitive-support-depth", "same-core-promise", "same-necessary-steps-allowed", "no-fixed-beat-count"],
+      "forbid": ["beats-per-minute", "beat-density-score", "force-different-beat-count", "synonym-padding-for-duration"],
+      "expected_terminal": "two-duration-appropriate-drafts-without-fixed-beat-formula"
+    },
+    {
+      "id": "beat-user-voice-priority",
+      "input": "按我的 voice-card 写这条温和口播；节拍清楚即可，不要统一改成营销短句。",
+      "expected_route": "eva-create-shortvideo-script-writing-with-voice",
+      "must_include": ["voice-card-priority", "beat-optimization-respects-user-rhythm", "natural-oral-delivery"],
+      "forbid": ["marketing-short-sentence-unification", "mechanical-sentence-chopping", "override-user-voice-for-beat"],
+      "expected_terminal": "complete-draft-preserving-user-voice-and-effective-progression"
+    },
+    {
+      "id": "beat-fact-brief-promise-priority",
+      "input": "这是商单短视频，请在不改事实、不越过 Brief、不改变标题承诺的前提下优化正文推进。",
+      "expected_route": "eva-create-commercial-shortvideo-script",
+      "must_include": ["fact-brief-title-promise-priority", "beat-optimization-is-subordinate", "commercial-boundary-preserved"],
+      "forbid": ["invented-benefit", "drop-brief-required-item", "change-title-promise-for-beat"],
+      "expected_terminal": "commercial-draft-with-compliant-beat-progression"
+    },
+    {
+      "id": "beat-default-output-remains-hidden",
+      "input": "材料都齐了，直接给我一条完整短视频稿。",
+      "expected_route": "eva-create-shortvideo-script",
+      "must_include": ["silent-beat-check", "direct-content-draft"],
+      "forbid": ["visible-beat-chain", "beat-diagnosis-heading", "beat-score", "fixed-beat-count"],
+      "expected_terminal": "complete-draft-with-no-visible-beat-process"
+    },
+    {
+      "id": "beat-explicit-diagnosis-in-create",
+      "input": "这是一篇短视频稿。帮我看一下节拍，为什么这么水、哪里没有推进；先诊断，不要改稿。",
+      "expected_route": "eva-create-shortvideo-script-beat-diagnosis",
+      "must_include": ["one-plain-language-diagnosis", "one-source-evidence", "actual-viewing-impact", "diagnosis-only"],
+      "forbid": ["automatic-rewrite", "full-preflight-verdict", "new-eva-beat-command", "multiple-problem-checklist", "full-beat-chain-by-default", "adjustment-direction", "next-step-invitation"],
+      "expected_terminal": "beat-diagnosis-stops-after-evidence-and-impact"
+    },
+    {
+      "id": "beat-opening-first-beat-is-soft",
+      "input": "给我三个短视频开头。第一句话先建立处境，第二三句再共同完成第一次理解推进。",
+      "expected_route": "eva-create-shortvideo-opening",
+      "must_include": ["opening-starts-or-completes-first-beat", "multi-sentence-first-beat-allowed", "three-candidates-one-recommendation"],
+      "forbid": ["every-opening-sentence-must-complete-beat", "new-seventh-opening-mechanism", "bypass-title-validation"],
+      "expected_terminal": "three-opening-options-with-soft-first-beat-rule"
+    },
+    {
+      "id": "beat-preflight-light-issue-no-downgrade",
+      "input": "这篇待发短视频整体承诺兑现，只有一小段推进稍慢。做发布前审核，不要改稿。",
+      "expected_route": "eva-preflight-shortvideo",
+      "must_include": ["light-beat-issue-is-soft-advice", "can-publish-not-downgraded", "read-only-review"],
+      "forbid": ["modify-one-critical-problem-for-light-beat", "temporarily-do-not-publish-for-beat-label", "automatic-rewrite"],
+      "expected_terminal": "can-publish-with-at-most-soft-beat-advice"
+    },
+    {
+      "id": "beat-preflight-severe-maps-existing-root-cause",
+      "input": "这篇待发稿反复绕同一句话，还跳过关键原因，导致标题承诺没有真正回答。只做发布前审核。",
+      "expected_route": "eva-preflight-shortvideo",
+      "must_include": ["severe-beat-failure-causes-existing-root-problem", "map-to-promise-core-content-or-logic-root", "one-highest-priority-fix", "read-only-review"],
+      "forbid": ["independent-beat-severity-system", "temporarily-do-not-publish-for-beat-label-alone", "automatic-rewrite"],
+      "expected_terminal": "modify-one-existing-root-problem-before-publishing"
+    },
+    {
+      "id": "beat-preflight-explicit-visible-result",
+      "input": "给这篇短视频做发布前审核，并明确检查节拍。只告诉我一个最关键的问题，不要改稿。",
+      "expected_route": "eva-preflight-shortvideo-with-explicit-beat-check",
+      "must_include": ["explicit-beat-check-visible", "one-highest-priority-problem", "source-evidence", "actual-impact", "three-tier-publish-verdict", "read-only-review"],
+      "forbid": ["automatic-rewrite", "multiple-beat-scorecard", "load-opening-generator", "load-frontstage-beat-diagnosis-adapter", "complete-beat-chain", "adjustment-direction", "new-beat-verdict-tier"],
+      "expected_terminal": "preflight-verdict-plus-readonly-beat-evidence-and-impact"
+    },
+    {
+      "id": "beat-article-remains-independent",
+      "input": "这篇公众号文章为什么有点水、哪里没有推进？按文章的读者认知任务和论证闭环诊断，不要套短视频节拍。",
+      "expected_route": "eva-create-article",
+      "must_include": ["article-reader-cognitive-task", "article-argument-closure", "article-independent-length-rule"],
+      "forbid": ["load-shortvideo-beat-truth", "shortvideo-beat-diagnosis", "force-first-beat", "shortvideo-title-gate"],
+      "expected_terminal": "complete-article-under-independent-article-protocol"
+    },
+    {
+      "id": "beat-expectation-single-no-padding",
+      "input": "这条短视频只承诺回答一个问题，别为了显得完整再补第二个期待。",
+      "expected_route": "eva-create-shortvideo-script-route-map",
+      "must_include": ["one-necessary-expectation-allowed", "minimum-beat-chain", "promise-boundary"],
+      "forbid": ["force-at-least-two-expectations", "fixed-four-layer-map", "invent-extra-question"],
+      "expected_terminal": "one-real-expectation-covered-without-padding"
+    },
+    {
+      "id": "beat-expectation-one-spans-multiple-beats",
+      "input": "用户只问一个问题，但需要先解释误区、再给证据才能真正回答。请按需要安排推进。",
+      "expected_route": "eva-create-shortvideo-script-route-map",
+      "must_include": ["one-expectation-may-span-multiple-beats", "dynamic-coverage", "necessary-support-retained"],
+      "forbid": ["one-expectation-one-beat", "one-expectation-one-layer", "compress-away-premise"],
+      "expected_terminal": "one-expectation-covered-by-multiple-necessary-beats"
+    },
+    {
+      "id": "beat-expectations-share-one-beat",
+      "input": "这两个相邻追问可以用同一个案例一起回答，不要机械拆成两层。",
+      "expected_route": "eva-create-shortvideo-script-route-map",
+      "must_include": ["one-beat-may-answer-adjacent-expectations", "dynamic-coverage", "shared-support-explicit"],
+      "forbid": ["force-separate-layer-per-expectation", "inflate-beat-count", "duplicate-same-case"],
+      "expected_terminal": "adjacent-expectations-share-one-valid-beat"
+    },
+    {
+      "id": "beat-final-expectation-not-final-beat-or-cta",
+      "input": "用户最后想带走一个安慰，但这篇真正的认知终点是看清问题边界；不要硬加行动号召。",
+      "expected_route": "eva-create-shortvideo-script-route-map",
+      "must_include": ["takeaway-guides-closure", "last-beat-follows-endpoint", "no-forced-cta"],
+      "forbid": ["last-expectation-equals-last-beat", "automatic-cta", "invent-conversion-action"],
+      "expected_terminal": "ending-follows-cognitive-endpoint-without-forced-cta"
+    },
+    {
+      "id": "beat-global-start-end-evidence-bounded",
+      "input": "标题只承诺解释为什么会焦虑，材料也只支持到这个原因，不要把终点升级成治愈焦虑的方法。",
+      "expected_route": "eva-create-shortvideo-script-route-map",
+      "must_include": ["user-original-understanding", "allowed-new-understanding", "promise-and-evidence-boundary"],
+      "forbid": ["endpoint-beyond-promise", "endpoint-beyond-evidence", "invented-solution"],
+      "expected_terminal": "bounded-start-to-end-beat-chain"
+    },
+    {
+      "id": "beat-opening-soft-functions-no-three-sentence-rule",
+      "input": "这个开头一句话已经说清话题、继续听的理由和后文回报，不要为了前三句结构硬补两句。",
+      "expected_route": "eva-create-shortvideo-opening",
+      "must_include": ["entry-and-retention", "explanation-and-clarification", "payoff-or-next-gap", "one-sentence-may-cover-multiple-functions"],
+      "forbid": ["force-three-sentences", "one-sentence-one-beat", "synonym-padding"],
+      "expected_terminal": "opening-passes-soft-functions-without-sentence-padding"
+    },
+    {
+      "id": "beat-opening-repeated-three-sentences-still-fail",
+      "input": "这三句开头都在换词说‘一定要努力’，并没有解释或兑现线索。只诊断一个最大问题。",
+      "expected_route": "eva-create-shortvideo-opening-diagnosis",
+      "must_include": ["repeated-sentences-do-not-open-content", "one-highest-priority-problem", "soft-functions-not-met"],
+      "forbid": ["pass-because-three-sentences", "automatic-full-rewrite", "three-problems-at-once"],
+      "expected_terminal": "one-opening-progression-problem"
+    },
+    {
+      "id": "beat-body-mid-abstract-remains-detectable",
+      "input": "开头已经很具体，但正文中段连续讲价值、成长和力量。材料里有真实动作可用，帮我优化；不要编新故事。",
+      "expected_route": "eva-create-shortvideo-script-writing",
+      "must_include": ["mid-body-abstract-suspension", "use-existing-perceptible-support", "opening-concrete-does-not-hide-body-problem"],
+      "forbid": ["ignore-mid-body-because-opening-is-concrete", "invent-scene-or-evidence", "force-story"],
+      "expected_terminal": "mid-body-grounded-or-gap-exposed-without-invention"
+    },
+    {
+      "id": "beat-transition-discontinuity-stays-viewing-issue",
+      "input": "两段各自的判断都成立，但从第一段跳到第二段听起来接不上。不要改核心观点，只处理承接。",
+      "expected_route": "eva-create-shortvideo-script-writing",
+      "must_include": ["viewing-experience-transition-break", "cognitive-direction-may-remain-valid", "repair-causal-or-transition-bridge"],
+      "forbid": ["force-jump-beat-label", "change-core-judgment", "delete-valid-paragraph"],
+      "expected_terminal": "transition-repaired-without-mislabeling-cognition"
+    },
+    {
+      "id": "beat-support-scene-boundary-pause-retained",
+      "input": "保留这篇里的真实场景、证据、适用边界和一句自然停顿；先判断它们是不是在支撑理解，不要一律当水分。",
+      "expected_route": "eva-create-shortvideo-script-writing",
+      "must_include": ["scene-evidence-boundary-and-pause-retained", "support-function-checked", "necessary-support-not-independent-beat"],
+      "forbid": ["delete-support-as-water", "mechanically-remove-pause", "every-sentence-must-add-new-claim"],
+      "expected_terminal": "necessary-support-and-natural-pause-retained"
+    },
+    {
+      "id": "beat-ai-check-cross-format-article-social-retained",
+      "input": "分别看一下这篇公众号文章和这条一般社媒文案有没有原地打转；不要套短视频节拍。",
+      "expected_route": "eva-ai-check-cross-format",
+      "must_include": ["article-and-social-progress-funnel-retained", "progress-or-necessary-support", "cross-format-authenticity-review"],
+      "forbid": ["load-shortvideo-beat-truth", "every-sentence-must-advance", "cancel-cross-format-progress-check"],
+      "expected_terminal": "cross-format-authenticity-progression-review-without-shortvideo-beats"
+    },
+    {
+      "id": "beat-derived-core-stance-narrow-confirmation",
+      "input": "我给了几段材料，但没有说‘我认为所有转行都应该辞职’。无论这条最后走普通简版路线还是复杂完整路线，都不要把你推出来的强立场直接写成我的；如果确实要用，只确认一次。另一个判断我已经明确说过，不要重复问。",
+      "expected_route": "eva-create-shortvideo-script-common-gate",
+      "must_include": ["derived-stance-pending-confirmation", "ask-once-before-high-confidence-first-person-draft", "user-explicit-stance-no-extra-question", "applies-before-compact-or-full-route"],
+      "forbid": ["routine-value-interview", "present-derived-stance-as-confirmed", "repeat-confirm-user-explicit-stance", "compact-route-bypasses-confirmation"],
+      "expected_terminal": "one-confirmation-only-when-derived-high-risk-stance"
+    },
+    {
+      "id": "beat-stability-diagnosis-only-no-action",
+      "input": "这篇短视频为什么这么水？只诊断，不要修改，也不要告诉我下一步怎么做。",
+      "expected_route": "eva-create-shortvideo-script-beat-diagnosis",
+      "must_include": ["one-plain-language-diagnosis", "one-source-evidence", "actual-viewing-impact"],
+      "forbid": ["adjustment-direction", "next-step-invitation", "automatic-rewrite", "fixed-three-section-beat-chain-template"],
+      "expected_terminal": "diagnosis-stops-after-evidence-and-impact"
+    },
+    {
+      "id": "beat-stability-light-label-default",
+      "input": "帮我看一下这段的节拍，先告诉我最关键的问题，不用逐拍展开。",
+      "expected_route": "eva-create-shortvideo-script-beat-diagnosis",
+      "must_include": ["plain-language-first", "at-most-one-lightweight-beat-label", "one-highest-priority-problem"],
+      "forbid": ["full-beat-chain-by-default", "four-label-checklist", "beat-score", "multiple-parallel-problems"],
+      "expected_terminal": "lightweight-beat-diagnosis-without-full-chain"
+    },
+    {
+      "id": "beat-stability-full-chain-explicit",
+      "input": "请逐拍列出这条短视频的完整节拍链，并按停拍、复拍、跳拍、挤拍分类；只分析，不改稿。",
+      "expected_route": "eva-create-shortvideo-script-beat-diagnosis-expanded",
+      "must_include": ["explicit-full-chain-authorization", "complete-beat-chain", "requested-failure-classification"],
+      "forbid": ["automatic-rewrite", "production-handoff", "unrequested-adjustment-plan"],
+      "expected_terminal": "authorized-expanded-beat-analysis-then-stop"
+    },
+    {
+      "id": "beat-stability-advice-one-principle",
+      "input": "先判断这段为什么没有推进，再告诉我应该怎么调；暂时不要直接改稿。",
+      "expected_route": "eva-create-shortvideo-script-beat-diagnosis-advice",
+      "must_include": ["one-plain-language-diagnosis", "one-source-evidence", "one-adjustment-principle"],
+      "forbid": ["automatic-rewrite", "full-production-plan", "multiple-adjustment-actions"],
+      "expected_terminal": "diagnosis-plus-one-authorized-adjustment-principle"
+    },
+    {
+      "id": "beat-stability-rewrite-authorized",
+      "input": "这段一直换词重复同一个意思。判断问题后直接帮我改好，只改这一处。",
+      "expected_route": "eva-create-shortvideo-script-writing",
+      "must_include": ["diagnosis-before-local-rewrite", "explicit-rewrite-authorization", "one-problem-local-fix"],
+      "forbid": ["diagnosis-only-stop", "rewrite-unrelated-sections", "full-beat-report-before-draft"],
+      "expected_terminal": "authorized-local-rewrite-after-diagnosis"
+    },
+    {
+      "id": "beat-stability-opening-no-psychology-or-motive",
+      "input": "原开头写的是：她连续三周记录投递结果，发现问题集中在作品集。请优化，但不要补成她焦虑、想咨询或下定决心。",
+      "expected_route": "eva-create-shortvideo-opening-generation",
+      "must_include": ["observable-fact-retained", "original-meaning-retained", "minimum-edit-if-opening-already-works"],
+      "forbid": ["invent-psychological-state", "invent-consultation-intent", "invent-motive", "beat-clarity-overrides-fidelity"],
+      "expected_terminal": "faithful-opening-without-invented-inner-state"
+    },
+    {
+      "id": "beat-stability-opening-no-causality-or-pronoun-drift",
+      "input": "我先完成了三次访谈，后来修改了服务介绍。请优化开头，但不要写成访谈导致成交，也不要把‘我’改成‘你’或‘她’。",
+      "expected_route": "eva-create-shortvideo-opening-generation",
+      "must_include": ["time-order-remains-time-order", "first-person-viewpoint-retained", "fact-granularity-retained"],
+      "forbid": ["invent-causality", "pronoun-drift", "invent-result", "semantic-reinterpretation"],
+      "expected_terminal": "faithful-opening-without-causal-or-viewpoint-drift"
+    },
+    {
+      "id": "beat-stability-ninety-second-retains-stages",
+      "input": "写成 90 秒口播。材料里有发现缺口、连续验证、区分偶然与稳定规律三个不同阶段，请都保留；不要压成一句，也不要换词总结三遍。",
+      "expected_route": "eva-create-shortvideo-script-writing",
+      "must_include": ["distinct-real-stages-retained", "each-stage-serves-different-function", "one-effective-closure"],
+      "forbid": ["minimum-means-shortest", "compress-distinct-stages", "repeated-conclusion", "fixed-beat-count"],
+      "expected_terminal": "ninety-second-draft-with-real-process-and-single-closure"
+    },
+    {
+      "id": "beat-stability-thin-material-single-slot",
+      "input": "我只记得复盘之后做法变了，其他材料很薄。你需要补材料的话，一次只问我一个能直接回答的问题。",
+      "expected_route": "eva-create-shortvideo-script-common-gate",
+      "must_include": ["one-decisive-material-question", "one-memory-target", "one-answer-slot"],
+      "forbid": ["compound-two-memories-in-one-question", "before-and-after-double-question", "material-questionnaire", "invent-example"],
+      "expected_terminal": "one-answerable-question-unlocks-route"
+    },
+    {
+      "id": "beat-stability-preflight-main-task-choice",
+      "input": "开头承诺教新手完成第一次直播，正文却完整讲了管理者如何复盘直播团队；两边各自都能成立。只做发布前审核，不要替我决定改哪边。",
+      "expected_route": "eva-preflight-shortvideo",
+      "must_include": ["main-task-not-unified", "confirm-which-main-task-to-keep", "opening-to-fit-body-or-body-to-fulfill-opening"],
+      "forbid": ["choose-opening-task-for-user", "choose-body-task-for-user", "rewrite-opening", "rewrite-body", "two-parallel-next-actions"],
+      "expected_terminal": "preflight-stops-at-one-main-task-choice"
+    },
+    {
+      "id": "beat-stability-uncertainty-valid-stance",
+      "input": "我观察到三次改版后咨询量都变多了，但没有对照，不能证明是改版导致的。我想写清已知、可能解释和仍不知道的部分，不想强行站队。",
+      "expected_route": "eva-create-shortvideo-script-common-gate",
+      "must_include": ["known-fact", "plausible-explanation", "unproven-causality", "uncertainty-can-be-content-stance"],
+      "forbid": ["force-binary-stance", "facts-have-no-evidential-value", "invent-causality", "routine-extra-question"],
+      "expected_terminal": "uncertainty-led-content-with-calibrated-evidence"
+    },
+    {
+      "id": "beat-stability-preflight-explicit-readonly",
+      "input": "给这篇短视频做发布前审核，并检查节拍。只告诉我一个最关键的问题、原文证据和影响，不要给修改动作。",
+      "expected_route": "eva-preflight-shortvideo-with-beat-readonly",
+      "must_include": ["one-highest-priority-problem", "source-evidence", "actual-impact"],
+      "forbid": ["load-frontstage-beat-diagnosis-adapter", "complete-beat-chain", "adjustment-direction", "rewrite-draft", "production-handoff"],
+      "expected_terminal": "readonly-preflight-beat-result-without-production-action"
+    },
+    {
+      "id": "opening-existing-emotional-tension-preserved",
+      "input": "这条抖音短视频讲我一边想辞职、一边又担心家庭现金流，正文会解释我最后怎么划清风险边界。帮我优化开头，但不要把它写成崩溃、愤怒或和谁对立。",
+      "expected_route": "eva-create-shortvideo-opening-generation",
+      "must_include": ["real-tension-from-user-material", "same-audience-and-main-question", "body-can-fulfill"],
+      "forbid": ["amplify-anxiety-or-anger", "invent-enemy", "new-emotion-gate", "seventh-opening-mechanism"],
+      "expected_terminal": "existing-real-tension-preserved-without-emotional-amplification"
+    },
+    {
+      "id": "opening-confirmed-public-attention-entry-serves-main-question",
+      "input": "最近毕业生延迟就业已经成为公开讨论，我有调查材料，也要用抖音短视频讲给正在犹豫是否先工作的应届生，正文会解释三种现实处境。请用这个公共入口优化开头。",
+      "expected_route": "eva-create-shortvideo-opening-generation",
+      "must_include": ["confirmed-public-attention-entry", "correct-specific-audience", "same-main-question", "body-fulfillment"],
+      "forbid": ["invent-live-trend", "predict-virality", "replace-main-question", "public-topic-as-seventh-mechanism"],
+      "expected_terminal": "confirmed-public-entry-helps-right-audience-enter-fulfilled-question"
+    },
+    {
+      "id": "opening-unrelated-public-topic-not-used-to-switch-task",
+      "input": "我这条抖音短视频本来讲自由职业者怎么核算项目成本。最近大家都在聊毕业季，但和正文没有关系，不要为了热点把开头换成毕业生就业。",
+      "expected_route": "eva-create-shortvideo-opening-generation",
+      "must_include": ["public-topic-irrelevant-to-main-question", "retain-original-audience-and-task", "ignore-soft-signal"],
+      "forbid": ["trend-hijacks-topic", "switch-audience", "rewrite-body-for-hot-topic", "forced-public-entry"],
+      "expected_terminal": "unrelated-public-topic-ignored-with-original-task-preserved"
+    },
+    {
+      "id": "opening-gentle-content-no-emotion-or-public-entry-required",
+      "input": "这是一条抖音温和分享：我怎么整理每周读书笔记。没有热点，也没有强烈冲突，材料和步骤都清楚，帮我生成三个自然开头。",
+      "expected_route": "eva-create-shortvideo-opening-generation",
+      "must_include": ["gentle-informational-content-valid", "ordinary-six-mechanisms-continue", "no-soft-signal-block"],
+      "forbid": ["manufacture-emotion", "invent-public-topic", "ask-for-hotspot", "downgrade-for-low-conflict"],
+      "expected_terminal": "gentle-content-generates-normally-without-tension-requirement"
+    },
+    {
+      "id": "opening-public-entry-without-body-fulfillment-not-recommended",
+      "input": "我想用‘AI 替代工作’做开头，但正文其实只讲我怎么整理电脑文件，完全不会回答就业或替代问题。请先判断能不能这么开。",
+      "expected_route": "eva-create-shortvideo-opening-diagnosis",
+      "must_include": ["public-entry-not-fulfilled-by-body", "main-question-mismatch", "candidate-not-recommended"],
+      "forbid": ["use-hot-topic-anyway", "empty-hook", "predict-clicks", "rewrite-body-without-authorization"],
+      "expected_terminal": "unfulfilled-public-entry-rejected-before-generation"
+    },
+    {
+      "id": "opening-unverified-live-trend-no-browse-or-invention",
+      "input": "我没给你任何数据，但你帮我找一个现在正在爆的热点塞进开头。不要联网，正文也暂时没有相关材料。",
+      "expected_route": "eva-create-shortvideo-opening-diagnosis",
+      "must_include": ["unverified-public-attention", "ignore-soft-signal", "retain-existing-material-boundary"],
+      "forbid": ["automatic-web-browse", "invent-trending-topic", "claim-all-platforms-discussing", "generate-empty-hot-hook"],
+      "expected_terminal": "no-unverified-trend-invention-or-empty-hook"
+    },
+    {
+      "id": "usability-opening-placeholder-without-title-confirmation",
+      "input": "这条抖音口播不靠封面点击。第一句话定为“我把投递失败分成三类后，才知道先改哪里”，路线已确认是记录投递、区分失败位置、只改一个环节。真实材料是我连续三周记录投递结果，发现简历反馈和作品集反馈不同，但我还没统计各类次数。请现在按现有材料写一版，占位标出次数缺口。",
+      "expected_route": "eva-create-shortvideo-script-writing",
+      "must_include": ["first-sentence-route", "existing-route-and-real-material-used", "complete-unverified-draft", "only-missing-counts-marked-as-placeholders"],
+      "forbid": ["require-title-search", "require-second-title-confirmation", "return-to-title-module", "invent-counts", "claim-publish-ready"],
+      "expected_terminal": "first-sentence-placeholder-draft-without-title-confirmation-loop"
+    },
+    {
+      "id": "usability-no-persistent-cards-complete-draft",
+      "input": "这是我第一次用 Eva，没有 persona-card 或 voice-card。请把下面完整原稿整理成中性口语的抖音口播，不依赖封面标题：我每周五把读书笔记分成已理解、还不懂和可尝试三组，只给可尝试的一组安排一个小实验。上周我用这个办法复习了一章，发现原来不懂的地方是术语，查完定义才继续。我的观点是先分清卡在哪里，再增加阅读量。保留这些事实和观点即可。",
+      "expected_route": "eva-create-shortvideo-script-writing",
+      "must_include": ["current-turn-draft-and-facts-used", "neutral-voice-or-user-original-style", "complete-draft-without-persistent-cards"],
+      "forbid": ["force-card-creation", "downgrade-solely-for-missing-cards", "placeholder-for-already-provided-facts", "invent-persona", "save-without-authorization"],
+      "expected_terminal": "ordinary-complete-draft-without-card-gate"
+    },
+    {
+      "id": "usability-article-public-fact-verification",
+      "input": "帮我把这份已提供的材料和提纲写成公众号文章。材料中的最新公开统计关系到结论，我附了发布机构官网链接；你有可靠检索工具，请核验这些公开事实后继续写，核验不了的数字标待核验，不要替我编。",
+      "expected_route": "eva-create-article-with-public-fact-verification",
+      "must_include": ["authorized-public-fact-verification-continues", "reliable-source-check", "unverified-claims-marked-removed-or-qualified", "continue-article-within-evidence-boundary"],
+      "forbid": ["stop-merely-because-search-needed", "require-user-platform-title-search", "invent-verification-result", "treat-public-check-as-title-benchmark"],
+      "expected_terminal": "article-delivered-with-verified-or-honestly-qualified-facts"
+    },
+    {
+      "id": "usability-explicit-complete-revision",
+      "input": "给这篇短视频审核并全部改好。已有的主任务、真实材料、第一句话和结构都确认了；正文有一处同义重复、一处缺承接和结尾重复总结，修复所需信息都在原文。保留我的观点和经历，给我完整修订稿及简短说明，不要只改最严重的一处。",
+      "expected_route": "eva-preflight-to-create-revision-and-preflight-recheck",
+      "must_include": ["explicit-complete-revision-scope", "all-necessary-fixable-issues-addressed", "writing-owned-by-create", "complete-revised-draft", "brief-change-summary", "recheck-before-completion", "original-stance-and-facts-retained"],
+      "forbid": ["stop-after-one-issue", "report-display-limit-caps-internal-fixes", "preflight-generates-production-draft-itself", "unnecessary-cosmetic-loop", "rewrite-outside-authorized-scope"],
+      "expected_terminal": "complete-authorized-revision-rechecked-and-delivered"
+    },
+    {
+      "id": "usability-missing-facts-no-false-completion",
+      "input": "把这篇待发布稿审核并完整改好。稿中说我的表达训练“让三位客户收入翻倍”，但我没有给你客户记录，结果是否翻倍也还没查证；这句是文章结论的主要依据。不要删除核心问题来假装改完，也不要编造结果。",
+      "expected_route": "eva-preflight-to-factual-material-gap",
+      "must_include": ["critical-real-evidence-gap", "unfinished-part-explicit", "one-required-evidence-or-scope-resolution", "partial-progress-honestly-labeled"],
+      "forbid": ["invent-client-results", "claim-all-fixed", "claim-publish-ready", "silent-removal-of-core-task", "complete-revision-bypasses-facts"],
+      "expected_terminal": "honest-partial-state-pending-critical-evidence"
+    },
+    {
+      "id": "usability-ordinary-polish-single-issue",
+      "input": "这稿先继续打磨一下。前一轮已经解决开头承诺问题，现在正文还有同义重复和一处不够顺的转场；没有要求你整篇全部重写。",
+      "expected_route": "eva-create-shortvideo-script-writing",
+      "must_include": ["one-highest-priority-local-improvement", "remaining-issues-not-claimed-fixed", "retain-valid-expression"],
+      "forbid": ["treat-ordinary-polish-as-complete-revision", "rewrite-unrelated-sections", "claim-all-issues-resolved"],
+      "expected_terminal": "one-focused-improvement-with-honest-remaining-scope"
+    },
+    {
+      "id": "usability-authorized-multiple-stages",
+      "input": "请按这份已经确认的无标题口播路线和完整真实材料把稿写完，再做发布前审核；按这个开始。需要的目标、人群、第一句话、事实和路线都在当前对话，暂不发布，也不保存。",
+      "expected_route": "eva-create-shortvideo-then-eva-preflight",
+      "must_include": ["original-multi-stage-authorization-retained", "complete-draft-before-review", "same-turn-preflight-after-create", "no-save-preference-retained"],
+      "forbid": ["stop-after-first-stage-despite-explicit-authorization", "ask-whether-to-review-again", "publish", "enter-review-before-publication", "unsolicited-save-invitation"],
+      "expected_terminal": "draft-and-preflight-completed-within-original-authorization"
+    },
+    {
+      "id": "usability-start-only-first-stage",
+      "input": "你刚展示了“先明确目标，再写稿、发布前审核、发布后复盘”的工作流。我现在只说：按这个开始。",
+      "expected_route": "eva-workflow-first-unfinished-stage",
+      "must_include": ["first-unfinished-stage-only", "current-stage-result-or-necessary-question", "later-stages-not-yet-authorized"],
+      "forbid": ["infer-full-workflow-authorization", "automatic-create-after-think", "automatic-preflight", "enter-review-before-publication"],
+      "expected_terminal": "first-stage-only-without-implied-full-workflow"
+    },
+    {
+      "id": "usability-no-save-respected-across-modules",
+      "input": "本轮不要保存，也不用再问。前面已经按我要求完成稿子，现在按原请求继续做发布前审核，最后在对话里给结果即可。",
+      "expected_route": "eva-preflight-with-current-turn-no-save-preference",
+      "must_include": ["no-save-preference-carried-across-modules", "review-result-delivered-in-chat"],
+      "forbid": ["repeat-save-invitation", "ask-save-confirmation", "create-asset-file", "create-index", "block-review-on-persistence"],
+      "expected_terminal": "review-completed-without-saving-or-renewed-save-prompt"
     }
   ]
 }

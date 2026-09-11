@@ -10,6 +10,9 @@ Eva 数据备份只汇总已经正式落盘的数据：
 - 当前运行项目与 `~/Documents/eva-learn/` 中发现的 Eva Learn 项目。
 - 用户本轮明确提供的其他 Eva Learn 项目路径。
 - 当前运行项目中已经获得保存授权的 `./eva-review/`。
+- 当前运行项目中已经获得保存授权的 `./eva-positioning/`。
+
+“完整 Eva 数据包”覆盖 Memory、Learn、Review 和 Positioning 四个独立数据域。Positioning 保存的是尚在验证中的账号阶段状态与证据账本，不是 Memory Asset：`memory` 范围始终只导出 `./eva-memory/`，`complete` 默认包含 Positioning，`custom` 才由用户决定是否包含。
 
 当前会话中仍然可见、已经形成结构但尚未保存的候选，不得直接夹带进压缩包。只有能整理成 `idea-card`、`persona-card`、`product-service-card` 或 `voice-card` 的候选，才可以先列出名称、类型、缺失字段和隐私状态；用户选中后，按 Asset 协议校验并正式保存，再进入备份。
 
@@ -24,6 +27,7 @@ Eva 数据备份只汇总已经正式落盘的数据：
 备份全部 Eva 记忆卡
 把我的 Eva 数据打包到桌面
 导出 Memory，并把 Eva Learn 和 Eva Review 一起带上
+导出完整 Eva 数据包，把已保存的 Positioning 进度也带上
 ```
 
 “压缩这个文件夹”“备份这个项目”“把桌面资料打包”等普通文件任务不属于 Eva，不得抢占。
@@ -47,10 +51,11 @@ python3 <当前安装的 eva-shared>/scripts/eva_data_export.py preview \
 - Memory 卡片数与总体积。
 - Learn 项目数、档案文件数、原始资料文件数与体积。
 - Review 账号数、记录文件数与体积。
+- Positioning 账号档案数、正式状态文件数、总文件数与体积，以及待校验或损坏状态数。
 - 当前会话可见的未保存候选数量；没有可靠结构时写 0，不重新猜测。
 - 符号链接、隐藏文件、临时文件、特殊文件等安全跳过项。
 - 拟写入的目标目录。
-- 完整包是本地未加密 ZIP，可能含个人经历、学习资料和账号数据。
+- 完整包是本地未加密 ZIP，可能含个人经历、学习资料、账号经营目标、平台证据摘要和未公开业务事实。
 
 预览只显示统计与安全范围，不展示正文、正文摘要或电脑绝对源路径。
 
@@ -62,7 +67,7 @@ python3 <当前安装的 eva-shared>/scripts/eva_data_export.py preview \
 这次你想：
 
 1. 只导出全部记忆卡；
-2. 导出完整 Eva 数据包（记忆卡＋学习档案及原始资料＋账号复盘记录）；
+2. 导出完整 Eva 数据包（记忆卡＋学习档案及原始资料＋账号复盘记录＋账号定位进度）；
 3. 自定义导出范围。
 ```
 
@@ -71,8 +76,8 @@ python3 <当前安装的 eva-shared>/scripts/eva_data_export.py preview \
 | 选择 | 范围 |
 |---|---|
 | 只导出全部记忆卡 | 仅当前项目 `./eva-memory/` |
-| 完整 Eva 数据包 | Memory、全部已知 Learn 项目及其原始资料、当前项目已授权 Review 记录库 |
-| 自定义 | 用户逐项选择 Memory、Learn、Review，并可排除 Learn 原始资料或补充其他 Learn 路径 |
+| 完整 Eva 数据包 | Memory、全部已知 Learn 项目及其原始资料、当前项目已授权 Review 记录库与 Positioning 进度库 |
+| 自定义 | 用户逐项选择 Memory、Learn、Review、Positioning，并可排除 Learn 原始资料或补充其他 Learn 路径 |
 
 不得把“盘点一下”当成导出授权，也不得把用户查看预览当成写入授权。
 
@@ -105,7 +110,7 @@ python3 <当前安装的 eva-shared>/scripts/eva_data_export.py export \
   --format json
 ```
 
-自定义模式按用户选择追加 Memory、Learn、Review、排除原始资料或额外 Learn 路径参数。不得用预览命令冒充实际导出，也不得在没有 `--confirm-export` 和匹配的 `--expected-plan-id` 时写文件。
+自定义模式按用户选择追加 Memory、Learn、Review、Positioning、排除原始资料或额外 Learn 路径参数；选择 Positioning 时使用 `--include positioning`。不得用预览命令冒充实际导出，也不得在没有 `--confirm-export` 和匹配的 `--expected-plan-id` 时写文件。
 
 `export` 的范围、Learn 路径、原始资料选项和目标目录必须与最终预检逐项一致；任一项变化都要再次预检，不能沿用旧 `plan_id`。
 
@@ -139,6 +144,13 @@ python3 <当前安装的 eva-shared>/scripts/eva_data_export.py export \
 - 只纳入已经按 Eva Review 协议获得持续保存授权并正式落盘的设置、账号档案、记录、回填和规律报告。
 - 不从其他项目搜集 Review，也不依据聊天内容临时生成 Review 记录。
 
+### Eva Positioning
+
+- 只读取当前真实项目根下的 `./eva-positioning/`，不读取其他项目、Documents、Home、Skill 仓库或整台电脑。
+- 账号档案数、正式状态文件数、总文件数与体积分别统计；预览不显示状态正文、证据摘要或绝对源路径。
+- 符合安全路径与普通文件规则、但 frontmatter 不完整或无法解析的状态仍纳入备份，并单独计为待校验或损坏；不可读的计划内普通文件仍使整次导出失败。
+- 导出只备份已经落盘的定位状态，不根据聊天临时生成档案，也不把定位进度转成 Memory 卡片。
+
 ## 安全过滤
 
 所有来源统一遵守：
@@ -162,7 +174,8 @@ Eva-data-backup-YYYYMMDD-HHMMSS/
 ├── MANIFEST.json
 ├── eva-memory/
 ├── eva-learn/
-└── eva-review/
+├── eva-review/
+└── eva-positioning/
 ```
 
 未选择或不存在的数据域不创建空目录。多个 Learn 来源可以在 `eva-learn/` 内使用不含绝对路径的稳定来源名称；同名项目不得互相覆盖。
@@ -175,6 +188,12 @@ Eva-data-backup-YYYYMMDD-HHMMSS/
 - 普通文件大小和 SHA-256。
 - 总文件数、总体积与安全跳过原因。
 
+新生成的备份使用 `format_version: 2`；`positioning` 是独立 kind，只能对应 `eva-positioning/` 归档前缀。验证器必须同时接受历史 v1 与当前 v2：
+
+- v1 的 `complete` 仍严格表示 Memory、Learn 和 Review；不得在 v1 Manifest 中伪造 `positioning` kind 或 `eva-positioning/` 路径。
+- v2 的 `memory` 只允许 Memory，`complete` 必须声明 Memory、Learn、Review 和 Positioning，`custom` 则按用户最终选择声明。
+- 旧 v1 包不因缺少 Positioning 而被误判为损坏；v2 完整包缺少 Positioning 声明或其他必需数据域时验证失败。
+
 不得记录电脑绝对路径、文件正文、正文摘要、对用户身份的推断或历史会话内容。
 
 每个 ZIP 都是不可变时间点：
@@ -183,6 +202,10 @@ Eva-data-backup-YYYYMMDD-HHMMSS/
 - 完成 ZIP 文件数、CRC、逐文件 SHA-256 和 Manifest 一致性校验后，再原子改名。
 - 同名时追加 `-02`、`-03`，永不覆盖旧备份。
 - 验证失败只清理本轮临时 ZIP，源文件和既有备份保持不变。
+
+### 恢复边界
+
+本流程只负责预览、导出与验证，不自动解压、恢复、覆盖或合并用户数据。用户手动将 `eva-positioning/` 放回目标项目后，现有 Positioning 恢复协议才可以读取；目标已存在同名账号或同版本状态时必须停止，不自动覆盖或合并。
 
 ## 完成输出
 

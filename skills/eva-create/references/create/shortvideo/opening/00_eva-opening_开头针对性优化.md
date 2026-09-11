@@ -15,8 +15,9 @@
 ## 必读顺序
 
 1. 所有开头任务先读 `01_eva-opening-diagnosis_开头承接与兑现诊断.md`。
-2. 只有诊断返回“材料放行：允许生成”时，才读 `02_eva-opening-generation_开头方案生成与推荐.md`。
-3. 需要第一句话交接卡时，只读 `../eva-shared/references/shared/00_handoff-cards_交接卡字段真源.md`，不在 Opening 维护第二套字段。
+2. 判断开头是否启动或完成第一拍时，按需读取 `../01_eva-beats_短视频节拍与心智推进.md`；不在 Opening 维护第二套节拍规则。
+3. 只有诊断返回“材料放行：允许生成”时，才读 `02_eva-opening-generation_开头方案生成与推荐.md`。
+4. 需要第一句话交接卡时，只读 `../eva-shared/references/shared/00_handoff-cards_交接卡字段真源.md`，不在 Opening 维护第二套字段。
 
 ## 主控表
 

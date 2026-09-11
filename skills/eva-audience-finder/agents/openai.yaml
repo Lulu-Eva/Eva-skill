@@ -1,4 +1,4 @@
 interface:
   display_name: "Eva Audience｜话题人群识别"
-  short_description: "识别话题真正替谁说话，校准人群、认知缺口与后续内容入口"
-  default_prompt: "用 $eva-audience-finder 看看这个话题真正戳中了谁。"
+  short_description: "写前识别人群，写后核对内容最后让谁接住"
+  default_prompt: "用 $eva-audience-finder 看看这个话题替谁说话，或检查这篇稿有没有写偏人群。"

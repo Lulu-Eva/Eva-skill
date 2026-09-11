@@ -1,4 +1,4 @@
 interface:
   display_name: "Eva"
-  short_description: "Eva 主入口：任务选路、素材采集、下一步与数据备份"
-  default_prompt: "用 $eva 判断我该进入哪个任务入口；需要时帮我采集人设素材或产品与服务事实、推荐下一步，或先预览 Eva 数据备份范围。"
+  short_description: "Eva 主入口：思考、阶段定位、创作、素材与下一步"
+  default_prompt: "用 $eva 判断我该进入哪个任务入口；需要时帮我做账号阶段性定位、采集人设素材或产品与服务事实、推荐下一步，或先预览 Eva 数据备份范围。"

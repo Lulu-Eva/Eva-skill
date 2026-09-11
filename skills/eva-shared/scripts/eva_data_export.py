@@ -24,8 +24,13 @@ import unicodedata
 import zipfile
 
 
-SCRIPT_VERSION = "2.3.0"
-BACKUP_FORMAT_VERSION = 1
+SCRIPT_VERSION = "2.4.1"
+LEGACY_BACKUP_FORMAT_VERSION = 1
+BACKUP_FORMAT_VERSION = 2
+SUPPORTED_BACKUP_FORMAT_VERSIONS = (
+    LEGACY_BACKUP_FORMAT_VERSION,
+    BACKUP_FORMAT_VERSION,
+)
 MANIFEST_NAME = "MANIFEST.json"
 README_NAME = "README.md"
 DEFAULT_ARCHIVE_PREFIX = "Eva-data-backup"
@@ -33,7 +38,17 @@ DEFAULT_MAX_FILES = 50_000
 DEFAULT_MAX_BYTES = 10 * 1024 * 1024 * 1024
 DEFAULT_MAX_MANIFEST_BYTES = 16 * 1024 * 1024
 CHUNK_SIZE = 1024 * 1024
-SOURCE_KINDS = ("memory", "learn", "review")
+LEGACY_SOURCE_KINDS = ("memory", "learn", "review")
+SOURCE_KINDS = LEGACY_SOURCE_KINDS + ("positioning",)
+ARCHIVE_PREFIXES = {
+    "memory": "eva-memory",
+    "learn": "eva-learn",
+    "review": "eva-review",
+    "positioning": "eva-positioning",
+}
+POSITIONING_PROFILE_ID_PATTERN = re.compile(r"[A-Za-z0-9][A-Za-z0-9._-]*\Z")
+POSITIONING_STATE_FILE_PATTERN = re.compile(r"state-v([0-9]{3})\.md\Z")
+POSITIONING_FRONTMATTER_MAX_BYTES = 256 * 1024
 TEMP_SUFFIXES = (
     ".tmp",
     ".temp",
@@ -80,6 +95,9 @@ class ScanReport:
     learn_raw_source_bytes: int = 0
     review_accounts: int = 0
     review_record_files: int = 0
+    positioning_profiles: int = 0
+    positioning_state_files: int = 0
+    positioning_invalid_state_files: int = 0
 
 
 def _result(
@@ -135,6 +153,11 @@ def _render_markdown(payload: dict[str, Any]) -> str:
     memory = data.get("memory") if isinstance(data.get("memory"), dict) else None
     learn = data.get("learn") if isinstance(data.get("learn"), dict) else None
     review = data.get("review") if isinstance(data.get("review"), dict) else None
+    positioning = (
+        data.get("positioning")
+        if isinstance(data.get("positioning"), dict)
+        else None
+    )
     if memory is not None:
         lines.extend(
             [
@@ -170,6 +193,19 @@ def _render_markdown(payload: dict[str, Any]) -> str:
                 f"- 复盘记录文件：{int(review.get('record_files') or 0)}",
                 f"- 文件：{int(review.get('files') or 0)}",
                 f"- 大小：{int(review.get('bytes') or 0)} 字节",
+            ]
+        )
+    if positioning is not None:
+        lines.extend(
+            [
+                "",
+                "## Eva Positioning",
+                "",
+                f"- 账号档案：{int(positioning.get('profile_count') or 0)}",
+                f"- 状态文件：{int(positioning.get('state_files') or 0)}",
+                f"- 文件：{int(positioning.get('files') or 0)}",
+                f"- 大小：{int(positioning.get('bytes') or 0)} 字节",
+                f"- 待校验状态文件：{int(positioning.get('invalid_state_files') or 0)}",
             ]
         )
 
@@ -576,6 +612,15 @@ def _discover_sources(
                     explicit=False,
                 )
 
+    if "positioning" in included_kinds:
+        add_source(
+            kind="positioning",
+            label="current-project",
+            root=project_root / "eva-positioning",
+            archive_prefix="eva-positioning",
+            explicit=False,
+        )
+
     if "learn" in included_kinds:
         current_learn = project_root / "eva-learn"
         add_learn_root(
@@ -644,6 +689,115 @@ def _probe_readable(path: Path, planned: os.stat_result) -> str | None:
     return None
 
 
+def _frontmatter_scalar(value: str) -> str:
+    value = value.strip()
+    if (
+        len(value) >= 2
+        and value[0] == value[-1]
+        and value[0] in {"'", '"'}
+    ):
+        return value[1:-1].strip()
+    return value
+
+
+def _read_positioning_frontmatter(
+    path: Path,
+    planned: os.stat_result,
+) -> tuple[dict[str, str] | None, str | None]:
+    """Read only the bounded frontmatter needed for Positioning health stats."""
+    try:
+        descriptor = _open_readonly_no_follow(path)
+    except OSError as exc:
+        return None, exc.__class__.__name__
+    raw = bytearray()
+    try:
+        opened = os.fstat(descriptor)
+        if not stat.S_ISREG(opened.st_mode):
+            return None, "not-regular-after-open"
+        if (opened.st_dev, opened.st_ino) != (planned.st_dev, planned.st_ino):
+            return None, "file-changed-during-scan"
+        remaining = POSITIONING_FRONTMATTER_MAX_BYTES + 1
+        while remaining > 0:
+            try:
+                chunk = os.read(descriptor, min(CHUNK_SIZE, remaining))
+            except OSError as exc:
+                return None, exc.__class__.__name__
+            if not chunk:
+                break
+            raw.extend(chunk)
+            remaining -= len(chunk)
+        closed = os.fstat(descriptor)
+        if (
+            int(closed.st_dev) != int(planned.st_dev)
+            or int(closed.st_ino) != int(planned.st_ino)
+            or int(closed.st_size) != int(planned.st_size)
+            or int(closed.st_mtime_ns) != int(planned.st_mtime_ns)
+        ):
+            return None, "file-changed-during-scan"
+    finally:
+        os.close(descriptor)
+
+    lines = bytes(raw[:POSITIONING_FRONTMATTER_MAX_BYTES]).splitlines()
+    if not lines or lines[0] != b"---":
+        return None, None
+    closing_index: int | None = None
+    for index, line in enumerate(lines[1:], start=1):
+        if line == b"---":
+            closing_index = index
+            break
+    if closing_index is None:
+        return None, None
+    try:
+        frontmatter_text = b"\n".join(lines[1:closing_index]).decode("utf-8")
+    except UnicodeDecodeError:
+        return None, None
+
+    fields: dict[str, str] = {}
+    for line in frontmatter_text.splitlines():
+        if not line.strip() or line.lstrip().startswith("#"):
+            continue
+        if line[:1].isspace() or ":" not in line:
+            continue
+        key, value = line.split(":", 1)
+        key = key.strip()
+        if key not in {"eva_positioning_state", "profile_id", "revision"}:
+            continue
+        if key in fields:
+            return None, None
+        fields[key] = _frontmatter_scalar(value)
+    return fields, None
+
+
+def _positioning_file_health(
+    path: Path,
+    planned: os.stat_result,
+    relative_parts: tuple[str, ...],
+) -> tuple[bool, bool, str | None]:
+    """Return (is_state_filename, minimally_valid, read_error)."""
+    filename_match = POSITIONING_STATE_FILE_PATTERN.fullmatch(path.name)
+    is_state_filename = filename_match is not None
+    profile_id = relative_parts[0] if len(relative_parts) == 2 else ""
+    path_valid = (
+        len(relative_parts) == 2
+        and POSITIONING_PROFILE_ID_PATTERN.fullmatch(profile_id) is not None
+        and filename_match is not None
+        and int(filename_match.group(1)) > 0
+    )
+    fields, read_error = _read_positioning_frontmatter(path, planned)
+    if read_error is not None:
+        return is_state_filename, False, read_error
+    if not path_valid or fields is None or filename_match is None:
+        return is_state_filename, False, None
+    revision = fields.get("revision", "")
+    valid = (
+        fields.get("eva_positioning_state", "").casefold() == "true"
+        and fields.get("profile_id") == profile_id
+        and re.fullmatch(r"[1-9][0-9]*", revision) is not None
+        and int(revision) == int(filename_match.group(1))
+    )
+    return is_state_filename, valid, None
+
+
 def _scan_source(
     source: SourceSpec,
     *,
@@ -663,6 +817,9 @@ def _scan_source(
     learn_raw_source_bytes = 0
     review_accounts: set[str] = set()
     review_record_files = 0
+    positioning_profiles: set[str] = set()
+    positioning_state_files = 0
+    positioning_invalid_state_files = 0
 
     def is_learn_raw_source(parts: tuple[str, ...]) -> bool:
         return (
@@ -679,6 +836,7 @@ def _scan_source(
         nonlocal memory_card_count
         nonlocal learn_raw_source_files, learn_raw_source_bytes
         nonlocal review_record_files
+        nonlocal positioning_state_files, positioning_invalid_state_files
         if errors:
             return
         try:
@@ -737,6 +895,12 @@ def _scan_source(
                     skipped["outside_root"] += 1
                     continue
                 if (
+                    source.kind == "positioning"
+                    and len(next_parts) == 1
+                    and POSITIONING_PROFILE_ID_PATTERN.fullmatch(name) is not None
+                ):
+                    positioning_profiles.add(name)
+                if (
                     source.kind == "review"
                     and len(next_parts) == 2
                     and next_parts[0] == "accounts"
@@ -786,6 +950,22 @@ def _scan_source(
                     f"{source.kind}:{source.label} 普通文件 {relative_posix} 无法安全读取：{read_error}"
                 )
                 return
+            if source.kind == "positioning":
+                is_state_file, valid_state, state_read_error = _positioning_file_health(
+                    path,
+                    entry_stat,
+                    next_parts,
+                )
+                if state_read_error:
+                    errors.append(
+                        f"{source.kind}:{source.label} 普通文件 {relative_posix} "
+                        f"无法安全读取：{state_read_error}"
+                    )
+                    return
+                if valid_state:
+                    positioning_state_files += 1
+                if not valid_state:
+                    positioning_invalid_state_files += 1
 
             scanned_regular_files += 1
             scanned_regular_bytes += int(entry_stat.st_size)
@@ -858,6 +1038,9 @@ def _scan_source(
         learn_raw_source_bytes=learn_raw_source_bytes,
         review_accounts=len(review_accounts),
         review_record_files=review_record_files,
+        positioning_profiles=len(positioning_profiles),
+        positioning_state_files=positioning_state_files,
+        positioning_invalid_state_files=positioning_invalid_state_files,
     )
 
 
@@ -970,6 +1153,11 @@ def _build_plan(
         errors.append("--exclude-learn-sources 要求自定义范围包含 learn")
     if errors:
         return _result(False, "data-export-preview", "导出范围无效。", errors=errors)
+    if "positioning" in included_kinds:
+        warnings.append(
+            "Positioning 可能包含账号经营目标、平台证据摘要和未公开业务事实；"
+            "生成的 ZIP 是未加密本地文件，请妥善保管。"
+        )
 
     selection = {
         "scope": scope,
@@ -1022,6 +1210,13 @@ def _build_plan(
         "files": 0,
         "bytes": 0,
     }
+    positioning_stats = {
+        "profile_count": 0,
+        "state_files": 0,
+        "files": 0,
+        "bytes": 0,
+        "invalid_state_files": 0,
+    }
 
     for source in sources:
         remaining_files = max_files - len(all_files)
@@ -1056,6 +1251,14 @@ def _build_plan(
             review_stats["record_files"] += report.review_record_files
             review_stats["files"] += len(report.files)
             review_stats["bytes"] += source_bytes
+        elif source.kind == "positioning":
+            positioning_stats["profile_count"] += report.positioning_profiles
+            positioning_stats["state_files"] += report.positioning_state_files
+            positioning_stats["files"] += len(report.files)
+            positioning_stats["bytes"] += source_bytes
+            positioning_stats[
+                "invalid_state_files"
+            ] += report.positioning_invalid_state_files
         for entry in report.files:
             collision_key = _normalized_collision_key(entry.archive_path)
             if collision_key in global_archive_keys:
@@ -1080,6 +1283,12 @@ def _build_plan(
         errors.append(f"备份总文件数超过上限 {max_files}。")
     if total_bytes > max_bytes:
         errors.append(f"备份总数据量超过上限 {max_bytes} 字节。")
+    if positioning_stats["invalid_state_files"]:
+        warnings.append(
+            "Positioning 有 "
+            f"{positioning_stats['invalid_state_files']} 个状态文件未通过最小路径或 "
+            "frontmatter 校验；为避免丢失，这些可安全读取的文件仍会纳入备份。"
+        )
     if errors:
         return _result(
             False,
@@ -1097,6 +1306,7 @@ def _build_plan(
                 "memory": memory_stats,
                 "learn": learn_stats,
                 "review": review_stats,
+                "positioning": positioning_stats,
                 "proposed_output_dir": str(proposed_output_dir),
                 "skipped": aggregate_skipped,
                 "will_write": False,
@@ -1118,6 +1328,7 @@ def _build_plan(
                 "memory": memory_stats,
                 "learn": learn_stats,
                 "review": review_stats,
+                "positioning": positioning_stats,
                 "proposed_output_dir": str(proposed_output_dir),
                 "skipped": aggregate_skipped,
                 "will_write": False,
@@ -1147,6 +1358,7 @@ def _build_plan(
             "memory": memory_stats,
             "learn": learn_stats,
             "review": review_stats,
+            "positioning": positioning_stats,
             "proposed_output_dir": str(proposed_output_dir),
             "skipped": aggregate_skipped,
             "plan_id": plan_id,
@@ -1271,6 +1483,12 @@ def _readme_bytes(
     included_kinds: tuple[str, ...],
 ) -> bytes:
     kinds = "、".join(included_kinds)
+    positioning_notice = ""
+    if "positioning" in included_kinds:
+        positioning_notice = (
+            "\nPositioning 可能包含账号经营目标、平台证据摘要和未公开业务事实。"
+            "请将本备份按敏感本地数据保管。\n"
+        )
     text = f"""# Eva 数据备份
 
 - 备份格式版本：{BACKUP_FORMAT_VERSION}
@@ -1282,6 +1500,7 @@ def _readme_bytes(
 本压缩包是用户主动确认后生成的本地备份，不会联网上传。
 它没有加密，请妥善保管。`MANIFEST.json` 保存相对路径、文件大小和 SHA-256，
 不包含电脑上的绝对来源路径。解压或迁移前可再次运行 Eva 的备份校验。
+{positioning_notice}
 """
     return text.encode("utf-8")
 
@@ -1443,8 +1662,18 @@ def _validate_zip(path: Path) -> dict[str, Any]:
                 errors.append(f"ZIP 缺少顶层目录内的 {README_NAME}")
 
             if manifest is not None:
-                if manifest.get("format_version") != BACKUP_FORMAT_VERSION:
+                manifest_format_version = manifest.get("format_version")
+                if (
+                    not isinstance(manifest_format_version, int)
+                    or isinstance(manifest_format_version, bool)
+                    or manifest_format_version not in SUPPORTED_BACKUP_FORMAT_VERSIONS
+                ):
                     errors.append("Manifest 格式版本不受支持")
+                    allowed_manifest_kinds: tuple[str, ...] = ()
+                elif manifest_format_version == LEGACY_BACKUP_FORMAT_VERSION:
+                    allowed_manifest_kinds = LEGACY_SOURCE_KINDS
+                else:
+                    allowed_manifest_kinds = SOURCE_KINDS
                 manifest_eva_version = manifest.get("eva_skill_version")
                 if (
                     not isinstance(manifest_eva_version, str)
@@ -1465,7 +1694,7 @@ def _validate_zip(path: Path) -> dict[str, Any]:
                     not isinstance(manifest_kinds, list)
                     or not manifest_kinds
                     or any(
-                        not isinstance(kind, str) or kind not in SOURCE_KINDS
+                        not isinstance(kind, str) or kind not in allowed_manifest_kinds
                         for kind in manifest_kinds
                     )
                     or len(set(manifest_kinds)) != len(manifest_kinds)
@@ -1478,11 +1707,37 @@ def _validate_zip(path: Path) -> dict[str, Any]:
                         errors.append("memory 范围只能包含 memory")
                     if (
                         manifest_scope == "complete"
-                        and normalized_manifest_kinds != list(SOURCE_KINDS)
+                        and normalized_manifest_kinds != list(allowed_manifest_kinds)
                     ):
-                        errors.append(
-                            "complete 范围必须声明 memory、learn、review"
-                        )
+                        required_kinds = "、".join(allowed_manifest_kinds)
+                        errors.append(f"complete 范围必须声明 {required_kinds}")
+                manifest_sources = manifest.get("sources")
+                if isinstance(manifest_sources, list):
+                    for index, source_row in enumerate(manifest_sources):
+                        if not isinstance(source_row, dict):
+                            continue
+                        source_kind = source_row.get("kind")
+                        source_prefix = source_row.get("archive_prefix")
+                        if (
+                            isinstance(source_kind, str)
+                            and source_kind not in allowed_manifest_kinds
+                        ):
+                            errors.append(
+                                f"Manifest sources[{index}] 数据域不受格式版本支持"
+                            )
+                        if (
+                            manifest_format_version == LEGACY_BACKUP_FORMAT_VERSION
+                            and isinstance(source_prefix, str)
+                            and (
+                                source_prefix == ARCHIVE_PREFIXES["positioning"]
+                                or source_prefix.startswith(
+                                    f"{ARCHIVE_PREFIXES['positioning']}/"
+                                )
+                            )
+                        ):
+                            errors.append(
+                                f"Manifest sources[{index}] 不得在 v1 中声明 Positioning"
+                            )
                 selection = manifest.get("selection")
                 exclude_learn_sources = False
                 if not isinstance(selection, dict):
@@ -1516,6 +1771,9 @@ def _validate_zip(path: Path) -> dict[str, Any]:
                 expected_names: set[str] = {str(manifest_path)}
                 expected_total = 0
                 data_row_count = 0
+                allowed_prefixes = {
+                    kind: ARCHIVE_PREFIXES[kind] for kind in allowed_manifest_kinds
+                }
                 for index, row in enumerate(rows):
                     if not isinstance(row, dict):
                         errors.append(f"Manifest files[{index}] 不是对象")
@@ -1545,11 +1803,6 @@ def _validate_zip(path: Path) -> dict[str, Any]:
                         if row_kind != "metadata":
                             errors.append("README.md 的 Manifest kind 必须是 metadata")
                     else:
-                        allowed_prefixes = {
-                            "memory": "eva-memory",
-                            "learn": "eva-learn",
-                            "review": "eva-review",
-                        }
                         expected_prefix = allowed_prefixes.get(str(row_kind))
                         if (
                             expected_prefix is None
@@ -1646,6 +1899,7 @@ def _validate_zip(path: Path) -> dict[str, Any]:
             "archive_sha256": digest,
             "file_count": int((manifest or {}).get("file_count") or 0),
             "total_bytes": int((manifest or {}).get("total_bytes") or 0),
+            "format_version": (manifest or {}).get("format_version"),
             "scope": (manifest or {}).get("scope"),
             "included_kinds": (manifest or {}).get("included_kinds") or [],
             "archive_root": (manifest or {}).get("archive_root"),
@@ -1918,6 +2172,7 @@ def _export_plan(
                 "memory": data.get("memory") or {},
                 "learn": data.get("learn") or {},
                 "review": data.get("review") or {},
+                "positioning": data.get("positioning") or {},
                 "skipped": data.get("skipped") or {},
                 "verified": True,
             },
@@ -1971,7 +2226,10 @@ def _build_parser() -> argparse.ArgumentParser:
             "--scope",
             choices=("memory", "complete", "custom"),
             default="memory",
-            help="memory=cards only; complete=Memory+Learn+Review; custom uses --include.",
+            help=(
+                "memory=cards only; complete=Memory+Learn+Review+Positioning; "
+                "custom uses --include."
+            ),
         )
         target.add_argument(
             "--include",

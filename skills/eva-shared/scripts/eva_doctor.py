@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Check Eva Shared 2.3.0 structure and dependencies."""
+"""Check Eva Shared 2.4.1 structure and dependencies."""
 
 from __future__ import annotations
 
@@ -54,8 +54,21 @@ REQUIRED_PEER_SKILLS = {
         "../eva-shared/references/shared/07_next-step-navigation_动态选路与下一步推荐.md",
     ],
     "eva-new-user": [],
+    "eva-positioning": [
+        "references/positioning/00_entry_账号阶段性定位主控.md",
+        "references/positioning/01_evidence-ledger_证据与候选账本.md",
+        "references/positioning/02_platform-search_平台现实取证.md",
+        "references/positioning/03_stage-output_阶段结论与主页三件套.md",
+        "references/positioning/04_persistence_暂停恢复与隐私.md",
+        "references/positioning/05_ai-creator_AI博主专项.md",
+        "../eva-shared/references/shared/04_light-interaction_轻交互协议.md",
+        "../eva-shared/references/shared/06_external-material-safety_外部材料安全边界.md",
+        "../eva-shared/references/shared/07_next-step-navigation_动态选路与下一步推荐.md",
+    ],
     "eva-audience-finder": [
         "../eva-shared/references/audience/00_eva-audience-finder_话题人群识别器.md",
+        "../eva-shared/references/audience/01_eva-audience-alignment_写后人群对位.md",
+        "../eva-shared/references/shared/06_external-material-safety_外部材料安全边界.md",
     ],
     "eva-think": [
         "references/think/00_eva-think_思考助理.md",
@@ -75,6 +88,7 @@ REQUIRED_PEER_SKILLS = {
         "references/create/article/00_eva-article_文章主入口.md",
         "references/create/article/01_eva-article-argument_观点与论证路线.md",
         "references/create/article/02_eva-article-writing_文章撰写与长度调节.md",
+        "references/create/shortvideo/01_eva-beats_短视频节拍与心智推进.md",
         "references/create/shortvideo/opening/00_eva-opening_开头针对性优化.md",
         "references/create/shortvideo/opening/01_eva-opening-diagnosis_开头承接与兑现诊断.md",
         "references/create/shortvideo/opening/02_eva-opening-generation_开头方案生成与推荐.md",
