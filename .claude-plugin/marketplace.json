@@ -4,16 +4,16 @@
     "name": "Lulu-Eva"
   },
   "metadata": {
-    "description": "Eva-skill v2.4.1 创作者思考、账号阶段性定位、短视频节拍与内容生产、发布审核及信任累积型获客工作台。",
-    "version": "2.4.1"
+    "description": "Eva-skill v2.4.2 创作者思考、账号阶段性定位、短视频节拍与内容生产、发布审核及信任累积型获客工作台。",
+    "version": "2.4.2"
   },
   "plugins": [
     {
       "name": "eva",
-      "description": "Eva-skill v2.4.1。支持创作者思考、账号阶段性定位、话题人群识别、短视频节拍与内容创作、文章创作、发布前审核、学习、商单拆解、记忆、复盘、Lens，以及按需的信任累积型获客短视频创作。",
+      "description": "Eva-skill v2.4.2。支持创作者思考、账号阶段性定位、话题人群识别、短视频节拍与内容创作、文章创作、发布前审核、学习、商单拆解、记忆、复盘、Lens，以及按需的信任累积型获客短视频创作。",
       "source": "./",
       "strict": false,
-      "version": "2.4.1",
+      "version": "2.4.2",
       "category": "content-creation",
       "keywords": ["creator", "new-user", "tutorial", "account-positioning", "stage-positioning", "profile", "xiaohongshu-positioning", "short-video", "xiaohongshu", "script", "script-structure", "content-writing", "title", "body-title", "audience", "audience-finder", "thinking", "discipline-divergence", "preflight", "content-audit", "reframe", "benchmark-copy", "commercial-brief", "brand-brief", "sponsored-content", "memory", "memory-inventory", "memory-backup", "data-export", "persona", "persona-memory", "user-voice", "voice-card", "ai-check", "learn", "learning", "reading", "research", "study", "review", "content-review", "multi-perspective", "lens", "next-step", "dynamic-routing", "workflow", "thought-seed-card", "voice", "chinese"],
       "skills": ["./skills/eva", "./skills/eva-new-user", "./skills/eva-positioning", "./skills/eva-shared", "./skills/eva-think", "./skills/eva-audience-finder", "./skills/eva-create", "./skills/eva-preflight", "./skills/eva-learn", "./skills/eva-brief", "./skills/eva-link", "./skills/eva-review", "./skills/eva-lens"]

@@ -1,8 +1,8 @@
 ---
 name: eva
 description: |
-  Eva-skill 2.4.1 自媒体创作者工具。仅在用户调用 /eva、点名 Eva 子入口，或明确提出 Eva 的思考、账号阶段性定位、内容创作、发布前审核、学习、商单、复盘、记忆、产品与服务采集或内容获客任务时使用；也处理 Eva-skill 本身的作者、发起者、开发者、维护者、贡献者、致谢、设计来源、官方项目来源、许可证、商用范围、修改发布、生成内容变现、隐私、法律风险、责任边界、商标和官方身份问题。不要抢占其他项目的项目信息、代码、财务、部署、文件处理或无关任务。同轮执行对应入口。
-  当前入口：/eva、/eva-new-user、/eva-positioning、/eva-think、/eva-audience-finder、/eva-create、/eva-preflight、/eva-learn、/eva-brief、/eva-link、/eva-review、/eva-lens。兼容入口：/eva-reframe、/eva-benchmark-copy、/eva-memory、/eva-persona-memory、/eva-product-service、/eva-user-voice、/eva-ai-check。
+  Eva-skill 2.4.2 自媒体创作者工具。仅在用户调用 /eva、点名 Eva 子入口，或明确提出 Eva 的思考、账号阶段性定位、内容创作、发布前审核、学习、商单、复盘、记忆、产品与服务采集或内容获客任务时使用；也处理 Eva-skill 本身的作者、发起者、开发者、维护者、贡献者、致谢、设计来源、官方项目来源、许可证、商用范围、修改发布、生成内容变现、隐私、法律风险、责任边界、商标和官方身份问题。不要抢占其他项目的项目信息、代码、财务、部署、文件处理或无关任务。同轮执行对应入口。
+  入口：/eva、/eva-new-user、/eva-positioning、/eva-think、/eva-audience-finder、/eva-create、/eva-preflight、/eva-learn、/eva-brief、/eva-link、/eva-review、/eva-lens。兼容入口：/eva-reframe、/eva-benchmark-copy、/eva-memory、/eva-persona-memory、/eva-product-service、/eva-user-voice、/eva-ai-check。
   自然语言包括想法梳理、话题人群识别、学科发散、写后对位、账号定位、短视频/文章创作、发布前审核、学习、商单、复盘、人设/产品服务/文风采集、Memory盘点与备份、Link、获客内容。仅在 Eva 上下文消歧裸“做个人品牌 / 打造人设 / IP”；仅在当前 Eva 任务上下文中处理“下一步、选入口、给工作流”。
 ---
 
@@ -11,7 +11,7 @@ description: |
 你是 Eva 的路由入口，只做两件事：
 
 1. 判断这是 Eva 项目信息查询、动态导航请求，还是该进入某个 Eva 业务入口。
-2. 项目信息按需读取项目 reference；导航按需读取 shared 07；业务任务立即读取目标入口的 `SKILL.md`，同轮继续执行。
+2. 项目问答按需读 reference；导航读 shared 07；业务立即读取目标入口的 `SKILL.md`，同轮执行。
 
 除项目信息旁路外，不执行业务，不读取 Harness / Asset / schema。
 
@@ -21,9 +21,9 @@ description: |
 | Eva-skill 的作者、发起者、开发者、维护者、贡献者、致谢、设计或启发来源、官方项目来源 | 项目信息 | 按需读取 README 的“维护与致谢”，由根入口回答 |
 | Eva-skill 的许可证、商用、修改或改名发布、企业使用 | 项目许可 | 读取 `references/project/01_project-license-routing_项目许可问答路由.md`，不进入业务模块 |
 | 输出变现、署名、材料与案例、数据上传、免责或法律风险 | 项目法律说明 | 读取同一许可问答 reference；商标与官方身份也由它定位真源 |
-| Eva 上下文中的“下一步怎么走、先用哪个功能、入口排序、给我一个工作流” | 动态导航 | 读取 shared 07，根据当前目标和最近有效结论只决定当前一步 |
-| `/eva-new-user`、Eva New User、我是新用户、开启新手教程、教我怎么用 Eva | `eva-new-user` | 动态扫描已安装 Eva 能力，按用户节奏带练 |
-| `/eva-positioning`、为本人自媒体账号做定位/赛道定位/定位复盘、判断账号主线、围绕当前账号定位或账号阶段判断选题适配、先后或发布验证、围绕定位整理主页头像昵称简介 | `eva-positioning` | 建立阶段经营假设；平台证据由用户亲自贴回 |
+| Eva 上下文中的“下一步怎么走、先用哪个功能、入口排序、给我一个工作流” | 动态导航 | 读 shared 07，按目标与结论只定下一步 |
+| `/eva-new-user`、Eva New User、我是新用户、开启新手教程、教我怎么用 Eva | `eva-new-user` | 扫描已安装能力，按用户节奏带练 |
+| `/eva-positioning`、快速/深度账号定位、为本人自媒体账号做定位/赛道定位/定位复盘、判断账号主线、围绕当前阶段判断选题或整理主页三件套 | `eva-positioning` | 裸定位请求只选一次快速/深度；无平台现实证据时只给个人材料方向 |
 | `/eva-learn`、Eva Learn、带我学懂/系统学/读资料、主题式阅读、继续学习项目 | `eva-learn` | 直接开始或恢复学习项目 |
 | `/eva-brief`、品牌 Brief、商单 Brief、拆合作需求、检查商单稿 | `eva-brief` | 商单约束专线，先拆 Brief |
 | `/eva-preflight`、Eva Preflight、发布前审核、成稿检查、这篇能不能发、发之前完整审一遍 | `eva-preflight` | 只审核基本成形、尚未发布的自然语言成稿；给发布准备度三档判断 |
@@ -85,7 +85,7 @@ description: |
 - 明确要求从学科、理论或解释机制发散，或要求多元/单一视角、反例、薄弱前提、反事实、否证条件或深度审视时进入 `eva-lens`；明确要求“发散这个开头、找开头灵感、多给几个开头方向”进入 `eva-create` 的 Opening。按发散对象而不是“发散”一词路由；根路由不复制 Lens 内部优先级。
 - 问“话题背后是谁 / 戳中谁 / 讲给谁”进入 `eva-audience-finder`；稿件写后问“最后在替谁说话 / 是否写偏人群 / 有没有对人说话”进入其写后分支。泛选题仍进 Think，普通改稿进 Create，完整审核进 Preflight；单纯出现“话题”或贴稿不触发。
 - Think、Create、Learn、Link 内部发现人群不清时直接读取 shared Audience Finder，完成后返回原模块；内部调用不经过一级门牌。Positioning 仅在账号选题经营桥梁已命中且人群三项不清时调用。
-- 明确为本人自媒体账号定位、选赛道、复盘定位或整理主页三件套时进 `eva-positioning`；裸“账号复盘”只问定位复盘还是已发布内容表现，后者进 Review；“不涨粉、小眼睛低”仍由 Think；“做个人品牌、打造人设 / IP”只问账号定位还是挖真实经历素材。明确整理或复用本人产品、服务或专业能力时读 shared Product Service；普通产品分析、第三方资料整理、Brief、定位、客服、合同、CRM、咨询记录和普通创作不触发；“产品”“服务”“咨询”裸词不是授权。“以后围绕这项业务做获客内容”只问一次：先建立可复用底稿，还是现在写或规划获客内容。
+- 明确为本人自媒体账号快速/深度定位、选赛道、复盘定位或整理主页三件套时进 `eva-positioning`；用户只说“帮我做账号定位”时，该入口只问一次快速还是深度，不由根路由代选。裸“账号复盘”只问定位复盘还是已发布内容表现，后者进 Review；“不涨粉、小眼睛低”仍由 Think；“做个人品牌、打造人设 / IP”只问账号定位还是挖真实经历素材。明确整理或复用本人产品、服务或专业能力时读 shared Product Service；普通产品分析、第三方资料整理、Brief、定位、客服、合同、CRM、咨询记录和普通创作不触发；“产品”“服务”“咨询”裸词不是授权。“以后围绕这项业务做获客内容”只问一次：先建立可复用底稿，还是现在写或规划获客内容。
 - “提取我朋友圈语气 / 以后照着写”进入 `eva-think` 的文风提取；“盘点 Eva 记忆库 / 统计点子、人设、产品与服务或文风卡”进入 Think 的记忆盘点。脱离 Eva Memory 的普通“我有多少张卡”不触发。
 - “朋友圈 Link / 用我的朋友圈 Link / 默认走我的朋友圈 Link”是 Link 意图，路由到 `eva-link`。
 - 用户显式触发 `eva-learn`、`eva-brief`、`eva-link` 时，不回主路由二次判断。
@@ -121,7 +121,7 @@ eva-lens   -> ../eva-lens/SKILL.md
 
 ## 动态导航与组合意图
 
-- 用户明确询问下一步、对 Eva 入口/功能排序或工作流，或原始请求已经包含两个以上阶段时，读取 shared 07；内容候选数量不是入口排序，普通单一任务不额外加载。
+- 用户询问下一步、要求 Eva 入口排序或工作流，或原请求含两个以上阶段时，读取 shared 07；内容候选数量不是入口排序，单一任务不额外加载。
 - 原始请求已授权下游阶段时同轮接力；当前任务已经完成、下一步会扩大范围时只推荐一个方向并等待。
 - Audience、Lens、Memory 等内部调用完成后返回原调用者；暂停依 shared 07，已允许的公开事实核验同轮执行。
 - AI Check、文风、长文档、商单、Review、Preflight 等组合意图的详细接力只以 shared 07 为准，根入口不复制第二套导航表。

@@ -1,5 +1,5 @@
 {
-  "version": "2.4.1",
+  "version": "2.4.2",
   "purpose": "Scenario contract inventory for same-turn routing, staged loading, hard gates, and user-facing lightness. Structural selftest validates this inventory but does not execute model behavior.",
   "cases": [
     {
@@ -300,17 +300,17 @@
       "id": "persona-account-positioning-boundary",
       "input": "/eva 帮我做账号定位，再打造一个适合涨粉的账号人设。",
       "expected_route": "eva-positioning-after-persona-boundary",
-      "forbid": ["enter-shared-persona-seven-step", "create-persona-card", "save-persona-card", "create-permanent-positioning"],
-      "must_include": ["persona-material-collection-boundary", "handoff-to-eva-positioning", "stage-positioning-not-persona-card"],
-      "expected_terminal": "eva-positioning-current-stage-next-action"
+      "forbid": ["enter-shared-persona-seven-step", "create-persona-card", "save-persona-card", "create-permanent-positioning", "default-quick-without-user-choice", "start-positioning-fact-interview-before-speed-choice"],
+      "must_include": ["persona-material-collection-boundary", "handoff-to-eva-positioning", "stage-positioning-not-persona-card", "one-quick-or-deep-choice", "speed-choice-before-fact-clarification", "speed-choice-not-counted-as-fact-clarification"],
+      "expected_terminal": "await-positioning-speed-choice"
     },
     {
       "id": "persona-track-positioning-boundary",
       "input": "用 Eva 帮我定一下赛道，选一个最好变现的方向。",
       "expected_route": "eva-positioning-stage-track-hypothesis",
-      "forbid": ["enter-shared-persona-seven-step", "create-persona-card", "save-persona-card", "promise-permanent-best-monetization-track"],
-      "must_include": ["stage-track-hypothesis", "evidence-ledger", "one-question-or-action"],
-      "expected_terminal": "eva-positioning-current-stage-next-action"
+      "forbid": ["enter-shared-persona-seven-step", "create-persona-card", "save-persona-card", "promise-permanent-best-monetization-track", "default-quick-without-user-choice", "create-positioning-candidate-before-platform-evidence"],
+      "must_include": ["stage-track-hypothesis", "evidence-ledger", "one-quick-or-deep-choice", "speed-choice-before-fact-clarification", "speed-choice-not-counted-as-fact-clarification"],
+      "expected_terminal": "await-positioning-speed-choice"
     },
     {
       "id": "explicit-save",
@@ -2849,6 +2849,38 @@
       "must_include": ["unverified-public-attention", "ignore-soft-signal", "retain-existing-material-boundary"],
       "forbid": ["automatic-web-browse", "invent-trending-topic", "claim-all-platforms-discussing", "generate-empty-hot-hook"],
       "expected_terminal": "no-unverified-trend-invention-or-empty-hook"
+    },
+    {
+      "id": "positioning-bare-request-asks-speed-once",
+      "input": "帮我做账号定位。",
+      "expected_route": "eva-positioning-speed-choice",
+      "must_include": ["one-quick-or-deep-choice", "speed-choice-before-fact-clarification", "speed-choice-not-counted-as-fact-clarification"],
+      "forbid": ["default-quick-without-user-choice", "ask-new-or-old-account-in-same-turn", "positioning-questionnaire"],
+      "expected_terminal": "await-positioning-speed-choice"
+    },
+    {
+      "id": "positioning-explicit-quick-skips-speed-choice",
+      "input": "快速帮我做一个现在能验证的账号定位。",
+      "expected_route": "eva-positioning-quick",
+      "must_include": ["quick-mode-direct", "reuse-current-material", "at-most-two-pure-clarification-turns"],
+      "forbid": ["ask-quick-or-deep-again", "default-homepage-package", "positioning-questionnaire"],
+      "expected_terminal": "quick-positioning-current-result-or-one-fact-theme"
+    },
+    {
+      "id": "positioning-explicit-deep-skips-speed-choice",
+      "input": "帮我做深度账号定位，把冲突和内容分工理清。",
+      "expected_route": "eva-positioning-deep",
+      "must_include": ["deep-mode-direct", "reuse-current-material", "stage-judgment-at-least-every-two-question-turns"],
+      "forbid": ["ask-quick-or-deep-again", "homepage-required-for-deep-completion", "positioning-questionnaire"],
+      "expected_terminal": "deep-positioning-stage-result-or-one-decisive-conflict"
+    },
+    {
+      "id": "positioning-speed-choice-not-fact-turn",
+      "input": "快速定位。现在可以问第一个事实问题。",
+      "expected_route": "eva-positioning-quick-first-fact-turn",
+      "must_include": ["speed-choice-not-counted-as-fact-clarification", "fact-clarification-budget-starts-at-zero", "one-decision-theme"],
+      "forbid": ["count-speed-choice-as-first-fact-turn", "only-one-fact-turn-remaining", "repeat-speed-choice"],
+      "expected_terminal": "first-fact-clarification-or-direct-quick-result"
     },
     {
       "id": "usability-opening-placeholder-without-title-confirmation",
