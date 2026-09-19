@@ -2,6 +2,8 @@
 
 本文件是 Opening、Script 与短视频 Preflight 共用的唯一节拍语义真源。它只处理短视频的心智推进，不适用于 Article、Think、Lens、Audience 或 Positioning。
 
+Teaching 批改短视频时可按需只读取本文件的判断标准，返回问题类型、原文证据和实际影响；不加载节拍诊断前台适配器，不向其他文体扩展。
+
 ## 核心定义
 
 ```text

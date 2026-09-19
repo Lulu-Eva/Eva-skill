@@ -49,7 +49,7 @@
 ```markdown
 ---
 eva_positioning_state: true
-eva_version: 2.4.2
+eva_version: 2.5.0
 profile_id: example-account
 revision: 1
 created_at: 2026-08-24T00:00:00+08:00

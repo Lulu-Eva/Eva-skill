@@ -1,0 +1,4 @@
+interface:
+  display_name: "Eva Teaching｜新手教程、对标学习与文稿批改"
+  short_description: "三分钟新手入门、快速与深度对标学习、基于原文证据的文稿批改讲解"
+  default_prompt: "用 $eva-teaching 带我认识 Eva-skill、学习对标内容，或讲解我的文稿怎样修改。"

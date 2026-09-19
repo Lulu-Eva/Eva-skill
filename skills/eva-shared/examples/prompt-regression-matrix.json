@@ -1,5 +1,5 @@
 {
-  "version": "2.4.2",
+  "version": "2.5.0",
   "purpose": "Scenario contract inventory for same-turn routing, staged loading, hard gates, and user-facing lightness. Structural selftest validates this inventory but does not execute model behavior.",
   "cases": [
     {
@@ -106,14 +106,14 @@
     {
       "id": "explicit-eva-new-user",
       "input": "我是第一次使用 Eva，开启新手教程",
-      "expected_route": "eva-new-user-scan-installed-skills",
+      "expected_route": "eva-teaching-onboarding-scan-installed-skills",
       "forbid": ["assume-installed-features", "fixed-full-course", "ask-name", "save-new-user-status"],
       "expected_terminal": "ask-current-goal-or-offer-one-high-frequency-start"
     },
     {
       "id": "new-user-minimum-success-loop",
       "input": "我是第一次用 Eva，我想先学怎么把一个模糊想法做成短视频",
-      "expected_route": "eva-new-user-goal-specific-minimum-loop",
+      "expected_route": "eva-teaching-onboarding-goal-specific-minimum-loop",
       "forbid": ["show-full-feature-menu", "repeat-known-goal-question", "complete-full-production-chain", "teach-internal-module-fields"],
       "must_include": ["one-minimum-demo", "one-user-practice-prompt", "what-the-user-will-get"],
       "expected_terminal": "demonstrate-then-invite-one-sentence-practice"
@@ -121,14 +121,14 @@
     {
       "id": "eva-new-user-skip",
       "input": "这一块我会了，跳过，我想先学人设采集",
-      "expected_route": "eva-new-user-adaptive-switch",
+      "expected_route": "eva-teaching-onboarding-adaptive-switch",
       "forbid": ["force-finish-current-lesson", "restart-full-course", "treat-skip-as-exit"],
       "expected_terminal": "switch-directly-to-installed-persona-learning"
     },
     {
       "id": "eva-new-user-to-real-task",
       "input": "不用继续教了，我现在就想正式梳理这个选题讲给谁",
-      "expected_route": "eva-new-user-to-eva-think-same-turn",
+      "expected_route": "eva-teaching-onboarding-to-eva-think-same-turn",
       "forbid": ["continue-tutorial", "complete-task-inside-tutorial", "show-full-feature-menu"],
       "expected_terminal": "exit-tutorial-and-run-audience-finder"
     },
@@ -494,9 +494,10 @@
     {
       "id": "compatibility-benchmark-alias",
       "input": "/eva-benchmark-copy 帮我拆一下这篇爆款图文的结构",
-      "expected_route": "eva-think-to-shared-benchmark",
-      "forbid": ["reject-because-not-video", "copy-source-wording", "write-new-post"],
-      "expected_terminal": "benchmark-structure-and-transferable-actions"
+      "expected_route": "eva-teaching-benchmark-quick",
+      "forbid": ["reject-because-not-video", "copy-source-wording", "write-new-post", "ask-user-to-judge-before-output"],
+      "must_include": ["audience-and-user-question", "effective-mechanism-and-evidence", "one-supported-condition", "transferable-and-nontransferable-boundary"],
+      "expected_terminal": "quick-benchmark-analysis-delivered"
     },
     {
       "id": "compatibility-memory-alias",
@@ -536,9 +537,10 @@
     {
       "id": "general-benchmark-analysis",
       "input": "这是一篇爆款图文，只拆它的标题承诺、用户疑问和正文结构",
-      "expected_route": "eva-think-to-shared-benchmark",
-      "forbid": ["force-short-video-create", "eva-create-article", "write-new-content", "copy-source-wording"],
-      "expected_terminal": "diagnostic-benchmark-deconstruction"
+      "expected_route": "eva-teaching-benchmark-quick",
+      "forbid": ["force-short-video-create", "eva-create-article", "write-new-content", "copy-source-wording", "ask-user-to-judge-before-output"],
+      "must_include": ["audience-and-user-question", "effective-mechanism-and-evidence", "one-supported-condition", "transferable-and-nontransferable-boundary"],
+      "expected_terminal": "quick-benchmark-analysis-delivered"
     },
     {
       "id": "ai-check-rewrite-combination",
@@ -2881,6 +2883,1952 @@
       "must_include": ["speed-choice-not-counted-as-fact-clarification", "fact-clarification-budget-starts-at-zero", "one-decision-theme"],
       "forbid": ["count-speed-choice-as-first-fact-turn", "only-one-fact-turn-remaining", "repeat-speed-choice"],
       "expected_terminal": "first-fact-clarification-or-direct-quick-result"
+    },
+    {
+      "id": "teaching-entry-no-goal-one-choice",
+      "input": "/eva-teaching",
+      "expected_route": "eva-teaching-three-mode-choice",
+      "must_include": ["onboarding-benchmark-or-manuscript", "one-question-only"],
+      "forbid": ["full-feature-menu", "start-onboarding-without-choice", "scan-all-modules"],
+      "expected_terminal": "wait-for-teaching-mode-choice"
+    },
+    {
+      "id": "teaching-entry-explicit-benchmark-goal",
+      "input": "/eva-teaching 拿这篇口播稿带我练习怎么看对标",
+      "expected_route": "eva-teaching-benchmark-deep-guided",
+      "must_include": ["load-deep-benchmark-only", "one-observation-location", "one-judgment-question"],
+      "forbid": ["ask-onboarding-benchmark-or-manuscript", "scan-full-feature-list", "write-new-script"],
+      "expected_terminal": "wait-for-user-benchmark-judgment"
+    },
+    {
+      "id": "teaching-legacy-new-user-direct-onboarding",
+      "input": "/eva-new-user 我第一次用 Eva",
+      "expected_route": "eva-teaching-onboarding-compatibility",
+      "must_include": ["scan-installed-eva-skills", "three-minute-minimum-loop"],
+      "forbid": ["ask-onboarding-or-benchmark", "remove-legacy-command", "save-new-user-status"],
+      "expected_terminal": "ask-current-goal-or-offer-one-high-frequency-start"
+    },
+    {
+      "id": "teaching-benchmark-default-one-observation",
+      "input": "拆一下这篇，我想学它为什么有效",
+      "expected_route": "eva-teaching-benchmark-quick",
+      "must_include": ["material-sufficiency-check", "four-part-quick-output", "one-verifiable-evidence-anchor"],
+      "forbid": ["force-user-practice", "write-similar-content"],
+      "expected_terminal": "quick-benchmark-analysis-delivered"
+    },
+    {
+      "id": "teaching-correction-one-key-deviation",
+      "input": "我觉得它有效就是因为用了很多反问句。",
+      "expected_route": "eva-teaching-choice-correction",
+      "must_include": ["acknowledge-seen-part", "one-key-deviation", "why-deviation-affects-transfer", "four-real-choices"],
+      "forbid": ["list-multiple-errors", "rewrite-user-answer", "force-retry"],
+      "expected_terminal": "wait-for-retry-continue-eva-judgment-or-exit"
+    },
+    {
+      "id": "teaching-retry-same-question-with-one-scaffold",
+      "input": "我想再试一次",
+      "expected_route": "eva-teaching-retry-current-observation",
+      "must_include": ["same-observation-location", "same-judgment-question", "one-more-concrete-scaffold"],
+      "forbid": ["switch-question", "reveal-full-answer", "restart-benchmark-analysis"],
+      "expected_terminal": "wait-for-second-user-judgment"
+    },
+    {
+      "id": "teaching-continue-without-forced-rework",
+      "input": "这个偏差我先记下，继续看下一层",
+      "expected_route": "eva-teaching-next-supported-observation",
+      "must_include": ["advance-immediately", "do-not-claim-mastery", "one-next-observation-question", "unrevealed-supported-focus"],
+      "forbid": ["force-retry", "repeat-correction", "full-report", "quiz-already-explained-answer"],
+      "expected_terminal": "wait-for-next-layer-judgment"
+    },
+    {
+      "id": "teaching-show-eva-judgment-no-draft",
+      "input": "这一层我不想再猜了，直接看 Eva 的判断",
+      "expected_route": "eva-teaching-explain-current-judgment",
+      "must_include": ["evidence-supported-judgment", "one-supported-condition", "transfer-boundary"],
+      "forbid": ["write-imitation-draft", "generate-similar-topics", "claim-user-mastered", "condition-free-answer"],
+      "expected_terminal": "current-teaching-judgment-explained"
+    },
+    {
+      "id": "teaching-exit-to-create-with-own-material",
+      "input": "退出教学。我已经有自己的用户问题、核心判断和真实经历，现在把它写成一条抖音口播。",
+      "expected_route": "eva-teaching-exit-to-eva-create-same-turn",
+      "must_include": ["same-turn-create", "user-owned-question-judgment-evidence"],
+      "forbid": ["return-to-teaching-after-draft", "force-more-lessons", "copy-benchmark-wording"],
+      "expected_terminal": "eva-create-shortvideo-route"
+    },
+    {
+      "id": "teaching-benchmark-fast-path-three-judgments",
+      "input": "不用带练，直接告诉我这篇最关键的结论",
+      "expected_route": "eva-teaching-benchmark-quick",
+      "must_include": ["audience-and-user-question", "effective-mechanism-and-evidence", "one-supported-condition", "transferable-and-nontransferable-boundary"],
+      "forbid": ["paragraph-by-paragraph-copy-actions", "generate-new-topics", "force-user-practice"],
+      "expected_terminal": "quick-benchmark-analysis-delivered"
+    },
+    {
+      "id": "teaching-single-sample-tentative-only",
+      "input": "这是这个账号唯一一篇我能提供的内容，带我看它的规律。",
+      "expected_route": "eva-teaching-single-sample",
+      "must_include": ["tentative-single-sample-judgment", "one-observation-question"],
+      "forbid": ["account-rule", "stable-pattern", "causal-claim", "fixed-formula"],
+      "expected_terminal": "wait-for-single-sample-judgment"
+    },
+    {
+      "id": "teaching-two-sample-comparison-only",
+      "input": "这是同一作者的两篇口播稿，带我比较它们。",
+      "expected_route": "eva-teaching-two-sample-comparison",
+      "must_include": ["similarity-and-difference", "conditions-comparison", "one-comparison-question"],
+      "forbid": ["stable-account-pattern", "causal-claim", "fixed-formula", "write-new-script"],
+      "expected_terminal": "wait-for-two-sample-comparison-judgment"
+    },
+    {
+      "id": "teaching-three-sample-pattern-no-causality",
+      "input": "这里有四篇同时期、同平台的口播稿，带我看哪些机制反复出现。",
+      "expected_route": "eva-teaching-multi-sample-pattern",
+      "must_include": ["repeated-mechanism-as-hypothesis", "single-item-accident", "author-specific-condition"],
+      "forbid": ["correlation-as-causation", "proven-account-formula", "guaranteed-performance"],
+      "expected_terminal": "one-multi-sample-comparison-question"
+    },
+    {
+      "id": "teaching-multi-sample-no-viral-formula",
+      "input": "把这五篇爆款总结成一个我可以照套的爆款公式。",
+      "expected_route": "eva-teaching-multi-sample-boundary",
+      "must_include": ["repeated-pattern-is-not-causality", "conditions-and-nontransferable-parts", "learning-alternative"],
+      "forbid": ["fixed-viral-formula", "guaranteed-template", "auto-generate-imitation-draft"],
+      "expected_terminal": "teach-pattern-conditions-without-formula"
+    },
+    {
+      "id": "teaching-transfer-needs-user-owned-triad",
+      "input": "我想把它的结构迁移给我，但我还没想好自己要回答什么问题，也没有素材。",
+      "expected_route": "eva-teaching-transfer-one-upstream-gap",
+      "must_include": ["one-most-upstream-gap", "user-question-before-transfer"],
+      "forbid": ["fill-gap-from-source", "generate-imitation-topic", "write-draft", "ask-multiple-questions"],
+      "expected_terminal": "ask-one-user-owned-question"
+    },
+    {
+      "id": "teaching-transfer-functional-one-deviation",
+      "input": "这是原文和我的迁移稿。我有自己的用户问题、判断和经历，帮我看最大的迁移偏差。",
+      "expected_route": "eva-teaching-transfer-functional-comparison",
+      "must_include": ["compare-function-not-wording", "one-largest-deviation", "why-it-affects-originality-or-validity"],
+      "forbid": ["full-rewrite", "word-similarity-score", "list-all-errors", "copy-source-structure-wholesale"],
+      "expected_terminal": "one-transfer-correction-and-user-choice"
+    },
+    {
+      "id": "teaching-refuse-laundering-request",
+      "input": "把这篇洗一下，保留它的观点和顺序，换成我的产品，改到看不出来。",
+      "expected_route": "eva-teaching-anti-laundering-boundary",
+      "must_include": ["refuse-synonym-laundering", "restart-from-user-owned-question-judgment-material"],
+      "forbid": ["retain-source-central-judgment", "retain-source-paragraph-order", "produce-disguised-draft"],
+      "expected_terminal": "offer-original-learning-or-creation-path"
+    },
+    {
+      "id": "teaching-course-material-stays-learn",
+      "input": "/eva-teaching 带我系统学懂这门课程和这份论文",
+      "expected_route": "eva-learn",
+      "must_include": ["learning-project-route"],
+      "forbid": ["benchmark-learning", "new-user-minimum-loop", "short-video-create"],
+      "expected_terminal": "eva-learn-entry"
+    },
+    {
+      "id": "teaching-reference-to-own-thinking-stays-think",
+      "input": "这篇内容让我想到自己一直在回避的问题，先别拆它，陪我把自己的想法聊清楚。",
+      "expected_route": "eva-think-with-reference-as-support",
+      "must_include": ["own-judgment-first", "reference-remains-supporting-material"],
+      "forbid": ["start-benchmark-lesson", "full-benchmark-report", "auto-create"],
+      "expected_terminal": "eva-think-current-judgment"
+    },
+    {
+      "id": "teaching-platform-benchmark-search-stays-title",
+      "input": "帮我去小红书找一批对标标题，我想验证这个选题。",
+      "expected_route": "eva-create-title-manual-search-plan",
+      "must_include": ["search-terms", "observation-criteria", "paste-back-request"],
+      "forbid": ["benchmark-teaching", "browse-platform-for-user", "invent-platform-results"],
+      "expected_terminal": "wait-for-user-platform-search-results"
+    },
+    {
+      "id": "teaching-explicit-draft-with-own-material-goes-create",
+      "input": "我提供了参考样本，也已经有自己的用户问题、核心判断和真实案例。不用带练，现在直接写成一条短视频。",
+      "expected_route": "eva-create-with-internal-benchmark-boundary-check",
+      "must_include": ["user-owned-question-judgment-evidence", "benchmark-functional-boundary-only", "return-to-create"],
+      "forbid": ["force-teaching", "copy-source-central-judgment", "copy-source-case"],
+      "expected_terminal": "short-video-create-route"
+    },
+    {
+      "id": "teaching-think-internal-benchmark-returns-caller",
+      "input": "我们刚才已经在 Think 里聊我的观点了。我贴一篇参考内容，只用它检查我的判断还缺哪个环节，然后继续聊我的。",
+      "expected_route": "eva-think-internal-shared-benchmark-return",
+      "must_include": ["benchmark-as-supporting-material", "return-control-to-think", "one-current-gap"],
+      "forbid": ["jump-to-teaching", "full-benchmark-report", "write-draft"],
+      "expected_terminal": "eva-think-continues-current-judgment"
+    },
+    {
+      "id": "teaching-create-internal-benchmark-returns-caller",
+      "input": "我的短视频问题、判断和真实素材都有了。这是参考样本，只检查我有没有误把它的内容当结构，然后继续 Create。",
+      "expected_route": "eva-create-internal-shared-benchmark-return",
+      "must_include": ["functional-transfer-check", "originality-boundary", "return-control-to-create"],
+      "forbid": ["jump-to-teaching", "full-benchmark-lesson", "copy-source-wording"],
+      "expected_terminal": "eva-create-continues-original-task"
+    },
+    {
+      "id": "teaching-zero-save-and-no-memory-scan",
+      "input": "/eva-teaching 带我练习看这篇对标，只做教学，我没说保存。",
+      "expected_route": "eva-teaching-benchmark-no-persistence",
+      "must_include": ["guided-practice-only", "no-persistence"],
+      "forbid": ["scan-eva-memory", "save-learning-progress", "create-asset", "create-error-profile", "save-third-party-persona-or-voice"],
+      "expected_terminal": "wait-for-user-benchmark-judgment"
+    },
+    {
+      "id": "teaching-noncontent-document-not-captured",
+      "input": "拆一下这篇合同的风险条款。",
+      "expected_route": "non-eva-professional-document-analysis",
+      "must_include": ["contract-risk-task-not-benchmark-learning", "use-appropriate-professional-boundary"],
+      "forbid": ["eva-teaching", "shared-benchmark", "one-benchmark-observation-question"],
+      "expected_terminal": "professional-document-analysis-or-one-required-clarification"
+    },
+    {
+      "id": "teaching-reference-acquisition-create-integration",
+      "input": "这是参考样本。我有自己的客户问题、核心判断、真实咨询经历和服务边界。不要带练，按我的材料写一条获客抖音口播，但不能照搬对标观点和顺序。",
+      "expected_route": "eva-create-acquisition-with-internal-benchmark-boundary",
+      "must_include": ["load-acquisition-overlay", "benchmark-functional-boundary-only", "user-owned-question-judgment-evidence", "return-to-create"],
+      "forbid": ["enter-teaching", "copy-source-central-judgment", "copy-source-order", "invent-service-proof"],
+      "expected_terminal": "eva-create-acquisition-shortvideo-route"
+    },
+    {
+      "id": "teaching-research-paper-design-not-captured",
+      "input": "拆一下这篇论文的研究设计，为什么有效？",
+      "expected_route": "eva-learn-or-professional-research-analysis",
+      "must_include": ["research-design-task-not-benchmark-learning", "choose-learning-or-analysis-by-final-goal"],
+      "forbid": ["eva-teaching", "shared-benchmark", "content-transfer-practice"],
+      "expected_terminal": "research-learning-or-analysis-route"
+    },
+    {
+      "id": "teaching-temporary-focus-explicit-current-session",
+      "input": "这轮我只想练怎么看一篇口播的开头承诺，别再问我想学哪一层。",
+      "expected_route": "eva-teaching-explicit-temporary-focus",
+      "must_include": ["use-user-stated-focus", "temporary-focus-current-session-only", "one-focused-observation-question"],
+      "forbid": ["ask-focus-again", "save-focus", "build-learning-profile", "full-benchmark-report"],
+      "expected_terminal": "wait-for-focused-user-judgment"
+    },
+    {
+      "id": "teaching-temporary-focus-default-without-question",
+      "input": "用教学模式带我练这篇，我没有指定要先学哪一层。",
+      "expected_route": "eva-teaching-default-temporary-focus",
+      "must_include": ["choose-highest-value-supported-focus", "no-focus-menu", "one-judgment-question"],
+      "forbid": ["ask-unnecessary-focus-question", "save-focus", "scan-memory", "show-course-menu"],
+      "expected_terminal": "wait-for-default-focused-judgment"
+    },
+    {
+      "id": "teaching-correction-evidence-anchor",
+      "input": "我觉得这段有效只是因为句子短。请按教学模式纠偏。",
+      "expected_route": "eva-teaching-correction-with-evidence-anchor",
+      "must_include": ["one-verifiable-evidence-anchor", "evidence-from-shared-benchmark", "one-key-deviation"],
+      "forbid": ["vague-evidence", "full-benchmark-report", "second-deviation", "rewrite-user-answer"],
+      "expected_terminal": "wait-for-four-learning-control-choices"
+    },
+    {
+      "id": "teaching-correction-exactly-one-condition",
+      "input": "我已经回答了当前观察题。纠正我时告诉我这个判断在什么条件下才成立。",
+      "expected_route": "eva-teaching-correction-with-one-condition",
+      "must_include": ["exactly-one-supported-condition", "condition-linked-to-current-judgment", "four-real-choices"],
+      "forbid": ["zero-condition", "multiple-conditions", "causal-overclaim", "list-multiple-errors"],
+      "expected_terminal": "wait-for-retry-continue-eva-judgment-or-exit"
+    },
+    {
+      "id": "teaching-correction-preserves-four-controls",
+      "input": "纠偏后让我自己决定怎么继续，但不要替我加新的必选步骤。",
+      "expected_route": "eva-teaching-choice-correction-four-controls",
+      "must_include": ["retry-continue-eva-judgment-exit-only", "four-real-choices", "transfer-not-fifth-choice"],
+      "forbid": ["fifth-control-choice", "forced-retry", "forced-transfer", "score-gate"],
+      "expected_terminal": "wait-for-retry-continue-eva-judgment-or-exit"
+    },
+    {
+      "id": "teaching-own-material-transfer-offered-after-completion",
+      "input": "这一教学单元已经讲清了。接下来我想拿自己的材料试一次，但这应该是可选的。",
+      "expected_route": "eva-teaching-optional-own-material-transfer",
+      "must_include": ["optional-after-unit-completion", "user-owned-question-judgment-evidence", "load-transfer-truth-after-user-attempt"],
+      "forbid": ["transfer-as-fifth-correction-choice", "auto-generate-user-material", "copy-source-central-judgment", "claim-required-for-completion"],
+      "expected_terminal": "wait-for-own-material-triad-or-transfer-attempt"
+    },
+    {
+      "id": "teaching-temporary-focus-ambiguous-one-question",
+      "input": "我想用这篇练习，标题承诺和信任依据对我都重要，但我没说先练哪个。",
+      "expected_route": "eva-teaching-ambiguous-focus-one-question",
+      "must_include": ["two-materially-different-learning-outcomes", "one-outcome-changing-focus-question", "wait-for-focus-choice"],
+      "forbid": ["choose-focus-arbitrarily", "ask-multiple-questions", "show-course-menu", "start-full-benchmark-report"],
+      "expected_terminal": "wait-for-one-focus-decision"
+    },
+    {
+      "id": "teaching-completion-three-part-criterion",
+      "input": "证据是第一句明确写了‘只看一个指标’；这个判断只在后文能兑现该指标时成立；我能迁移的是缩小问题的功能，不能搬走它的原句和作者经历。",
+      "expected_route": "eva-teaching-unit-completion-check",
+      "must_include": ["verifiable-evidence-anchor", "one-supported-condition", "transfer-boundary", "state-current-unit-complete"],
+      "forbid": ["claim-long-term-mastery", "score-user", "persist-completion", "require-extra-practice", "invent-deviation"],
+      "expected_terminal": "current-teaching-unit-complete"
+    },
+    {
+      "id": "teaching-completion-missing-one-dimension",
+      "input": "我能说出它大概起什么作用，但还没有指出材料证据，也没想清成立条件。这样算完成了吗？",
+      "expected_route": "eva-teaching-unit-not-yet-complete",
+      "must_include": ["identify-one-highest-impact-missing-dimension", "do-not-claim-complete", "preserve-user-control"],
+      "forbid": ["list-all-missing-dimensions", "forced-rework", "score-user", "persist-incomplete-status"],
+      "expected_terminal": "wait-for-current-learning-control-choice"
+    },
+    {
+      "id": "teaching-unscaffolded-judgment-optional",
+      "input": "这轮完成后，用我在当前对话里已经提供、但还没练过的另一篇可比材料，做一次不带提示的判断；这是加练，不是通关。",
+      "expected_route": "eva-teaching-optional-unscaffolded-judgment",
+      "must_include": ["user-provided-unused-comparable-sample", "no-observation-scaffold", "optional-not-completion-gate"],
+      "forbid": ["auto-search-new-sample", "invent-new-sample", "provide-answer-with-prompt", "force-unscaffolded-practice", "save-score"],
+      "expected_terminal": "wait-for-unscaffolded-user-judgment"
+    },
+    {
+      "id": "teaching-unscaffolded-no-answer-before-attempt",
+      "input": "下一题不要提示观察位置，也不要先告诉我答案，等我独立判断后再纠偏。",
+      "expected_route": "eva-teaching-unscaffolded-wait-first",
+      "must_include": ["withhold-scaffold", "withhold-answer-before-attempt", "wait-for-user-judgment"],
+      "forbid": ["reveal-standard-answer", "hint-judgment-dimension", "pre-correct-user", "claim-completion-from-request"],
+      "expected_terminal": "wait-for-unscaffolded-user-judgment"
+    },
+    {
+      "id": "teaching-back-half-multiturn-closure",
+      "input": "刚才你让我先看标题，我做了判断，你只纠正了一个偏差；我选择继续后，现在已能指出证据、成立条件和迁移边界。结束这个教学单元。",
+      "expected_route": "eva-teaching-back-half-multiturn-closure",
+      "must_include": ["observation-to-user-judgment", "one-deviation-only", "respect-continue-choice", "evidence-condition-boundary-complete", "stop-teaching"],
+      "forbid": ["force-retry", "add-second-deviation", "require-unscaffolded-test", "save-mastery-label", "offer-another-menu"],
+      "expected_terminal": "teaching-ended-after-completed-unit"
+    },
+    {
+      "id": "teaching-back-half-no-persistence",
+      "input": "这轮结束后请把我的教学焦点、完成状态和加练结果都记成以后默认已掌握。",
+      "expected_route": "eva-teaching-current-conversation-only",
+      "must_include": ["teaching-focus-not-persisted", "completion-not-persisted", "practice-result-not-persisted"],
+      "forbid": ["write-learning-progress", "create-mastery-profile", "create-error-log", "set-future-default"],
+      "expected_terminal": "explain-current-conversation-only-boundary"
+    },
+    {
+      "id": "teaching-navigation-entry-not-shared-benchmark",
+      "input": "下一步我想学会怎么看自媒体对标，告诉我该进哪个 Eva 入口。",
+      "expected_route": "eva-teaching-entry",
+      "must_include": ["actual-entry-eva-teaching", "shared-benchmark-internal-only", "enter-teaching-without-extra-menu"],
+      "forbid": ["recommend-shared-benchmark-as-user-entry", "expose-internal-benchmark-route", "invent-new-public-command", "show-full-feature-menu"],
+      "expected_terminal": "eva-teaching-benchmark-deep-guided"
+    },
+    {
+      "id": "teaching-real-entry-quick",
+      "input": "/eva-teaching 快速拆一下这篇自媒体文案，直接给结论。",
+      "expected_route": "eva-teaching-benchmark-quick",
+      "must_include": ["actual-entry-eva-teaching", "load-quick-benchmark-only", "four-part-quick-output"],
+      "forbid": ["legacy-entry-as-real-skill", "force-user-practice", "write-imitation-draft"],
+      "expected_terminal": "quick-benchmark-analysis-delivered"
+    },
+    {
+      "id": "teaching-deep-direct-analysis",
+      "input": "对这篇第三方口播稿做一次深度、完整拆解，不用让我答题。",
+      "expected_route": "eva-teaching-benchmark-deep-direct",
+      "must_include": ["material-boundary", "user-question", "promise-and-fulfillment", "trust-and-evidence", "conditions", "transfer-boundary"],
+      "forbid": ["force-user-practice", "invent-unsupported-body", "write-imitation-draft"],
+      "expected_terminal": "deep-benchmark-analysis-delivered"
+    },
+    {
+      "id": "teaching-deep-guided-practice",
+      "input": "带我深度拆这篇口播，先让我自己判断，再纠正我。",
+      "expected_route": "eva-teaching-benchmark-deep-guided",
+      "must_include": ["one-observation-location", "why-this-location-matters", "one-scaffolded-judgment-question"],
+      "forbid": ["standard-answer-before-user-attempt", "full-benchmark-report-before-user-attempt", "write-imitation-draft"],
+      "expected_terminal": "wait-for-user-benchmark-judgment"
+    },
+    {
+      "id": "teaching-deep-direct-answer-priority",
+      "input": "深度拆解这篇，但别向我提问，直接告诉我 Eva 的完整判断。",
+      "expected_route": "eva-teaching-benchmark-deep-direct",
+      "must_include": ["direct-answer-over-guided-practice", "deep-analysis"],
+      "forbid": ["ask-user-to-judge-first", "force-guided-practice", "withhold-answer"],
+      "expected_terminal": "deep-benchmark-analysis-delivered"
+    },
+    {
+      "id": "teaching-quick-four-part-no-question",
+      "input": "我只想快速看懂它为什么有效，直接拆，不用带练。",
+      "expected_route": "eva-teaching-benchmark-quick",
+      "must_include": ["audience-and-user-question", "effective-mechanism-and-evidence", "one-supported-condition", "transferable-and-nontransferable-boundary"],
+      "forbid": ["ask-user-to-judge-before-output", "paragraph-by-paragraph-exhaustion", "generate-new-topics"],
+      "expected_terminal": "quick-benchmark-analysis-delivered"
+    },
+    {
+      "id": "teaching-quick-to-guided-unrevealed-focus",
+      "input": "你刚才已经快速拆过它的标题了。现在带我深度练习，不要再拿已经讲透的标题问我。",
+      "expected_route": "eva-teaching-quick-to-deep-guided",
+      "must_include": ["choose-unrevealed-supported-focus", "one-scaffolded-judgment-question"],
+      "forbid": ["reuse-revealed-observation", "repeat-quick-answer-as-question", "restart-full-analysis"],
+      "expected_terminal": "wait-for-unrevealed-focus-judgment"
+    },
+    {
+      "id": "teaching-guided-switch-to-direct-immediately",
+      "input": "我刚进入深度带练，但改主意了，不答这道题，直接把深度分析给我。",
+      "expected_route": "eva-teaching-deep-guided-to-direct",
+      "must_include": ["honor-direct-answer-request-immediately", "deep-analysis"],
+      "forbid": ["force-finish-current-question", "force-retry", "withhold-answer"],
+      "expected_terminal": "deep-benchmark-analysis-delivered"
+    },
+    {
+      "id": "teaching-third-party-opening-deep",
+      "input": "这是别人口播的开头和对应正文。深度拆它的开头为什么成立，不要替我改写。",
+      "expected_route": "eva-teaching-benchmark-deep-direct",
+      "must_include": ["third-party-sample-analysis", "opening-promise-and-condition", "transfer-boundary"],
+      "forbid": ["rewrite-user-opening", "eva-create-opening-generation", "copy-source-wording"],
+      "expected_terminal": "deep-benchmark-analysis-delivered"
+    },
+    {
+      "id": "teaching-own-opening-optimization-stays-create",
+      "input": "这是我自己写的短视频开头，帮我诊断后优化成三个可用版本。",
+      "expected_route": "eva-create-opening-optimization",
+      "must_include": ["user-owned-draft", "opening-diagnosis-and-generation"],
+      "forbid": ["eva-teaching", "benchmark-lesson", "third-party-sample-analysis"],
+      "expected_terminal": "opening-options-or-one-real-blocker"
+    },
+    {
+      "id": "teaching-own-viewpoint-deep-review-stays-lens",
+      "input": "这是我自己的观点，请用 Eva Lens 深度审视，找反例和否证条件。",
+      "expected_route": "eva-lens-deep-review",
+      "must_include": ["own-viewpoint", "weakest-premise-and-falsification"],
+      "forbid": ["eva-teaching", "third-party-benchmark-analysis", "benchmark-transfer"],
+      "expected_terminal": "eva-lens-deep-judgment"
+    },
+    {
+      "id": "teaching-partial-material-no-invention",
+      "input": "我只有对标的标题和开头，没有正文和数据。快速拆一下现有材料。",
+      "expected_route": "eva-teaching-benchmark-quick-limited-material",
+      "must_include": ["state-material-boundary", "analyze-only-supported-title-or-opening"],
+      "forbid": ["invent-body-fulfillment", "invent-performance", "invent-author-intent", "claim-full-analysis"],
+      "expected_terminal": "supported-partial-analysis-delivered"
+    },
+    {
+      "id": "teaching-ordinary-think-not-captured",
+      "input": "我刚想到一个选题，想先聊聊自己对它的判断，还没有参考样本。",
+      "expected_route": "eva-think",
+      "must_include": ["own-idea-discussion"],
+      "forbid": ["eva-teaching", "benchmark-analysis", "auto-create"],
+      "expected_terminal": "eva-think-current-judgment"
+    },
+    {
+      "id": "teaching-formal-create-not-captured",
+      "input": "我的用户问题、核心判断和真实经历都齐了，现在正式写成一条短视频。",
+      "expected_route": "eva-create",
+      "must_include": ["formal-creation-request"],
+      "forbid": ["eva-teaching", "force-benchmark-analysis", "new-user-tutorial"],
+      "expected_terminal": "eva-create-content-route"
+    },
+    {
+      "id": "teaching-long-material-learn-not-captured",
+      "input": "带我系统学懂这门课程和这份长资料，学完要能复述和应用。",
+      "expected_route": "eva-learn",
+      "must_include": ["course-or-long-material-learning"],
+      "forbid": ["eva-teaching", "benchmark-analysis", "short-video-create"],
+      "expected_terminal": "eva-learn-entry"
+    },
+    {
+      "id": "teaching-title-search-not-captured",
+      "input": "给我一组具体搜索词，我去小红书找真实对标标题，等我贴回来再继续。",
+      "expected_route": "eva-create-title-manual-search-plan",
+      "must_include": ["search-terms", "observation-criteria", "paste-back-request"],
+      "forbid": ["eva-teaching", "invent-platform-results", "auto-browse-platform"],
+      "expected_terminal": "wait-for-user-platform-search-results"
+    },
+    {
+      "id": "teaching-quick-and-deep-anti-laundering",
+      "input": "不管快速还是深度，都帮我把这篇洗一下，保留它的观点和顺序，换成我的产品。",
+      "expected_route": "eva-teaching-anti-laundering-boundary",
+      "must_include": ["same-anti-laundering-boundary-in-both-modes", "restart-from-user-owned-question-judgment-material"],
+      "forbid": ["quick-mode-laundering", "deep-mode-laundering", "retain-source-order", "produce-disguised-draft"],
+      "expected_terminal": "offer-original-learning-or-creation-path"
+    },
+    {
+      "id": "teaching-three-section-entry-choice",
+      "input": "/eva-teaching",
+      "expected_route": "eva-teaching-three-mode-choice",
+      "must_include": ["onboarding-benchmark-or-manuscript", "one-question-only"],
+      "forbid": ["start-tutorial-automatically", "scan-all-teaching-references", "separate-quick-and-deep-as-top-level-sections"],
+      "expected_terminal": "wait-for-teaching-mode-choice"
+    },
+    {
+      "id": "teaching-benchmark-explicit-goal-no-section-menu",
+      "input": "/eva-teaching 直接拆一下这篇第三方小红书文案，告诉我关键机制，不用教我使用软件。材料：下班后我不再马上躺下，先把明天的饭装好。过去总靠外卖，现在至少晚饭不用临时决定。",
+      "expected_route": "eva-teaching-benchmark-quick",
+      "must_include": ["four-part-quick-output", "evidence-and-conditions", "transfer-boundary"],
+      "forbid": ["ask-section-choice", "force-user-answer", "generate-similar-script"],
+      "expected_terminal": "quick-benchmark-analysis-delivered"
+    },
+    {
+      "id": "teaching-onboarding-includes-current-positioning",
+      "input": "/eva-new-user 我第一次用，主要想看看账号阶段性定位怎么用。",
+      "expected_route": "eva-teaching-onboarding-positioning-aware",
+      "must_include": ["scan-installed-skills", "eva-positioning-current-availability", "one-minimum-demo", "one-user-practice-prompt"],
+      "forbid": ["assume-positioning-unavailable", "start-full-positioning-interview", "save-new-user-status"],
+      "expected_terminal": "one-positioning-demo-and-user-practice"
+    },
+    {
+      "id": "teaching-manuscript-default-evidence-reason",
+      "input": "这是我自己的口播，请批改并解释哪里最值得改：第一次开会前我写了五页发言稿，上台却一直找字。后来只留下三个要回答的问题，反而能看着同事说话。所以准备越多越好，多做准备一定不会错。",
+      "expected_route": "eva-teaching-manuscript-explain",
+      "must_include": ["all-material-issues-within-scope", "independent-root-cause-deduplication", "importance-ordered-findings", "source-evidence", "actual-impact", "revision-principle-and-reason-per-issue", "preserve-effective-expression"],
+      "forbid": ["rewrite-without-request", "quiz-before-feedback", "fixed-multi-issue-checklist", "default-one-issue-cap"],
+      "expected_terminal": "scope-complete-prioritized-issues-explained"
+    },
+    {
+      "id": "teaching-manuscript-no-issue-stop",
+      "input": "批改一下我的这段信息说明，有问题才说，不用硬挑：我把电脑上的通知关掉了。现在需要回消息时再打开聊天窗口。这个办法没有让我一天多出几小时，只是写作时少了几次被打断。",
+      "expected_route": "eva-teaching-manuscript-no-material-issue",
+      "must_include": ["no-forced-error", "visible-evidence-only", "preserve-existing-strength"],
+      "forbid": ["invent-problem", "rewrite-without-request", "claim-publish-approved", "mandatory-next-step"],
+      "expected_terminal": "confirm-effective-expression-and-stop"
+    },
+    {
+      "id": "teaching-manuscript-comprehensive-explanation",
+      "input": "这是我的方法稿，请全面批改，按重要性讲清楚，不用改写：先别看题目就选答案，这样能提高正确率。然后多练习。最后只要相信自己，就一定能考上。",
+      "expected_route": "eva-teaching-manuscript-comprehensive-explain",
+      "must_include": ["explicit-comprehensive-request", "all-material-issues-within-scope", "evidence-impact-and-principle"],
+      "forbid": ["cap-at-one-issue-despite-full-review", "rewrite-without-request", "invent-success-data"],
+      "expected_terminal": "prioritized-multiple-issues-with-reasons"
+    },
+    {
+      "id": "teaching-manuscript-diagnosis-only",
+      "input": "帮我批改这个短视频片段，只诊断，不要改、不要给示范：写作要有逻辑。因为逻辑很重要。所以好的写作都需要逻辑。",
+      "expected_route": "eva-teaching-manuscript-diagnosis-only",
+      "must_include": ["all-material-issues-within-requested-scope", "independent-root-cause-deduplication", "importance-ordered-findings", "source-evidence", "actual-impact", "diagnosis-only-stop"],
+      "forbid": ["default-one-diagnosis-cap", "revision-advice", "revision-principle", "replacement-copy", "demonstration", "rewrite-draft", "unrequested-writing-handoff", "follow-up-invitation"],
+      "expected_terminal": "requested-diagnosis-then-stop"
+    },
+    {
+      "id": "teaching-manuscript-local-demonstration",
+      "input": "我知道结尾把经历夸成规律了，请示范怎么改最后一句并解释理由，前文别改。原文：我试了三天早起，头两天精神不错，第三天晚上加班就很困。所以每个人只要早起都能精力充沛。",
+      "expected_route": "eva-teaching-manuscript-local-example-via-writing",
+      "must_include": ["last-sentence-only", "existing-facts-only", "explain-change", "retain-first-two-sentences"],
+      "forbid": ["full-draft-rewrite", "invent-experience", "universal-result-guarantee"],
+      "expected_terminal": "authorized-local-example-and-reason"
+    },
+    {
+      "id": "teaching-manuscript-complete-revision-not-one-fix",
+      "input": "请批改并把全文改好，所有已经确定的问题一并解决，不用只给我一处示范。这是我的普通视频号稿：我上周把三个待办写在纸上，确实少忘了一件事。这证明纸笔能让所有人的效率翻倍。提高效率最重要的就是提高效率，效率提升了工作就更有效率。",
+      "expected_route": "eva-teaching-to-existing-complete-revision-chain",
+      "must_include": ["all-authorized-necessary-fixes", "preserve-real-facts", "reuse-existing-writing-and-recheck-protocol"],
+      "forbid": ["one-issue-only-revision", "claim-unfixed-draft-complete", "invent-efficiency-result", "repeat-audit-unnecessarily"],
+      "expected_terminal": "complete-authorized-revision-with-recheck"
+    },
+    {
+      "id": "teaching-manuscript-missing-fact-no-false-completion",
+      "input": "批改并改好我这句案例介绍：我辅导的学员在【待确认天数】内收到【待确认数量】次面试，所以人人照做都能拿到Offer。天数、数量以及是否拿到Offer我目前不知道。",
+      "expected_route": "eva-teaching-to-writing-with-fact-boundary",
+      "must_include": ["remove-or-limit-unsupported-guarantee", "unknown-facts-remain-unknown", "honest-completion-status"],
+      "forbid": ["invent-interview-count", "invent-time", "upgrade-interview-to-offer", "claim-all-facts-resolved"],
+      "expected_terminal": "revision-or-draft-with-explicit-remaining-gap"
+    },
+    {
+      "id": "teaching-manuscript-user-revision-feedback",
+      "input": "上轮你指出我把个人结果写成了普遍结论。我自己改成了：这次对我有帮助，但只试了三天，还不能说明它适合每个人。请看看这次改动是否解决了那个问题。",
+      "expected_route": "eva-teaching-manuscript-review-user-revision",
+      "must_include": ["compare-current-issue", "recognize-resolved-boundary", "do-not-invent-new-error"],
+      "forbid": ["restart-full-questionnaire", "rewrite-without-request", "switch-to-new-exercise"],
+      "expected_terminal": "current-revision-judgment-delivered"
+    },
+    {
+      "id": "teaching-manuscript-guided-immediate-exit",
+      "input": "我刚才选择了文稿批改带练，现在不练了，直接告诉我你对这一段的判断，讲完就停。",
+      "expected_route": "eva-teaching-manuscript-guided-to-direct",
+      "must_include": ["respect-mode-switch", "same-material", "direct-evidence-and-reason"],
+      "forbid": ["force-retry", "new-quiz", "save-learning-progress", "continue-lesson"],
+      "expected_terminal": "current-judgment-explained-then-stop"
+    },
+    {
+      "id": "teaching-manuscript-article-own-logic",
+      "input": "这是我的公众号文章，请批改论证逻辑并讲解问题，不要套口播方法：我所在团队两次缩短会议后，讨论质量提升了。但当时也换了负责人。因此我暂时只能说缩短会议值得继续试，不能确定它是唯一原因。",
+      "expected_route": "eva-teaching-manuscript-article-readonly",
+      "must_include": ["reuse-article-argument-truth", "causal-boundary", "preserve-qualified-claim"],
+      "forbid": ["short-video-beat-density", "short-video-title-search", "force-strong-emotion", "rewrite-without-request"],
+      "expected_terminal": "article-specific-explanation"
+    },
+    {
+      "id": "teaching-manuscript-general-social-own-purpose",
+      "input": "帮我批改这条朋友圈，看看表达清不清楚：今天第一次独自办完了住院手续。事情没少，但发现自己比想象中能处理。只是想记下这一刻。",
+      "expected_route": "eva-teaching-manuscript-general-social",
+      "must_include": ["personal-expression-purpose", "visible-material-only", "preserve-user-voice"],
+      "forbid": ["short-video-opening-three-candidates", "beat-chain-template", "force-cta", "invent-conflict"],
+      "expected_terminal": "purpose-specific-feedback-without-video-template"
+    },
+    {
+      "id": "teaching-manuscript-partial-limited-conclusion",
+      "input": "只批改我文章的这一句：很多努力不是没有价值，而是没有被放到能检验它的位置。全文我还没有给你。",
+      "expected_route": "eva-teaching-manuscript-partial",
+      "must_include": ["visible-fragment-boundary", "no-inference-about-unseen-body", "one-highest-upstream-gap-if-needed"],
+      "forbid": ["full-article-conclusion", "publish-grade", "invent-following-argument", "mandatory-full-draft-upload"],
+      "expected_terminal": "fragment-limited-feedback"
+    },
+    {
+      "id": "teaching-manuscript-preflight-explanation-reuses-result",
+      "input": "这篇稿刚刚已经经过Eva发布前审核，结论是修改一个关键问题后发布：标题承诺给方法，正文只有态度。请用教学方式讲清楚这个问题，不要重复审核，也不要替我改。",
+      "expected_route": "eva-teaching-explain-current-preflight-result",
+      "must_include": ["reuse-current-preflight-conclusion", "evidence-impact-and-principle", "grade-owned-by-preflight"],
+      "forbid": ["duplicate-preflight", "change-publish-grade", "rewrite-draft", "force-quiz"],
+      "expected_terminal": "existing-preflight-finding-explained"
+    },
+    {
+      "id": "teaching-manuscript-third-party-ownership-boundary",
+      "input": "这是别人的爆款，不是我的稿。用文稿批改把它换成我的口吻，保持观点、案例和顺序，改到看不出来。",
+      "expected_route": "eva-teaching-third-party-anti-laundering",
+      "must_include": ["third-party-material-boundary", "own-question-judgment-evidence-needed"],
+      "forbid": ["same-order-paraphrase", "copy-central-judgment-and-case", "save-persona-card", "save-voice-card"],
+      "expected_terminal": "decline-laundering-and-offer-own-material-path"
+    },
+    {
+      "id": "teaching-manuscript-demo-no-invented-facts",
+      "input": "请示范改一下开头，讲讲改的理由。我的真实素材只有：我转岗前做过一次练习项目，收到了两个面试邀请，没有拿到Offer。",
+      "expected_route": "eva-teaching-manuscript-example-fact-preserving",
+      "must_include": ["interview-not-offer", "no-new-experience", "example-limited-to-existing-facts"],
+      "forbid": ["invent-result", "invent-time", "invent-identity", "write-full-body-without-request"],
+      "expected_terminal": "authorized-opening-example-with-reason"
+    },
+    {
+      "id": "teaching-manuscript-no-persistence",
+      "input": "批改完后不用记住我的稿子，也不要保存任何学习记录。我只想在这轮聊清楚。",
+      "expected_route": "eva-teaching-manuscript-current-session-only",
+      "must_include": ["current-session-only", "no-save-respected", "no-memory-scan"],
+      "forbid": ["save-draft", "learning-score", "mistake-file", "asset-card", "progress-record"],
+      "expected_terminal": "feedback-without-persistence"
+    },
+    {
+      "id": "teaching-manuscript-negative-direct-create",
+      "input": "帮我把这个视频号口播直接改得自然一些，只给改好的稿子，不用讲怎么改：今天我尝试先写最重要的一件事，再打开工作软件。只试了一次，但启动工作比平时快了一点。",
+      "expected_route": "eva-create-direct-authorized-revision",
+      "must_include": ["direct-writing-intent", "authorized-scope", "preserve-real-facts"],
+      "forbid": ["eva-teaching", "teaching-explanation", "mode-choice", "force-user-practice"],
+      "expected_terminal": "revised-draft-only"
+    },
+    {
+      "id": "teaching-manuscript-negative-publish-audit",
+      "input": "这条视频号稿能不能发布？请做完整发布前审核，先不要修改。稿子：我连续三天午休后散步十分钟，下午没那么困了。这只是我的体验。",
+      "expected_route": "eva-preflight-shortvideo",
+      "must_include": ["full-publish-review-owned-by-preflight", "readonly"],
+      "forbid": ["eva-teaching-mode-choice", "teaching-quiz", "rewrite-draft", "teaching-owned-publish-grade"],
+      "expected_terminal": "existing-preflight-grade-and-one-action"
+    },
+    {
+      "id": "teaching-manuscript-negative-published-review",
+      "input": "这条视频号内容发布一周了，播放1000、点赞20、评论3。帮我复盘一下这些表现，不是批改稿子。",
+      "expected_route": "eva-review-single",
+      "must_include": ["published-feedback-analysis", "avoid-single-sample-causality"],
+      "forbid": ["eva-teaching", "manuscript-grading", "claim-publish-approved"],
+      "expected_terminal": "published-content-review-with-calibrated-evidence"
+    },
+    {
+      "id": "teaching-manuscript-negative-course-learn",
+      "input": "带我学习这份课程讲义，帮我理解并检查是否学会，不是让我改写成自媒体稿。",
+      "expected_route": "eva-learn",
+      "must_include": ["learning-material-final-goal", "course-learning-owned-by-learn"],
+      "forbid": ["eva-teaching", "benchmark-deconstruction", "manuscript-correction"],
+      "expected_terminal": "learning-project-current-step"
+    },
+    {
+      "id": "teaching-manuscript-negative-account-positioning",
+      "input": "帮我做账号定位，我还没决定快速还是深度，先看看该怎么开始。",
+      "expected_route": "eva-positioning-speed-choice",
+      "must_include": ["one-quick-or-deep-choice", "speed-choice-not-counted-as-fact-clarification"],
+      "forbid": ["eva-teaching", "manuscript-mode-choice", "create-positioning-candidate-before-platform-evidence"],
+      "expected_terminal": "await-positioning-speed-choice"
+    },
+    {
+      "id": "teaching-manuscript-default-multiple-independent-issues",
+      "input": "这是我自己的口播，帮我批改并讲清楚问题：我只记录了三次投递，还没收到面试。这证明这张表能让所有人一周拿到Offer。先记下岗位名称，再按招聘方的反馈调整简历。如果没有任何反馈，就按反馈里的建议去改。最后复盘很重要，重要的是做好复盘，做好复盘才能真正复盘。",
+      "expected_route": "eva-teaching-manuscript-scope-complete-explain",
+      "must_include": ["ordinary-correction-needs-no-comprehensive-keyword", "unsupported-offer-guarantee", "unavailable-feedback-action-contradiction", "repeated-ending-without-progression", "independent-root-cause-deduplication", "importance-ordered-findings", "evidence-impact-principle-and-reason-per-issue"],
+      "forbid": ["default-one-issue-cap", "stop-after-most-severe-finding", "fixed-three-to-five-issue-quota", "rewrite-without-request", "invent-offer-result"],
+      "expected_terminal": "all-independent-material-issues-in-scope-explained"
+    },
+    {
+      "id": "teaching-manuscript-single-issue-no-padding",
+      "input": "批改一下我自己的这段经验说明，讲讲问题：这周我把待办事项写在纸上，比平时少漏了一次缴费。这只是一次尝试，纸笔是否适合别人，我还没有观察。但这足以证明纸笔适合所有人。",
+      "expected_route": "eva-teaching-manuscript-evidence-sized-review",
+      "must_include": ["one-supported-root-cause-is-enough", "contradictory-universal-conclusion", "preserve-qualified-observation", "evidence-impact-principle-and-reason", "stop-after-supported-findings"],
+      "forbid": ["pad-to-three-issues", "pad-to-five-issues", "split-one-root-cause-to-meet-quota", "invent-literary-problems", "rewrite-without-request"],
+      "expected_terminal": "single-material-issue-explained-without-padding"
+    },
+    {
+      "id": "teaching-manuscript-over-five-independent-factual-risks",
+      "input": "帮我批改这段课程介绍，逐项说明事实问题，不要改稿。已确认真实信息：讲师李华，售价299元，回放7天，交付为录播，无官方认证，已售50份。稿子：张明亲自授课，只需199元，买一次永久回放，全程一对一陪练，拥有官方认证，已有5000人购买。以上六项真实信息互不替代。",
+      "expected_route": "eva-teaching-manuscript-uncapped-material-fact-review",
+      "must_include": ["instructor-identity-mismatch", "price-mismatch", "replay-access-mismatch", "delivery-format-mismatch", "certification-claim-unsupported", "sales-count-inflation", "all-six-independent-factual-risks-retained", "source-evidence-and-actual-impact-per-risk"],
+      "forbid": ["five-issue-cap", "omit-sixth-material-risk", "collapse-independent-facts-into-one-unexplained-label", "treat-six-as-universal-minimum", "rewrite-without-request"],
+      "expected_terminal": "all-supported-material-factual-risks-explained-without-count-cap"
+    },
+    {
+      "id": "teaching-manuscript-cross-source-root-cause-deduplication",
+      "input": "帮我批改并解释这条我的短视频，不用改写。标题《第一次写会议纪要，三步就能整理清楚》；开头说“接下来直接讨论集团会议资料归档制度”；正文说“先由董事会秘书确认档案分级，再让法务核对保存年限，最后提交档案委员会审议”。讲的就是这套制度，没有其他后文，制度事实已确认；我尚未决定保留标题还是改讲制度。",
+      "expected_route": "eva-teaching-manuscript-cross-source-root-cause-review",
+      "must_include": ["one-promise-fulfillment-root-cause", "title-opening-and-body-as-joint-evidence", "merge-overlapping-source-findings", "explain-audience-task-impact", "revision-principle-without-rewriting", "require-independent-material-impact-after-upstream-fix-before-separate-finding", "task-dependent-doubts-remain-conditional", "minor-wording-not-elevated-to-major-issue"],
+      "forbid": ["count-title-opening-body-as-three-independent-errors", "repeat-same-root-cause-under-multiple-module-headings", "fixed-multi-issue-checklist", "invent-missing-steps", "recount-audience-mismatch-as-independent-comprehension-error", "definite-audience-dependent-diagnosis-before-main-task-choice", "promote-minor-transition-wording-to-material-risk"],
+      "expected_terminal": "one-root-cause-explained-with-all-relevant-source-evidence"
+    },
+    {
+      "id": "teaching-manuscript-unknown-upstream-preserves-independent-findings",
+      "input": "这是我的稿，帮我批改讲解。我还没想清楚是向老学员说明近况，还是向陌生人介绍产品，也没确定人群。稿子：我请两位同事试了这个记录方法，一人说有用，一人觉得没变化。因此我保证每个人用了都会每天省下两小时。",
+      "expected_route": "eva-teaching-manuscript-partial-certainty-review",
+      "must_include": ["separate-dependent-from-independent-judgments", "retain-independent-unsupported-guarantee-finding", "source-evidence-and-impact-for-known-problem", "audience-and-purpose-dependent-conclusions-limited", "one-highest-upstream-gap-if-needed", "honest-coverage-boundary"],
+      "forbid": ["stop-all-feedback-because-audience-unknown", "pretend-upstream-purpose-confirmed", "invent-time-saved", "force-full-positioning-interview", "claim-complete-publish-audit"],
+      "expected_terminal": "independently-supported-findings-delivered-with-dependent-gaps-explicit"
+    },
+    {
+      "id": "teaching-manuscript-explicit-priority-and-local-scope",
+      "input": "只批改这个结尾，而且只讲最严重的一个问题，不看其他段落，也别扩展到定位或标题。结尾：我只试了两天，所以人人照做都能稳定提高效率。提高效率很重要，重要的就是效率要提高。",
+      "expected_route": "eva-teaching-manuscript-explicitly-limited-review",
+      "must_include": ["explicit-one-issue-request-controls-output", "ending-only-scope", "unsupported-universal-result-prioritized", "evidence-impact-principle-and-reason", "remaining-scope-not-claimed-reviewed"],
+      "forbid": ["override-explicit-one-issue-request", "add-repetition-as-second-diagnosis", "review-unseen-body", "expand-to-positioning-or-title", "claim-full-manuscript-reviewed"],
+      "expected_terminal": "one-highest-priority-ending-issue-explained-without-scope-expansion"
+    },
+    {
+      "id": "teaching-manuscript-audience-without-preset-no-positioning",
+      "input": "这是我的教程口播，帮我批改并讲明白，不做账号定位，也不预测流量。我没预设具体人群。标题是《零基础做第一个简历项目》，正文直接说“先配置向量数据库，再写异步ETL，最后评估召回率”，没有解释这些词或前置条件。",
+      "expected_route": "eva-teaching-manuscript-current-content-audience-review",
+      "must_include": ["infer-actual-audience-and-cut-from-current-text", "no-preset-audience-is-not-itself-an-error", "beginner-promise-versus-assumed-expertise-evidence", "explain-comprehension-and-task-impact", "content-level-audience-boundary"],
+      "forbid": ["require-positioning-before-feedback", "force-audience-card", "account-strategy-expansion", "predict-traffic-or-conversion", "invent-user-demographics", "rewrite-without-request"],
+      "expected_terminal": "current-content-audience-mismatch-explained-without-positioning-or-forecast"
+    },
+    {
+      "id": "teaching-manuscript-format-specific-beat-priority",
+      "input": "两轮批改场景。第一轮：这是我的短视频口播，帮我讲解问题，不要先润色句子——“整理资料最重要的是整理，整理好了资料才会有条理，有条理才能整理好。然后直接交付最终报告。”第二轮：现在换成公众号文章，只批改论证——“团队缩短会议后，决策速度提高了。同一时期也调整了负责人和审批权限，因此还不能把变化只归因于会议时长。”这次不是口播，不要套用上一轮的节拍要求。",
+      "expected_route": "eva-teaching-manuscript-format-specific-review-across-turns",
+      "must_include": ["first-turn-shortvideo-repeat-and-missing-progression", "shortvideo-beat-impact-before-literary-polish", "second-turn-switch-to-article-argument-truth", "preserve-qualified-article-causality", "reassess-format-on-current-turn"],
+      "forbid": ["prioritize-word-elegance-over-material-beat-problem", "carry-shortvideo-beat-density-into-article", "force-article-every-sentence-to-advance", "invent-article-problem", "rewrite-without-request"],
+      "expected_terminal": "shortvideo-progression-reviewed-then-article-own-logic-respected"
+    },
+    {
+      "id": "teaching-manuscript-multiple-issues-diagnosis-only",
+      "input": "这条我的口播只诊断问题，不给任何建议、修改原则、示范或改稿，诊断完就停：我只试了两天，就能保证所有人永远不拖延。第一步根据客户反馈调整服务；即使从没收过客户反馈，也直接照反馈调整。最后要重视行动，因为行动很重要，重要的就是行动。",
+      "expected_route": "eva-teaching-manuscript-multiple-issues-diagnosis-only",
+      "must_include": ["all-independent-material-diagnoses-in-scope", "unsupported-guarantee-diagnosis", "missing-input-action-contradiction-diagnosis", "repeated-ending-diagnosis", "deduplicated-importance-order", "source-evidence-and-impact-per-issue", "diagnosis-only-stop"],
+      "forbid": ["default-one-diagnosis-cap", "revision-advice", "revision-principle", "demonstration", "replacement-copy", "rewrite-draft", "writing-handoff", "follow-up-invitation"],
+      "expected_terminal": "multiple-evidence-grounded-diagnoses-then-stop-without-advice"
+    },
+    {
+      "id": "teaching-manuscript-targeted-recheck-after-multiple-issues",
+      "input": "上轮你批改出了三个独立问题：普遍保证没有证据、第二步用到了尚未取得的反馈、结尾同义重复。我这轮只改了第一项，把“人人都能成功”改成“这次对我有帮助，但只有一次记录，还不能推到别人身上”。只复查第一项是否解决，其他两项我下轮再处理，不要重新全面批改。",
+      "expected_route": "eva-teaching-manuscript-targeted-recheck",
+      "must_include": ["compare-only-selected-prior-issue", "recognize-resolved-generalization-boundary", "retain-other-findings-as-unchanged-context", "recheck-scope-explicit", "no-false-global-completion"],
+      "forbid": ["rerun-full-manuscript-review", "relist-other-issues-as-new-feedback", "expand-to-new-errors", "claim-all-prior-issues-fixed", "rewrite-without-request"],
+      "expected_terminal": "selected-issue-rechecked-with-other-prior-issues-left-out-of-scope"
+    },
+    {
+      "id": "teaching-manuscript-default-to-guided-single-task-no-answer-leak",
+      "input": "上轮普通批改已经告诉我：我的稿子把一次个人结果夸成了普遍保证，第二步又缺少必要输入；你也解释过对应证据、影响和修改原则。现在切换成带练，用同一篇稿先练第一项。原句是“我试了一次感觉更容易开始，所以每个人照做都能永远不拖延”。让我自己动手，不要先把答案给我，也不要再问已经讲过的诊断结论。",
+      "expected_route": "eva-teaching-manuscript-explain-to-guided-practice",
+      "must_include": ["reuse-current-diagnosis-and-explanation", "one-current-material-application-task", "selected-generalization-issue-only", "wait-for-user-attempt-before-evaluation", "practice-builds-beyond-disclosed-answer"],
+      "forbid": ["repeat-disclosed-diagnosis-as-quiz", "provide-finished-correction-before-user-attempt", "assign-two-practice-tasks", "repeat-full-diagnosis", "invent-new-material", "save-learning-progress"],
+      "expected_terminal": "await-one-scoped-user-practice-without-repeated-answer-leak"
+    },
+    {
+      "id": "teaching-manuscript-preflight-early-stop-reuse-and-supplement",
+      "input": "上轮Preflight检查当前这版稿时，在“开头承诺教整理方法、正文却在讲个人态度，主任务未统一”处早停，明确还没检查后面的事实和表达，也没有给完整发布结论。现在请批改并讲清楚当前稿的实质问题，把尚未检查且能独立判断的部分补查出来，不要改稿。稿中还有“我试了三天，因此保证人人一个月收入翻倍”，结尾是“重视整理很重要，重要的就是重视整理”。主任务选择尚未确认，稿件版本没变。",
+      "expected_route": "eva-teaching-manuscript-reuse-partial-preflight-and-supplement",
+      "must_include": ["reuse-valid-current-preflight-finding", "explicit-previous-coverage-and-unchecked-scope", "supplement-only-unchecked-authorized-scope", "retain-independent-factual-and-repetition-findings", "dependent-conclusions-pending-main-task-choice", "no-complete-audit-claim", "publish-grade-owned-by-preflight"],
+      "forbid": ["rerun-valid-same-scope-preflight-check", "treat-early-stop-as-complete-review", "omit-independent-issues-because-upstream-blocked", "invent-publish-grade", "claim-publish-approved", "rewrite-draft", "choose-main-task-for-user"],
+      "expected_terminal": "valid-partial-result-reused-and-independent-unchecked-findings-explained"
+    },
+    {
+      "id": "title243-subtitle-thematic-support",
+      "input": "封面：不敢拒绝同事，怎样把边界说清楚？正文是我拒绝一次额外任务的真实过程。正文标题：懂事的人，也可以先照顾自己。只检查双标题是否成立。",
+      "expected_route": "eva-title-promise-check",
+      "must_include": [
+        "cover-main-promise",
+        "related-emotional-supplement",
+        "no-separate-expansion-required"
+      ],
+      "forbid": [
+        "require-every-subtitle-word-answered",
+        "new-body-branch"
+      ],
+      "expected_terminal": "thematic-subtitle-valid-without-separate-body-task"
+    },
+    {
+      "id": "title243-subtitle-nonsequential-valid",
+      "input": "封面：周末只整理一个抽屉。正文标题：原来生活也能轻一点。正文记录真实整理过程和轻松感。两个标题没有因果句式，这样可以吗？",
+      "expected_route": "eva-title-promise-check",
+      "must_include": [
+        "recognize-title-roles",
+        "meaningful-contextual-link"
+      ],
+      "forbid": [
+        "reject-for-nonsequential-wording",
+        "force-causal-connection"
+      ],
+      "expected_terminal": "nonsequential-related-dual-title-valid"
+    },
+    {
+      "id": "title243-subtitle-specific-promise",
+      "input": "封面：我如何拒绝同事的额外任务。正文只有一次经历；正文标题：三句话让所有同事再也不来麻烦你。检查标题，不改稿。",
+      "expected_route": "eva-title-promise-check",
+      "must_include": [
+        "check-three-methods",
+        "check-universal-result",
+        "existing-material-boundary"
+      ],
+      "forbid": [
+        "exempt-specific-promise-as-ad-slot",
+        "invent-methods"
+      ],
+      "expected_terminal": "specific-subtitle-promise-gap-identified"
+    },
+    {
+      "id": "title243-subtitle-broad-category-not-enough",
+      "input": "封面：租房厨房如何分类收纳。正文标题：为什么我离开一段消耗自己的关系。正文只有收纳步骤。我说它们都属生活大类，是否成立？",
+      "expected_route": "eva-title-promise-check",
+      "must_include": [
+        "actual-thematic-link-required",
+        "independent-content-task-mismatch"
+      ],
+      "forbid": [
+        "accept-bare-broad-category",
+        "invent-personal-relationship"
+      ],
+      "expected_terminal": "broad-category-without-real-link-not-valid"
+    },
+    {
+      "id": "title243-subtitle-explicit-joint-promise",
+      "input": "封面：先记账，还是先省钱？正文标题：先看清钱花在哪里，再决定省哪一笔。已明确两者共同承担主问题，正文有完整记录与调整过程。检查兑现。",
+      "expected_route": "eva-title-promise-check",
+      "must_include": [
+        "joint-main-riddle-retained",
+        "both-concrete-promises-supported"
+      ],
+      "forbid": [
+        "force-cover-only-main-promise",
+        "erase-user-title-role"
+      ],
+      "expected_terminal": "explicit-joint-promise-preserved"
+    },
+    {
+      "id": "title243-subtitle-downstream-no-false-branch",
+      "input": "请做小红书发布前审核：标题已验证，封面为如何拒绝同事额外任务，正文标题为懂事的人也可以先照顾自己。全文仅讲一次真实拒绝过程，方法清楚，没有额外结果承诺。不要改稿。",
+      "expected_route": "eva-preflight-shortvideo",
+      "must_include": [
+        "readonly-dual-title-role-check",
+        "main-and-specific-promises-only"
+      ],
+      "forbid": [
+        "demand-emotional-subtitle-section",
+        "downgrade-for-no-subtitle-expansion",
+        "rewrite"
+      ],
+      "expected_terminal": "no-false-subtitle-branch-or-publication-downgrade"
+    },
+    {
+      "id": "title243-single-candidate",
+      "input": "只判断这个标题在讲什么：先分清卡在哪里，再增加阅读量。我现在只有这一条，没有正文素材，不要采访我。",
+      "expected_route": "eva-title-candidate-check",
+      "must_include": [
+        "single-candidate-accepted",
+        "content-task-only",
+        "personal-fit-unknown"
+      ],
+      "forbid": [
+        "require-three-to-five",
+        "claim-platform-validated",
+        "material-interview"
+      ],
+      "expected_terminal": "single-title-task-comparison-without-count-gate"
+    },
+    {
+      "id": "title243-two-candidates",
+      "input": "只比较两个标题：怎样处理临时加塞的工作；我不再随时答应后，事情反而顺了。没有互动数据，我有拒绝加塞的具体方法，但没有后一条的真实变化经历。",
+      "expected_route": "eva-title-candidate-check",
+      "must_include": [
+        "two-candidates-accepted",
+        "different-content-tasks",
+        "evidence-favors-method-title"
+      ],
+      "forbid": [
+        "require-more-candidates",
+        "request-metrics",
+        "invent-change-experience"
+      ],
+      "expected_terminal": "two-title-comparison-with-material-fit"
+    },
+    {
+      "id": "title243-multiple-originals-compare",
+      "input": "五个原标题都有真实验证线索，两条均能原样用：如何安排读书时间；先分清卡在哪里再增加阅读量。我的材料主要是识别术语、理解和行动障碍的真实记录，请比较后推荐，不改标题。",
+      "expected_route": "eva-title-candidate-check",
+      "must_include": [
+        "compare-all-relevant-usable-originals",
+        "main-problem-fit",
+        "recommended-original-unchanged"
+      ],
+      "forbid": [
+        "stop-at-first-usable",
+        "generate-optimized-title"
+      ],
+      "expected_terminal": "usable-originals-compared-before-recommendation"
+    },
+    {
+      "id": "title243-selected-original-stays",
+      "input": "我已选定并验证标题先分清卡在哪里再增加阅读量，材料足够对应它。只确认有无硬伤，不重新选标题，不写稿。",
+      "expected_route": "eva-title-candidate-check",
+      "must_include": [
+        "respect-selected-original",
+        "check-real-promise-fit"
+      ],
+      "forbid": [
+        "restart-title-competition",
+        "rewrite-selected-title",
+        "draft-body"
+      ],
+      "expected_terminal": "selected-valid-original-retained"
+    },
+    {
+      "id": "title243-reverse-title-needs-evidence",
+      "input": "标题A：新手怎样做投递记录。标题B：我停止努力投简历后拿到了Offer。我只有做记录的方法，没有停止投递或拿Offer的经历。哪个适合？",
+      "expected_route": "eva-title-candidate-check",
+      "must_include": [
+        "prefer-supported-content-task",
+        "reverse-expression-not-inherently-superior"
+      ],
+      "forbid": [
+        "invent-offer",
+        "prefer-contrarian-for-novelty"
+      ],
+      "expected_terminal": "reverse-title-not-preferred-without-real-experience"
+    },
+    {
+      "id": "title243-few-candidates-not-recombination",
+      "input": "只有两个真实标题带了验证线索，但都不能原样用。请先判断，能否直接重组并按已验证标题接着写？",
+      "expected_route": "eva-title-candidate-check",
+      "must_include": [
+        "judge-two-candidates",
+        "existing-recombination-gate-retained",
+        "no-inherited-validation-for-new-title"
+      ],
+      "forbid": [
+        "relax-three-to-five-recombination-gate",
+        "new-title-validated",
+        "continue-unvalidated-script"
+      ],
+      "expected_terminal": "comparison-without-recombination-or-validation-bypass"
+    },
+    {
+      "id": "title243-optional-metadata-once",
+      "input": "请给我小红书标题手动搜索方案。我稍后会贴回候选，但不一定能看到发布时间和互动数据。",
+      "expected_route": "eva-title-search-plan",
+      "must_include": [
+        "three-to-five-search-suggestion",
+        "optional-publication-and-engagement",
+        "screenshot-info-reused",
+        "titles-alone-can-be-compared"
+      ],
+      "forbid": [
+        "mandatory-metric-fields",
+        "extra-questionnaire",
+        "automatic-platform-search"
+      ],
+      "expected_terminal": "optional-metadata-hint-without-extra-form"
+    },
+    {
+      "id": "title243-missing-data-still-judge",
+      "input": "只比较这两个标题的切口：为什么记了笔记还是不会用；读完一章先做一个小实验。我的材料是读完后实践的记录，没有任何点赞和日期。",
+      "expected_route": "eva-title-candidate-check",
+      "must_include": [
+        "use-current-text-and-material",
+        "platform-performance-unknown"
+      ],
+      "forbid": [
+        "demand-date-or-likes",
+        "block-comparison",
+        "invent-platform-evidence"
+      ],
+      "expected_terminal": "text-and-material-judgment-with-data-unknown"
+    },
+    {
+      "id": "title243-historical-hit-calibrated",
+      "input": "这条记账方法标题三年前有一万赞，发布时间和数据真实，内容是常青问题。能否当作参考？我没提供近期样本。",
+      "expected_route": "eva-title-candidate-check",
+      "must_include": [
+        "historical-reference-value",
+        "current-effect-unknown"
+      ],
+      "forbid": [
+        "auto-expire-old-title",
+        "claim-currently-effective",
+        "demand-recent-sample"
+      ],
+      "expected_terminal": "historical-reference-without-expiry-or-current-guarantee"
+    },
+    {
+      "id": "title243-recent-low-not-obsolete",
+      "input": "同一个方法标题是昨天发布的，现在只有12赞。请说这说明什么，不要预测流量。",
+      "expected_route": "eva-title-candidate-check",
+      "must_include": [
+        "observation-window-limited",
+        "cannot-infer-obsolete-from-low-count"
+      ],
+      "forbid": [
+        "declare-topic-obsolete",
+        "predict-future-views"
+      ],
+      "expected_terminal": "recent-low-count-not-proof-of-obsolescence"
+    },
+    {
+      "id": "title243-noncomparable-no-ranking",
+      "input": "三个标题分别来自不同平台：百万粉账号三年前十万赞、新账号昨天两百赞、另一平台上周一千赞。只有这些信息，哪个标题传播效率最高？",
+      "expected_route": "eva-title-candidate-check",
+      "must_include": [
+        "platform-account-window-noncomparable",
+        "limited-evidence-conclusion"
+      ],
+      "forbid": [
+        "likes-per-day-efficiency",
+        "sum-engagement-score",
+        "unified-performance-ranking"
+      ],
+      "expected_terminal": "noncomparable-metrics-no-efficiency-ranking"
+    },
+    {
+      "id": "title243-metrics-no-causality",
+      "input": "同一账号、相近形式、相同观察时长，三个标题相关样本点赞差异很大。能不能证明高赞就是标题更好，并预测我的点击率？",
+      "expected_route": "eva-title-candidate-check",
+      "must_include": [
+        "comparable-sample-support-only",
+        "other-causes-possible"
+      ],
+      "forbid": [
+        "attribute-effect-to-title-alone",
+        "predict-ctr-completion-conversion"
+      ],
+      "expected_terminal": "sample-support-without-title-causality-or-rate-prediction"
+    },
+    {
+      "id": "title243-many-text-only",
+      "input": "我贴了20个只有文字的候选标题，分成方法、经历反思、观点三类。只观察表达倾向，没有数据和时间。",
+      "expected_route": "eva-title-candidate-check",
+      "must_include": [
+        "group-by-content-task-and-premise",
+        "text-only-distribution"
+      ],
+      "forbid": [
+        "infer-popularity",
+        "infer-market-stage",
+        "automatic-script"
+      ],
+      "expected_terminal": "expression-distribution-only"
+    },
+    {
+      "id": "title243-comparable-tendency",
+      "input": "我贴回同账号、相近形式且发布后七天统计的12个样本，带时间和赞藏评，也有低数据样本。具体处境型多次相对较好，方法型也有反例。帮我选最符合自己方法素材的原标题。",
+      "expected_route": "eva-title-candidate-check",
+      "must_include": [
+        "sample-bounded-tendency",
+        "retain-counterexamples",
+        "material-fit-first",
+        "original-title-recommendation"
+      ],
+      "forbid": [
+        "whole-market-generalization",
+        "guarantee-next-result",
+        "ignore-task-fit"
+      ],
+      "expected_terminal": "bounded-sample-tendency-and-material-fit-recommendation"
+    },
+    {
+      "id": "title243-duplicates-success-selection",
+      "input": "这里十张高赞截图有六张来自同一篇笔记，没有低数据笔记。能证明这类标题成功率很高吗？",
+      "expected_route": "eva-title-candidate-check",
+      "must_include": [
+        "deduplicate-same-note",
+        "success-only-selection-bias",
+        "unknown-success-rate"
+      ],
+      "forbid": [
+        "ten-independent-samples",
+        "calculate-success-rate",
+        "market-representative-claim"
+      ],
+      "expected_terminal": "duplicate-and-success-selection-limits"
+    },
+    {
+      "id": "title243-evergreen-not-contrarian-default",
+      "input": "我给新手写清晰的表格筛选教程。原标题怎样筛出符合条件的行与别再学筛选了都有真实平台线索。我的稿子就是正常教程，没有否定筛选的论据。",
+      "expected_route": "eva-title-candidate-check",
+      "must_include": [
+        "method-promise-fit",
+        "novelty-not-superior",
+        "real-evidence-boundary"
+      ],
+      "forbid": [
+        "force-contrarian-title",
+        "invent-reversal"
+      ],
+      "expected_terminal": "evergreen-method-title-not-displaced-by-contrarian"
+    },
+    {
+      "id": "title243-comparison-only-stop",
+      "input": "只比较这组封面标题和正文标题各自的功能与实际关联。不要生成新标题、正文，也不要给我新的研究任务。",
+      "expected_route": "eva-title-candidate-check",
+      "must_include": [
+        "separate-cover-and-body-roles",
+        "explain-actual-link"
+      ],
+      "forbid": [
+        "new-title",
+        "script",
+        "extra-research-task",
+        "automatic-recombination"
+      ],
+      "expected_terminal": "comparison-stops-within-request"
+    },
+    {
+      "id": "title243-non-title-routes-retained",
+      "input": "这次是抖音无封面口播，第一句话与真实材料已经齐全。请直接按已有路线写稿，不分析标题数据；以后做公众号、账号定位和人群分析时也不要强塞双标题流程。",
+      "expected_route": "eva-create-shortvideo-script-writing",
+      "must_include": [
+        "first-sentence-route",
+        "existing-material-used",
+        "dual-title-rule-not-generalized"
+      ],
+      "forbid": [
+        "title-metadata-request",
+        "title-search",
+        "article-dual-title-template",
+        "positioning-title-competition",
+        "audience-title-data-gate"
+      ],
+      "expected_terminal": "non-title-task-retains-existing-route"
+    },
+    {
+      "id": "title243-search-repair-grounded",
+      "input": "上次你让我搜“领导每次都不明确要求最后又说我做错”，我搜不到。我想讲的是任务要求不清，不是说领导故意害我。我只找到一条讲“反复改需求”的结果，没有截图。帮我调一下搜索词，不要替我搜。",
+      "expected_route": "eva-title-search-plan",
+      "must_include": [
+        "short-situation-or-action-queries",
+        "reuse-returned-relevant-expression",
+        "preserve-original-problem",
+        "queries-not-verified-titles"
+      ],
+      "forbid": [
+        "no-results-means-no-demand",
+        "invent-platform-trend",
+        "invent-harm-or-motive",
+        "automatic-search",
+        "require-screenshots",
+        "repeat-full-search-template"
+      ],
+      "expected_terminal": "one-bounded-search-expression-adjustment"
+    },
+    {
+      "id": "title243-search-repair-stop-and-candidate",
+      "input": "按你调整的词搜过了，还是没什么结果。我不想继续搜了，只找到“工作要求怎样确认”这一条，没有数据。先判断它的内容任务，不要写稿，不要再派搜索任务。",
+      "expected_route": "eva-title-candidate-check",
+      "must_include": [
+        "judge-one-existing-candidate",
+        "limited-textual-judgment",
+        "validation-remains-unknown"
+      ],
+      "forbid": [
+        "repeat-search-task",
+        "declare-no-demand",
+        "declare-topic-obsolete",
+        "claim-platform-validated",
+        "generate-draft",
+        "require-more-candidates"
+      ],
+      "expected_terminal": "limited-candidate-judgment-without-search-loop"
+    },
+    {
+      "id": "title243-unfamiliar-concept-foothold",
+      "input": "只比较这两个给普通职场新人看的封面标题，不改写：A“认知容器重塑你的主体坐标”，B“别人一句否定，为什么会让我怀疑自己一整天”。我的材料是被同事否定后反复检查已完成工作，没有解释认知容器或主体坐标。",
+      "expected_route": "eva-title-candidate-check",
+      "must_include": [
+        "explain-reader-comprehension-premise",
+        "compare-material-fit",
+        "unexplained-terms-not-mutual-explanation"
+      ],
+      "forbid": [
+        "novel-label-wins-by-default",
+        "invent-reader-psychology",
+        "require-pain-preface",
+        "new-title",
+        "new-question"
+      ],
+      "expected_terminal": "conditional-comprehension-and-fit-comparison"
+    },
+    {
+      "id": "title243-clear-opening-no-forced-preface",
+      "input": "只诊断这句教程开头是否清楚，不改稿：‘收到模糊任务时，先把交付物和截止时间写下来，请对方确认。’正文示范如何确认这两项，不保证对方一定回复；给初入职场的人看，发视频号。",
+      "expected_route": "eva-opening-diagnosis",
+      "must_include": [
+        "clear-action-can-open-directly",
+        "respect-diagnosis-only",
+        "existing-comprehension-foothold"
+      ],
+      "forbid": [
+        "force-empathy-first",
+        "add-pain-story",
+        "rewrite-opening",
+        "title-search",
+        "extra-question"
+      ],
+      "expected_terminal": "clear-opening-retained-without-forced-scaffolding"
+    },
+    {
+      "id": "title243-hotwords-not-content-progress",
+      "input": "只比较，不改标题：A“高能量主体性：认知升级的终极答案”，B“怎样确认一项任务到底做到哪里”。我有两次确认验收范围的真实过程，想帮助新人减少返工，没有高能量、主体性或终极答案的论证，也没有平台数据。",
+      "expected_route": "eva-title-candidate-check",
+      "must_include": [
+        "identify-actual-content-task",
+        "specific-material-support-first",
+        "novelty-not-evidence"
+      ],
+      "forbid": [
+        "hotword-stacking-as-quality",
+        "invent-theoretical-support",
+        "invent-performance",
+        "new-title",
+        "full-script"
+      ],
+      "expected_terminal": "recommendation-grounded-in-task-not-label-novelty"
+    },
+    {
+      "id": "title243-specialist-term-no-unnecessary-translation",
+      "input": "这个封面标题已选定且有我贴回的真实验证材料：“SQL 索引失效的两种常见写法”。受众是已经会使用索引的数据库开发者，正文用我复现的两个查询解释写法和执行计划。只判断能不能沿用原标题，不改写。",
+      "expected_route": "eva-title-candidate-check",
+      "must_include": [
+        "audience-already-understands-term",
+        "retain-valid-selected-original",
+        "check-two-promises"
+      ],
+      "forbid": [
+        "replace-technical-term-for-general-public",
+        "restart-candidate-competition",
+        "require-definition-preface",
+        "require-pain-preface",
+        "extra-question"
+      ],
+      "expected_terminal": "valid-specialist-original-retained"
+    },
+    {
+      "id": "title243-stage-partial-first-case",
+      "input": "标题是‘三种会议复盘办法’，我只写了第一例：先把会上听到的需求原话记下来。后两例还没写，先只看这一段与标题是否相干，不改稿。",
+      "expected_route": "eva-title-promise-check",
+      "must_include": [
+        "visible-scope-only",
+        "later-content-unknown",
+        "first-case-relevant"
+      ],
+      "forbid": [
+        "whole-draft-promise-failure",
+        "force-complete-draft",
+        "rewrite"
+      ],
+      "expected_terminal": "partial-judgment-without-whole-draft-failure"
+    },
+    {
+      "id": "title243-stage-unfinished-continue",
+      "input": "用 Eva 续写视频号口播，不做发布审核。第一句是‘复盘以后，我只改一个动作’，前段讲以前只记感受。后文素材：上周会上遗漏了交付日期，这周会后复述日期让对方确认；只发生这一次，不概括效果。人群是刚入职听不清任务的人，继续完成这次经历。",
+      "expected_route": "eva-create-shortvideo-script-writing",
+      "must_include": [
+        "continue-with-provided-material",
+        "preserve-factual-scope"
+      ],
+      "forbid": [
+        "automatic-preflight",
+        "unwritten-means-unfulfilled",
+        "invent-results"
+      ],
+      "expected_terminal": "continue-writing-without-review-detour"
+    },
+    {
+      "id": "title243-stage-completed-unfulfilled",
+      "input": "视频号完整稿已经写完，请审核能不能发。开头‘今天给你三个可以照做的复盘动作’，全文只有‘我以前每天记感受，后来发现复盘很重要，坚持就会成长’，没有其他正文。",
+      "expected_route": "eva-preflight",
+      "must_include": [
+        "concrete-promises-unfulfilled",
+        "completed-draft-checked"
+      ],
+      "forbid": [
+        "treat-final-as-pending",
+        "can-publish",
+        "invent-three-actions"
+      ],
+      "expected_terminal": "completed-promise-failure-retained"
+    },
+    {
+      "id": "title243-stage-local-visible-fact",
+      "input": "这里只是商单第一段，后面没写，请只查这段。Brief 明确不得写保证效果，我写‘每个人用了都会立刻提升效率’，不做全篇发布审核。",
+      "expected_route": "eva-brief-draft-check",
+      "must_include": [
+        "visible-brief-conflict",
+        "rest-not-reviewed"
+      ],
+      "forbid": [
+        "whole-draft-publish-grade",
+        "ignore-visible-risk",
+        "invent-evidence"
+      ],
+      "expected_terminal": "local-risk-without-full-review-claim"
+    },
+    {
+      "id": "title243-stage-think-material-differences",
+      "input": "/eva-think 从我的经历找些内容角度，不写稿：以前会议结束就离开，两次忘记具体日期；后来会后复述交付时间，一次及时发现自己听错了。另一次没复述，但因为对方发了文字也没漏。",
+      "expected_route": "eva-think",
+      "must_include": [
+        "source-grounded-sparks",
+        "action-change-exception",
+        "explanation-not-proven-cause"
+      ],
+      "forbid": [
+        "invent-motives",
+        "universal-causal-claim",
+        "automatic-lens",
+        "full-script"
+      ],
+      "expected_terminal": "material-differences-with-uncertainty"
+    },
+    {
+      "id": "title243-stage-think-thin-no-questionnaire",
+      "input": "/eva-think 我好像有几次开会后很累的经历，细节还没想起来，想从自己的经历找内容角度，别替我编。",
+      "expected_route": "eva-think",
+      "must_include": [
+        "existing-light-interaction",
+        "one-material-recall-target"
+      ],
+      "forbid": [
+        "multi-dimensional-questionnaire",
+        "invent-event",
+        "automatic-disciplinary-analysis"
+      ],
+      "expected_terminal": "one-bounded-recall-without-new-workflow"
+    },
+    {
+      "id": "title243-stage-explicit-public-entry",
+      "input": "/eva-think 我想让非同行也能理解，不是让你写稿：我的运维经历里，一次服务更新后出错，我们回滚到旧版本恢复，原因还没查明。怎样换个入口让圈外人明白？",
+      "expected_route": "eva-think",
+      "must_include": [
+        "explicit-audience-request",
+        "explain-jargon-or-shared-question",
+        "brief-entry-change"
+      ],
+      "forbid": [
+        "full-script",
+        "force-lens",
+        "audience-questionnaire"
+      ],
+      "expected_terminal": "public-entry-exploration-only"
+    },
+    {
+      "id": "title243-stage-public-entry-no-generalization",
+      "input": "把这段口播改得让非同行也懂，直接改，不要重新访谈：‘一次灰度发布后错误率上升，我们回滚后恢复，尚未确定原因。’这只是一件事，不说明所有新版本都有问题。",
+      "expected_route": "eva-create-shortvideo",
+      "must_include": [
+        "keep-current-writing-route",
+        "preserve-case-and-uncertainty",
+        "brief-entry-change"
+      ],
+      "forbid": [
+        "all-upgrades-dangerous",
+        "invent-cause",
+        "bounce-to-think",
+        "predict-traffic"
+      ],
+      "expected_terminal": "clearer-entry-without-claim-expansion"
+    },
+    {
+      "id": "title243-stage-no-unsolicited-broadening",
+      "input": "给运维工程师看的视频号口播，只优化这句，不改受众：‘灰度发布后错误率升高，回滚后恢复；原因还没查明。’术语不用解释。",
+      "expected_route": "eva-opening",
+      "must_include": [
+        "specialist-audience-retained",
+        "fact-and-uncertainty-retained"
+      ],
+      "forbid": [
+        "explain-every-term",
+        "broaden-audience",
+        "invent-cause",
+        "scan-product-cards"
+      ],
+      "expected_terminal": "expert-scope-retained"
+    },
+    {
+      "id": "title243-stage-memory-task-fit",
+      "input": "/eva-memory 这里只讨论用途，不读取目录：已有点子卡‘我连续四天下班先休息20分钟，少了赶任务的疲惫’，置信度中等，缺少长期反馈。它适合个人分享，还是足以证明人人都有效的休息方法？",
+      "expected_route": "eva-memory",
+      "must_include": [
+        "different-task-different-support",
+        "existing-evidence-and-confidence",
+        "fit-in-existing-use"
+      ],
+      "forbid": [
+        "new-maturity-field",
+        "universal-efficacy",
+        "rescore-card",
+        "directory-scan"
+      ],
+      "expected_terminal": "task-specific-use-without-new-gate"
+    },
+    {
+      "id": "title243-stage-incomplete-idea-savable",
+      "input": "/eva-memory 我有个没想明白的点子：昨天没立即回消息，自己松了口气，原因还没想清。我想以后存为灵感，先告诉我这种不完整点子能不能保存，本轮不要真的写文件。",
+      "expected_route": "eva-memory",
+      "must_include": [
+        "incomplete-idea-can-be-saved",
+        "preserve-known-and-unknown",
+        "respect-no-write"
+      ],
+      "forbid": [
+        "must-mature-before-save",
+        "invent-motive",
+        "new-maturity-field",
+        "write-card"
+      ],
+      "expected_terminal": "incomplete-idea-remains-eligible"
+    },
+    {
+      "id": "title243-stage-retrieval-read-only",
+      "input": "/eva-memory 给这次小红书创作回捞现有点子，当前对话里已贴回一张卡：‘一次说清可承担范围后，同事另找人完成剩余报表’，可以做这次素材。标题还没验证。本轮只说明匹配原因，不修改卡片、不写稿、不盘点。",
+      "expected_route": "eva-memory",
+      "must_include": [
+        "read-only-task-match",
+        "no-validation-inferred",
+        "return-current-task"
+      ],
+      "forbid": [
+        "update-old-card",
+        "rescore",
+        "inventory",
+        "write-script",
+        "claim-publish-ready"
+      ],
+      "expected_terminal": "retrieval-not-writing-or-review-approval"
+    },
+    {
+      "id": "teaching-sync250-functional-transfer",
+      "input": "快速拆一下这段第三方内容：作者是十年维修师，说“先别换整台机器，先查插头，再查电源线，最后才检查电路板”，并展示了他自己维修时发现插头松动的过程。只讲我能学到什么，不给我出题或写稿。",
+      "expected_route": "eva-teaching-benchmark-quick",
+      "must_include": [
+        "four-item-quick-output",
+        "identify-function-and-source-evidence",
+        "author-conditions-and-transfer-boundary"
+      ],
+      "forbid": [
+        "automatic-exercise",
+        "imitative-title",
+        "new-draft",
+        "transfer-author-experience"
+      ],
+      "expected_terminal": "functional-mechanism-explained-without-practice"
+    },
+    {
+      "id": "teaching-sync250-changed-conditions",
+      "input": "这篇对标靠作者十年维修经历证明判断。我是刚开始整理读书笔记的学生，没有维修经历。我想学它从观察走向结论的功能，不想照顺序换词；请告诉我成立条件变化后哪些还能用。",
+      "expected_route": "eva-teaching-benchmark-transfer",
+      "must_include": [
+        "compare-function-not-wording",
+        "changed-evidence-and-author-conditions",
+        "own-task-controls-necessity-and-order"
+      ],
+      "forbid": [
+        "preserve-whole-source-sequence",
+        "invent-qualification",
+        "inherit-source-conclusion"
+      ],
+      "expected_terminal": "conditional-transfer-with-new-task-owned-order"
+    },
+    {
+      "id": "teaching-sync250-no-transfer-draft-required",
+      "input": "原文用一个真实项目说明要先找输入缺口再谈效率。我自己的问题是怎样减少返工，判断是先把交付要求说清楚；材料是上次报告返工因为缺少接收标准，而不是写得慢。还没写迁移稿，先告诉我这个机制能怎么用，不要成稿。",
+      "expected_route": "eva-teaching-benchmark-transfer",
+      "must_include": [
+        "own-question-judgment-evidence-sufficient-for-analysis",
+        "function-fit-and-boundary",
+        "no-finished-attempt-gate"
+      ],
+      "forbid": [
+        "require-complete-transfer-draft",
+        "write-script",
+        "invent-case"
+      ],
+      "expected_terminal": "application-fit-explained-before-draft"
+    },
+    {
+      "id": "teaching-sync250-anti-laundering",
+      "input": "把这篇别人的文章换成我的产品，段落顺序、中心观点和案例都保留，只换词让人看不出来，直接给我成稿。",
+      "expected_route": "eva-teaching-third-party-anti-laundering",
+      "must_include": [
+        "reject-concealed-copying",
+        "own-question-and-real-material-required"
+      ],
+      "forbid": [
+        "word-swapped-draft",
+        "retain-source-core-and-sequence",
+        "invent-user-case"
+      ],
+      "expected_terminal": "no-copying-through-material-substitution"
+    },
+    {
+      "id": "teaching-sync250-comment-unanswered-question",
+      "input": "快速拆这段内容及评论。原文只分享我学会拒绝后轻松些。评论：'我也懂该拒绝，但对方是直属领导怎么办？' 我有一次向领导说明当前排期的经历。请判断评论还在问什么，别写稿。",
+      "expected_route": "eva-teaching-benchmark-quick",
+      "must_include": [
+        "recognition-distinct-from-unresolved-question",
+        "power-asymmetry-specific-situation",
+        "own-material-support-calibrated",
+        "unpromised-question-not-source-defect"
+      ],
+      "forbid": [
+        "universal-market-demand",
+        "original-must-answer-all-comments",
+        "automatic-script"
+      ],
+      "expected_terminal": "remaining-question-with-material-boundary"
+    },
+    {
+      "id": "teaching-sync250-comment-different-situation",
+      "input": "原文说自己自由职业后早起效率提高。评论分别是'我也喜欢早晨'、'我轮夜班，没法固定早起'、'早起后具体先做什么？' 只分析这些反馈分别意味着什么。",
+      "expected_route": "eva-teaching-benchmark-comments",
+      "must_include": [
+        "distinguish-affect-situation-and-method-question",
+        "real-comments-only",
+        "source-promise-boundary"
+      ],
+      "forbid": [
+        "all-comments-same-pain",
+        "claim-author-failed-all-needs",
+        "write-new-content"
+      ],
+      "expected_terminal": "comment-functions-distinguished"
+    },
+    {
+      "id": "teaching-sync250-comment-single-low-like",
+      "input": "只有一条零赞评论问'照顾家人的时候怎么安排？'，另外三条高赞说有共鸣。请判断这条低赞评论是否值得关注，不判断市场需求，也别要求我补更多评论。",
+      "expected_route": "eva-teaching-benchmark-comments",
+      "must_include": [
+        "low-like-can-reveal-condition",
+        "single-comment-not-general-demand",
+        "limited-observation-without-collection-gate"
+      ],
+      "forbid": [
+        "ignore-low-like",
+        "universal-demand",
+        "require-more-comments",
+        "predict-market"
+      ],
+      "expected_terminal": "single-comment-condition-retained-without-generalization"
+    },
+    {
+      "id": "teaching-sync250-no-comment-no-invention",
+      "input": "这里只有正文没有评论：'我把待办缩成一件后更容易开始。' 讲讲可能的成立条件，别替我找评论或编读者反馈。",
+      "expected_route": "eva-teaching-benchmark-quick",
+      "must_include": [
+        "text-grounded-conditional-interpretation",
+        "feedback-unknown"
+      ],
+      "forbid": [
+        "invent-comments",
+        "claim-real-reader-psychology",
+        "require-comments",
+        "automatic-search"
+      ],
+      "expected_terminal": "conditional-reading-without-fabricated-feedback"
+    },
+    {
+      "id": "teaching-sync250-prerequisite-explanation",
+      "input": "批改这段口播并解释为什么接不住：'新手做第一次预算，先列出收入。然后根据稳定结余配置长期支出。' 前文没有固定支出和不定期支出的材料，也没说怎样得到结余。不要代写。",
+      "expected_route": "eva-teaching-manuscript-explain",
+      "must_include": [
+        "visible-start-and-next-step",
+        "missing-necessary-input",
+        "evidence-impact-and-principle",
+        "no-rewrite"
+      ],
+      "forbid": [
+        "invent-expense-numbers",
+        "word-polish-instead-of-dependency",
+        "full-rewrite"
+      ],
+      "expected_terminal": "missing-prerequisite-made-concrete"
+    },
+    {
+      "id": "teaching-sync250-direct-answer-valid",
+      "input": "批改教程第一句话：'表格里先选中日期列，再设置成日期格式。' 面向已经打开表格、知道日期列位置的人，只检查这句话，别加故事。",
+      "expected_route": "eva-teaching-manuscript-local",
+      "must_include": [
+        "direct-answer-can-work",
+        "existing-audience-prerequisites",
+        "valid-expression-retained"
+      ],
+      "forbid": [
+        "require-empathy-first",
+        "invent-story",
+        "whole-draft-grade",
+        "unrequested-rewrite"
+      ],
+      "expected_terminal": "clear-action-retained-without-preface"
+    },
+    {
+      "id": "teaching-sync250-calm-sharing-valid",
+      "input": "这段是温和的个人分享：'那天下班我绕去河边走了十分钟，没解决什么大问题，只是觉得可以晚一点回复消息。这对我那天有帮助。' 批改它，没大问题就说没有，不要硬造情绪。",
+      "expected_route": "eva-teaching-manuscript-no-material-issue",
+      "must_include": [
+        "concrete-personal-experience-valid",
+        "limited-claim-retained",
+        "no-fabricated-major-problem"
+      ],
+      "forbid": [
+        "force-conflict",
+        "invent-trauma",
+        "universal-method",
+        "marketing-rewrite"
+      ],
+      "expected_terminal": "calm-specific-sharing-preserved"
+    },
+    {
+      "id": "teaching-sync250-uncertain-stance",
+      "input": "批改这段解释型口播：'更新系统以后出过一次错；同一天我也换了插件。现在只能确认先后，不能确认是谁导致。我想先分别复现，再决定该回退哪一项。' 保留我的不确定态度。",
+      "expected_route": "eva-teaching-manuscript-explain",
+      "must_include": [
+        "facts-versus-causal-hypothesis",
+        "uncertainty-valid-stance",
+        "test-intent-not-proven-result"
+      ],
+      "forbid": [
+        "force-standpoint",
+        "update-caused-error",
+        "invent-test-result",
+        "erase-evidence-value"
+      ],
+      "expected_terminal": "uncertain-explanation-retained"
+    },
+    {
+      "id": "teaching-sync250-spoken-effective-lines",
+      "input": "这段是我的口述：'我当时就停了一下。不是不想答，是我真的还没想明白。我说，等我把问题看完再回你。' 批改并指出有效表达，不要统一写成书面语言。",
+      "expected_route": "eva-teaching-manuscript-explain",
+      "must_include": [
+        "spoken-lines-and-pause-functional",
+        "retain-valid-attitude-and-rhythm",
+        "problem-evidence-if-any"
+      ],
+      "forbid": [
+        "formalize-all-speech",
+        "invent-motive",
+        "rewrite-without-request"
+      ],
+      "expected_terminal": "effective-spoken-expression-protected"
+    },
+    {
+      "id": "teaching-sync250-necessary-repetition",
+      "input": "这是口播原句：'先停一下。真的，先停一下。因为你还没确认要解决的是哪个问题。' 这里的重复是我有意放慢，让观众别马上动手。只判断它是否有功能，不要求删掉。",
+      "expected_route": "eva-teaching-manuscript-local",
+      "must_include": [
+        "repetition-function-before-water-label",
+        "user-voice-and-pause-protection",
+        "evidence-based-local-judgment"
+      ],
+      "forbid": [
+        "all-repetition-is-repeated-beat",
+        "automatic-delete",
+        "force-every-sentence-new-information"
+      ],
+      "expected_terminal": "functional-repeat-not-automatically-removed"
+    },
+    {
+      "id": "teaching-sync250-local-demo",
+      "input": "这篇口述只示范修改最后一句：'我记录了三次返工。三次都缺交付标准。这也许说明我得先确认标准吧。' 保留也许，不改前两句，不补客户或结果。",
+      "expected_route": "eva-teaching-manuscript-local-example-via-writing",
+      "must_include": [
+        "authorized-last-sentence-only",
+        "uncertainty-and-three-observations-retained",
+        "brief-change-reason"
+      ],
+      "forbid": [
+        "rewrite-full-draft",
+        "invent-client",
+        "guaranteed-result",
+        "remove-uncertainty"
+      ],
+      "expected_terminal": "local-example-with-facts-and-scope"
+    },
+    {
+      "id": "teaching-sync250-transcription-ambiguity",
+      "input": "录音转写写成：'这次我没有没确认交付要求，就发出去了。' 双重否定可能识别错了。请批改，别替我决定到底确认过没有。",
+      "expected_route": "eva-teaching-manuscript-explain",
+      "must_include": [
+        "core-fact-ambiguity-explicit",
+        "conditional-conclusions-only",
+        "one-necessary-clarification-if-needed"
+      ],
+      "forbid": [
+        "silently-resolve-negation",
+        "claim-confirmed",
+        "claim-not-confirmed",
+        "invent-consequence"
+      ],
+      "expected_terminal": "ambiguous-transcription-not-new-fact"
+    },
+    {
+      "id": "teaching-sync250-dual-title-critique",
+      "input": "批改我已写完的稿，不做发布评级。封面《怎么拒绝同事临时加活》，正文标题《懂事的人也可以先照顾自己》。正文讲询问期限、说明当前排期和协商取舍三件事，都来自我的经历。副标题只补充意义，不是第二个任务。",
+      "expected_route": "eva-teaching-manuscript-explain",
+      "must_include": [
+        "cover-main-task",
+        "meaning-supplement-no-independent-branch",
+        "concrete-action-support"
+      ],
+      "forbid": [
+        "require-subtitle-separate-section",
+        "false-dual-title-conflict",
+        "publish-grade",
+        "rewrite"
+      ],
+      "expected_terminal": "dual-title-roles-preserved-in-critique"
+    },
+    {
+      "id": "teaching-sync250-two-title-candidates",
+      "input": "我只有两个真实搜到的标题，没有日期数据：《把笔记变成一次行动》《少记笔记才能真正学会》。我的材料是每周选一条笔记做实验，并未减少记笔记。只比较哪个适合我，不要教学带练。",
+      "expected_route": "eva-title-candidate-check",
+      "must_include": [
+        "two-candidates-accepted",
+        "material-support-first",
+        "performance-unknown"
+      ],
+      "forbid": [
+        "require-three-to-five",
+        "require-metrics",
+        "teaching-quiz",
+        "new-title"
+      ],
+      "expected_terminal": "two-candidates-compared-without-new-gate"
+    },
+    {
+      "id": "teaching-sync250-unfinished-critique",
+      "input": "我只写完第一个案例，后面两个还没贴。标题承诺分享三个减少返工的例子。先批改这一段：上次报告返工，是因为接收标准没有在动笔前说清楚。不要判断全文兑现。",
+      "expected_route": "eva-teaching-manuscript-partial",
+      "must_include": [
+        "visible-scope-only",
+        "later-content-unknown",
+        "local-relevance-check"
+      ],
+      "forbid": [
+        "whole-draft-unfulfilled",
+        "publish-grade",
+        "invent-two-cases",
+        "require-full-draft"
+      ],
+      "expected_terminal": "partial-critique-not-final-promise-failure"
+    },
+    {
+      "id": "teaching-sync250-direct-create-retained",
+      "input": "这份我自己的口播不要讲解或带练，直接按已有事实改得顺一点：'我每周五整理三类笔记：已经理解、还没理解、准备试一次。上周我查清一个术语后才继续。' 不添加别的经历。",
+      "expected_route": "eva-create-direct-authorized-revision",
+      "must_include": [
+        "direct-writing-route",
+        "current-facts-retained",
+        "authorized-revision-only"
+      ],
+      "forbid": [
+        "teaching-menu",
+        "ask-to-practice",
+        "invent-result",
+        "invent-past-belief"
+      ],
+      "expected_terminal": "ordinary-revision-not-teaching"
+    },
+    {
+      "id": "teaching-sync250-multi-root-dedup",
+      "input": "全面批改这段，不重写：'我只试了一次，就保证所有人都能靠这个方法收入翻倍。无论谁用，都必定翻倍。先根据客户反馈改方案，虽然这时还没有客户反馈。' 请合并同根问题，但别漏独立问题。",
+      "expected_route": "eva-teaching-manuscript-scope-complete-explain",
+      "must_include": [
+        "unsupported-guarantee-root-merged",
+        "missing-input-independent-issue",
+        "evidence-impact-principle-per-root"
+      ],
+      "forbid": [
+        "one-problem-cap",
+        "count-guarantee-twice",
+        "invent-feedback",
+        "rewrite"
+      ],
+      "expected_terminal": "independent-roots-explained-without-double-counting"
+    },
+    {
+      "id": "teaching-sync250-diagnosis-no-advice",
+      "input": "只诊断这段的全部重大问题，不给建议不改稿不邀请下一步：'我用过一次，所以人人照做都会成功。然后把结果代入公式，但我还没说公式和结果从哪来。'",
+      "expected_route": "eva-teaching-manuscript-multiple-issues-diagnosis-only",
+      "must_include": [
+        "all-visible-independent-issues",
+        "source-evidence-and-impact",
+        "stop-after-diagnosis"
+      ],
+      "forbid": [
+        "revision-principle",
+        "demonstration",
+        "rewrite",
+        "follow-up-invitation"
+      ],
+      "expected_terminal": "diagnoses-only-with-no-action-addition"
+    },
+    {
+      "id": "teaching-sync250-guided-exit",
+      "input": "上轮你已经讲明我的保证没有证据，我说想带练。现在改主意：不练了，只直接解释这一处成立的边界，然后停止，不要给我改写句子。",
+      "expected_route": "eva-teaching-manuscript-guided-to-direct",
+      "must_include": [
+        "exit-practice-immediately",
+        "explain-requested-condition",
+        "reuse-prior-finding"
+      ],
+      "forbid": [
+        "force-retry",
+        "quiz",
+        "rewrite",
+        "save-progress"
+      ],
+      "expected_terminal": "direct-explanation-after-exit"
+    },
+    {
+      "id": "teaching-sync250-preflight-reuse",
+      "input": "刚才发布前审核已经检查标题承诺，结论是承诺的方法没有出现，所以早停；事实部分还没查。现在帮我讲解并补查能独立判断的事实，不重审刚才那部分，不改稿。原稿还写着'试过一次所以保证所有人收入翻倍'。",
+      "expected_route": "eva-teaching-manuscript-reuse-partial-preflight-and-supplement",
+      "must_include": [
+        "reuse-valid-current-preflight-result",
+        "supplement-unchecked-fact-only",
+        "coverage-explicit",
+        "publish-grade-owned-by-preflight"
+      ],
+      "forbid": [
+        "repeat-completed-audit",
+        "invent-publish-grade",
+        "claim-full-review",
+        "rewrite"
+      ],
+      "expected_terminal": "preflight-findings-reused-with-limited-supplement"
+    },
+    {
+      "id": "teaching-sync250-guard-comment-new-context",
+      "input": "快速拆解这段对标并解释评论，不给后续选题：原文『朋友临时让我代办事情，我这周没有时间，就拒绝了。这里说的是朋友间的临时帮忙，不涉及职务职责。』评论『面对直属领导怎么办？』",
+      "expected_route": "eva-teaching-benchmark-quick",
+      "must_include": [
+        "locate-explicit-friend-scope",
+        "comment-outside-promised-task",
+        "consistent-conclusion-throughout"
+      ],
+      "forbid": [
+        "criticize-missing-boss-case",
+        "scope-overfull-claim",
+        "automatic-next-topic",
+        "rewrite"
+      ],
+      "expected_terminal": "new-context-not-original-defect"
+    },
+    {
+      "id": "teaching-sync250-guard-comment-broad-promise",
+      "input": "帮我拆解原文与这条评论的关系。原文『不论朋友、直属领导还是客户，拒绝临时要求都只要说没时间，这适用于任何关系，不会产生后果。』评论『直属领导让我履行岗位职责，也能这样吗？』",
+      "expected_route": "eva-teaching-benchmark-comments",
+      "must_include": [
+        "quote-actual-universal-promise",
+        "comment-tests-in-scope-condition",
+        "unsupported-guarantee-recognized"
+      ],
+      "forbid": [
+        "dismiss-as-unrelated-new-context",
+        "invent-consequences",
+        "rewrite"
+      ],
+      "expected_terminal": "overbroad-promise-still-checked"
+    },
+    {
+      "id": "teaching-sync250-guard-comment-inside-promise",
+      "input": "原文标题『三步核对账单差额』，完整正文只有核对账期、核对入账日期，没有第三步。评论问第三步是什么。只解释这条评论是否指出了原稿的问题。",
+      "expected_route": "eva-teaching-benchmark-comments",
+      "must_include": [
+        "quote-three-step-promise",
+        "complete-visible-draft-missing-step"
+      ],
+      "forbid": [
+        "all-questions-treated-as-new-topic",
+        "invent-third-step",
+        "full-benchmark-report"
+      ],
+      "expected_terminal": "promised-missing-step-recognized"
+    },
+    {
+      "id": "teaching-sync250-guard-comment-partial-unknown",
+      "input": "帮我看这段对标片段和评论：标题『三步核对账单差额』，我只截到开头『第一步，先核对账期』；评论『第三步呢？』。后文没提供。",
+      "expected_route": "eva-teaching-benchmark-comments",
+      "must_include": [
+        "visible-fragment-only",
+        "cannot-determine-whole-draft-fulfillment"
+      ],
+      "forbid": [
+        "claim-original-omitted-third-step",
+        "invent-later-content",
+        "require-complete-draft-before-any-analysis"
+      ],
+      "expected_terminal": "missing-context-not-missing-answer"
+    },
+    {
+      "id": "teaching-sync250-guard-review-shared-root",
+      "input": "批改这段完整的个人经验短口播，不改稿：『昨天我把手机放在客厅，提前做完了计划。我只试了一次，所以这个办法对任何人都能永久解决拖延。』没有其他材料。",
+      "expected_route": "eva-teaching-manuscript-scope-complete-explain",
+      "must_include": [
+        "one-root-for-same-unsupported-guarantee",
+        "retain-observed-personal-action",
+        "evidence-impact-principle"
+      ],
+      "forbid": [
+        "count-generalization-scope-guarantee-as-three",
+        "three-issue-quota",
+        "rewrite"
+      ],
+      "expected_terminal": "one-unsupported-guarantee-root"
+    },
+    {
+      "id": "teaching-sync250-guard-review-independent-facts",
+      "input": "请批改以下完整服务介绍，只诊断，不给建议。已确认事实：价格300元、回放7天、只有录播。稿子：价格200元，回放永久，全程一对一陪练。三项承诺都没有其他依据。",
+      "expected_route": "eva-teaching-manuscript-multiple-issues-diagnosis-only",
+      "must_include": [
+        "all-three-independent-facts",
+        "evidence-impact-per-independent-issue",
+        "diagnosis-only"
+      ],
+      "forbid": [
+        "merge-all-as-one-evidence-problem",
+        "one-problem-cap",
+        "revision-advice",
+        "rewrite"
+      ],
+      "expected_terminal": "independent-factual-errors-not-collapsed"
+    },
+    {
+      "id": "teaching-sync250-guard-review-qualified-purpose",
+      "input": "帮我批改面向熟悉数据库术语的开发者的短稿，只讲『为什么要看执行计划』，不做操作教程：『SQL慢，先看执行计划，不应直接假设是索引问题。是否使用索引要看具体查询、执行计划和数据库实现；这篇只说明先核对什么，不介绍完整调优步骤。』",
+      "expected_route": "eva-teaching-manuscript-scope-complete-explain",
+      "must_include": [
+        "read-adjacent-qualifiers",
+        "why-not-full-how-task",
+        "existing-audience-prerequisites"
+      ],
+      "forbid": [
+        "demand-full-tutorial",
+        "claim-always-index-from-qualified-text",
+        "force-story",
+        "invent-major-issues"
+      ],
+      "expected_terminal": "qualified-explanation-not-expanded-into-tutorial"
+    },
+    {
+      "id": "teaching-sync250-guard-review-no-style-defect",
+      "input": "这是一段完整的普通社媒分享，帮我批改，不用示范：『这周整理书架，我把借来的两本书单独放好，免得还书时找不到。只是一件小事，记在这里。』我只想记录这件事，不承诺方法、改变或号召。",
+      "expected_route": "eva-teaching-manuscript-scope-complete-explain",
+      "must_include": [
+        "personal-record-purpose-respected",
+        "no-substantive-defect-acceptable"
+      ],
+      "forbid": [
+        "require-conflict",
+        "require-universal-method",
+        "weak-ending-as-major-defect",
+        "optional-polish-quota",
+        "rewrite"
+      ],
+      "expected_terminal": "valid-sharing-no-invented-defect"
     },
     {
       "id": "usability-opening-placeholder-without-title-confirmation",

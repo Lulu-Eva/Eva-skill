@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Prompt-level lint checks for Eva 2.4.2 source-of-truth boundaries."""
+"""Prompt-level lint checks for Eva 2.5.0 source-of-truth boundaries."""
 
 from __future__ import annotations
 
@@ -237,6 +237,7 @@ AUDIENCE_ALIGNMENT_REFERENCE_ALLOWED = (
     "../eva-preflight/references/preflight/02_eva-preflight-article_文章审核.md",
     "../eva-preflight/references/preflight/03_eva-preflight-social_图文与一般社媒内容审核.md",
     "../eva-preflight/references/preflight/05_eva-preflight-truth-source-call_真源只读调用.md",
+    "../eva-teaching/references/teaching/04_manuscript-review_文稿审核与批改.md",
 )
 
 AUDIENCE_ALIGNMENT_REQUIRED_MARKERS = (
@@ -686,11 +687,207 @@ def has_positive_reference(text: str, marker: str) -> bool:
     )
 
 
+def lint_title_precision(base: Path) -> list[str]:
+    """Guard source ownership; scenario contracts and dialogue tests check behavior."""
+    errors: list[str] = []
+    title = (base / "../eva-create/references/create/shortvideo/title").resolve()
+    required = {
+        "../opening/01_eva-opening-diagnosis_开头承接与兑现诊断.md": (
+            "读者已经理解的术语或清楚的新观点可以直接开场",
+            "不强制先共鸣、先戳痛点或补故事",
+            "只作为理解门槛的软判断",
+        ),
+        "04_eva-title-promise-check_标题承诺与原稿检查.md": (
+            "双标题分工与兑现真源", "不自动形成第二项正文任务",
+            "不要求逐词回答", "具体附加承诺", "不能仅凭",
+            "Preflight 只读", "Article、一般社媒和无标题口播不继承",
+            "尚未写到", "最终未兑现", "材料未提供不等于用户没有材料",
+        ),
+        "02_eva-title-candidate-check_爆款标题候选判断.md": (
+            "一个候选也判断", "两个候选直接比较", "不要求凑数",
+            "不发现第一条可用就停止比较", "条件性解释",
+            "时间和互动数据是可选信息", "不重复索要", "不判断整个市场处于第几阶段",
+            "表现差异不能归因于标题本身", "成功样本筛选偏差",
+            "不新增阻塞", "用户已经贴回 3-5 个有真实验证线索",
+            "多个陌生名词不能互相充当解释", "专业受众已理解的术语不必白话替换",
+        ),
+        "01_eva-title-search-plan_爆款标题搜索方案.md": (
+            "如果方便", "发布时间", "截图里有就不用另填",
+            "只有标题也可以先比较", "平台表现暂不下结论",
+            "不增加首轮步骤", "不把搜索失败视为授权", "搜索少不能证明没有需求",
+            "已有相关候选就按现有候选判断接回",
+        ),
+    }
+    for filename, markers in required.items():
+        path = title / filename
+        if not path.exists():
+            errors.append(f"title precision missing owner: {filename}")
+            continue
+        text = path.read_text(encoding="utf-8")
+        for marker in markers:
+            if marker not in text:
+                errors.append(f"title precision owner {filename} missing boundary: {marker}")
+    stage_owners = {
+        "../eva-preflight/references/preflight/00_eva-preflight_发布前审核主控.md": (
+            "不因未完成自动启动 Preflight", "可见事实错误", "未审核全文",
+        ),
+        "../eva-think/references/think/00_eva-think_思考助理.md": (
+            "区分事实、推断和不确定处", "不得替用户编造动机",
+            "用户选定方向并明确要创作时", "不自动进入四视角或深度审视",
+        ),
+        "references/memory/00_eva-memory_点子卡沉淀与回溯.md": (
+            "不增加成熟度标签", "不完整点子仍可按原流程保存",
+            "回捞不自动更新旧卡、重新评分或启动全库盘点",
+        ),
+    }
+    for filename, markers in stage_owners.items():
+        path = base / filename
+        source = path.read_text(encoding="utf-8") if path.exists() else ""
+        for marker in markers:
+            if marker not in source:
+                errors.append(f"stage boundary owner {filename} missing boundary: {marker}")
+    truth_name = "04_eva-title-promise-check_标题承诺与原稿检查.md"
+    for name in (
+        "02_eva-title-candidate-check_爆款标题候选判断.md",
+        "03_eva-title-body-heading_正文标题补强.md",
+    ):
+        path = title / name
+        if path.exists() and not has_positive_reference(path.read_text(encoding="utf-8"), truth_name):
+            errors.append(f"title precision {name} must read the shared dual-title truth")
+    stale_rules = (
+        "用户至少提供：",
+        "正文标题必须逐项兑现",
+        "缺少近期数据则停止",
+        "近30天才有效",
+    )
+    for path in title.glob("*.md"):
+        text = path.read_text(encoding="utf-8")
+        for stale in stale_rules:
+            if stale in text:
+                errors.append(f"title precision {path.name} restores a retired hard gate: {stale}")
+    return errors
+
+
+def lint_teaching_transfer_support(base: Path) -> list[str]:
+    """Check that Teaching delegates judgments and keeps scope boundaries."""
+    owners = {
+        "../eva-create/SKILL.md": (
+            "以第三方样本改写、迁移或辅助创作时", "先读取 shared Benchmark",
+            "不得先拒绝、再交付", "不得把原作经历改成模糊的第一人称经历",
+        ),
+        "references/benchmark/00_eva-benchmark-copy_对标文案拆解.md": (
+            "用户实际提供相关评论时", "评论的新问题不自动算原稿缺陷",
+            "不让评论倒改原稿任务", "必须指出原文哪处实际承诺覆盖该问题",
+            "不自动规划下一篇", "不把尚未看到的回答判为不存在",
+            "单条不代表普遍需求", "没有评论时不把条件性读者疑问写成真实反馈",
+            "不自动布置练习或生成新稿", "用户要求应用时才读取",
+        ),
+        "references/benchmark/02_transfer-comparison_结构迁移对照.md": (
+            "三项已具备时不要求先写完整迁移稿", "比较功能适配",
+            "先核对问题与条件，再决定功能和顺序", "原创充分条件",
+            "不为教学硬找偏差", "用户明确要正式成稿时",
+        ),
+        "../eva-teaching/references/teaching/04_manuscript-review_文稿审核与批改.md": (
+            "当前已经交代什么", "下一步需要什么前提", "可见材料是否支持这一步",
+            "不确定立场都可以成立", "不要求先共情或藏答案",
+            "先合读相邻限定", "解释“为什么”不自动承诺完整“怎么做”",
+            "一个必须单独修复的判断", "仅换名称算三项",
+            "将各真源返回的发现先当作候选", "找不到原文证据与具体影响的，不列为缺陷",
+            "不同事实、缺失前提或承诺仍须分别修复时必须保留",
+            "不要求用户先改稿才能继续批改", "不在总结中重新添加已排除的问题",
+            "停顿与必要重复应保留", "转写歧义影响核心判断时标明不确定",
+            "授权示范仍只处理指定范围", "不补造经历、动机、结果或因果",
+        ),
+    }
+    errors: list[str] = []
+    for relative, markers in owners.items():
+        path = base / relative
+        source = path.read_text(encoding="utf-8") if path.exists() else ""
+        for marker in markers:
+            if marker not in source:
+                errors.append(f"Teaching source boundary {relative} missing: {marker}")
+    return errors
+
+
 def lint(base: Path) -> dict:
     errors: list[str] = lint_numbered_eva_references(base)
+    errors.extend(lint_title_precision(base))
+    errors.extend(lint_teaching_transfer_support(base))
     warnings: list[str] = []
     default_phrase_hits: dict[str, list[str]] = {phrase: [] for phrase in DEFAULT_STARTUP_UNIQUE_PHRASES}
     semantic_hits: dict[str, list[str]] = {rule["name"]: [] for rule in SEMANTIC_DUPLICATE_PATTERNS}
+
+    teaching_root = (base / "../eva-teaching").resolve()
+    teaching_root_file = teaching_root / "SKILL.md"
+    if (base / "../eva-new-user").resolve().exists():
+        errors.append("Eva Teaching must not coexist with a legacy eva-new-user registration")
+    if not teaching_root_file.exists():
+        errors.append("missing real Eva Teaching entry")
+    else:
+        teaching_text = teaching_root_file.read_text(encoding="utf-8")
+        for marker in ("name: eva-teaching", "新手教程", "对标拆解与学习", "文稿审核与批改",
+                       "/eva-new-user", "/eva-benchmark-copy", "不保存教学进度"):
+            if marker not in teaching_text:
+                errors.append(f"Eva Teaching entry missing required behavior: {marker}")
+    teaching_checks = {
+        "01_benchmark-quick_快速对标拆解.md": (
+            "00_eva-benchmark-copy_对标文案拆解.md", "回答谁的什么问题", "最关键的有效机制",
+            "这个机制成立的条件", "可以迁移", "不能迁移", "不要求用户先答题",
+        ),
+        "02_benchmark-deep_深度对标拆解.md": (
+            "00_eva-benchmark-copy_对标文案拆解.md", "深度直出", "深度带练",
+            "临时观察焦点", "03_choice-correction_选择式纠偏.md", "不保存",
+        ),
+        "03_choice-correction_选择式纠偏.md": (
+            "一个证据锚点", "一个对后续判断影响最大的偏差", "当前真源的成立条件",
+            "不得为凑格式虚构偏差", "再试一次", "继续看下一层", "直接看 Eva 的判断",
+            "退出教学", "不是通关门槛", "未经授权的修改稿",
+            "前轮纠偏已讲出的证据、条件和判断也算已公开", "没有新观察点时如实收束",
+        ),
+        "04_manuscript-review_文稿审核与批改.md": (
+            "Teaching 只读调用", "所有调用完成后返回本文件", "不继承生产流程",
+            "不因发现第一个问题就停止检查", "对应原文", "修改原则及其理由",
+            "不为凑格式挑错", "不是固定配额", "不附修改建议、续轮邀请或示范",
+            "同一根因的不同表现合并为一项", "隐藏第六项重大风险的上限",
+            "修复上游根因后", "轻微措辞", "不单独升级成重大问题",
+            "只诊断”限制交付类型，不限制问题数量", "只补查尚未完成且材料允许判断的部分",
+            "01_eva-audience-alignment_写后人群对位.md", "文学性、修辞和个别措辞",
+            "授权范围内全部必要问题", "不自动返回带练", "直接复用",
+            "最终三档发布结论始终归 Preflight", "不宣称全部改好",
+            "不扫描 Memory", "文章和一般社媒不加载短视频节拍或标题搜索规则",
+        ),
+    }
+    for filename, markers in teaching_checks.items():
+        path = teaching_root / "references/teaching" / filename
+        if not path.exists():
+            errors.append(f"missing Teaching interaction reference: {filename}")
+            continue
+        source = path.read_text(encoding="utf-8")
+        for marker in markers:
+            if marker not in source:
+                errors.append(f"Teaching {filename} missing boundary: {marker}")
+    # Each callable judgment source explicitly returns without inheriting production actions.
+    for relative in (
+        "../eva-create/references/create/shortvideo/title/04_eva-title-promise-check_标题承诺与原稿检查.md",
+        "../eva-create/references/create/shortvideo/opening/01_eva-opening-diagnosis_开头承接与兑现诊断.md",
+        "../eva-create/references/create/shortvideo/script/01_eva-script-logic_正文逻辑链推理.md",
+        "../eva-create/references/create/article/01_eva-article-argument_观点与论证路线.md",
+        "../eva-create/references/create/article/02_eva-article-writing_文章撰写与长度调节.md",
+        "../eva-preflight/references/preflight/03_eva-preflight-social_图文与一般社媒内容审核.md",
+        "references/quality/00_eva-ai-check_表达真实性审查.md",
+        "references/commerce/03_draft-check_已有商单稿检查.md",
+        "references/audience/01_eva-audience-alignment_写后人群对位.md",
+    ):
+        source = base / relative
+        if not source.exists() or "Teaching 只读调用" not in source.read_text(encoding="utf-8"):
+            errors.append(f"Teaching judgment source lacks its read-only return interface: {relative}")
+
+    alignment = base / "references/audience/01_eva-audience-alignment_写后人群对位.md"
+    if alignment.exists():
+        interface = alignment.read_text(encoding="utf-8").split("## Teaching 只读调用", 1)[-1].split("\n## ", 1)[0]
+        for marker in ("必要的独立偏移", "不继承本文件", "单项数量限制", "不执行写前七步", "交回 Teaching", "不改稿"):
+            if marker not in interface:
+                errors.append(f"Teaching audience read-only scope missing boundary: {marker}")
 
     for path in md_files(base):
         text = path.read_text(encoding="utf-8")
@@ -757,7 +954,7 @@ def lint(base: Path) -> dict:
         ):
             errors.append(
                 f"{path_rel}: write-after audience-alignment truth may only be "
-                "loaded by its truth source, Audience entry or explicit Preflight paths"
+                "loaded by its truth source, Audience entry, explicit Preflight paths or Teaching manuscript read-only interface"
             )
 
         if has_positive_reference(text, BEAT_REFERENCE_NAME) and not in_allowed(
@@ -815,14 +1012,15 @@ def lint(base: Path) -> dict:
             "先用哪个功能",
             "入口排序",
             "工作流",
-            "仅在当前 Eva 任务上下文中",
+            "仅在当前 Eva 任务中处理",
             "用户只说“研究 / 看看 / 处理这份资料”",
-            "按发散对象而不是“发散”一词路由",
+            "发散自己的开头进 Create Opening",
             "指定数量的开头方案",
             "内容候选数量不是入口排序",
             "围绕当前阶段判断选题",
             "为本人自媒体账号做定位/赛道定位/定位复盘",
-            "自然语言包括想法梳理、话题人群识别、学科发散",
+            "按下表识别自然语言任务",
+            "明确提出 Eva 的思考、定位、创作、教学、审核",
             "Positioning 仅在账号选题经营桥梁已命中且人群三项不清时调用",
         ):
             if marker not in text:

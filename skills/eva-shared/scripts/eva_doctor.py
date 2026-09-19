@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Check Eva Shared 2.4.2 structure and dependencies."""
+"""Check Eva Shared 2.5.0 structure and dependencies."""
 
 from __future__ import annotations
 
@@ -53,7 +53,13 @@ REQUIRED_PEER_SKILLS = {
         "references/project/01_project-license-routing_项目许可问答路由.md",
         "../eva-shared/references/shared/07_next-step-navigation_动态选路与下一步推荐.md",
     ],
-    "eva-new-user": [],
+    "eva-teaching": [
+        "references/teaching/00_eva-new-user_新手教程.md",
+        "references/teaching/01_benchmark-quick_快速对标拆解.md",
+        "references/teaching/02_benchmark-deep_深度对标拆解.md",
+        "references/teaching/03_choice-correction_选择式纠偏.md",
+        "references/teaching/04_manuscript-review_文稿审核与批改.md",
+    ],
     "eva-positioning": [
         "references/positioning/00_entry_账号阶段性定位主控.md",
         "references/positioning/01_evidence-ledger_证据与候选账本.md",
@@ -515,7 +521,7 @@ def check_peer_skills(base: Path) -> tuple[list[str], list[str], dict]:
             errors.append(f"missing peer skill: ../{skill_name}/SKILL.md")
             continue
         skill_text = skill_file.read_text(encoding="utf-8")
-        if skill_name not in ("eva", "eva-new-user", "eva-lens") and "../eva-shared" not in skill_text:
+        if skill_name not in ("eva", "eva-teaching", "eva-lens") and "../eva-shared" not in skill_text:
             warnings.append(f"../{skill_name}/SKILL.md does not reference ../eva-shared")
         for relative in referenced_paths:
             target = (skill_root / relative).resolve()
